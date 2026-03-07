@@ -17,31 +17,52 @@ interface SiteContextType {
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'bss-site-content-v1.1';
+const API_URL = 'http://localhost:3001/api/content';
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {
     const [content, setContent] = useState<SiteContent>(defaultContent);
     const [isAdmin, setIsAdmin] = useState(false);
     const [editMode, setEditMode] = useState(false);
 
-    // Load from localStorage on mount
+    // Load from database on mount
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
+        const fetchContent = async () => {
             try {
-                const parsed = JSON.parse(stored);
-                // Basic deep merge or just overwrite if structure matches
-                setContent(parsed);
+                const res = await fetch(API_URL);
+                if (res.ok) {
+                    const data = await res.json();
+                    setContent(data);
+                } else if (res.status === 404) {
+                    // Seed initial data if DB is empty
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(defaultContent),
+                    });
+                }
             } catch (e) {
-                console.error('Failed to parse stored content', e);
+                console.error('Failed to fetch content', e);
             }
-        }
+        };
+        fetchContent();
     }, []);
+
+    const saveContent = async (newContent: SiteContent) => {
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newContent),
+            });
+        } catch (e) {
+            console.error('Failed to save content', e);
+        }
+    };
 
     const updateContent = useCallback((key: keyof SiteContent, value: any) => {
         setContent((prev) => {
             const updated = { ...prev, [key]: value };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            saveContent(updated);
             return updated;
         });
     }, []);
@@ -55,7 +76,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 item.id === id ? { ...item, [field]: value } : item
             );
             const updated = { ...prev, [section]: updatedSection };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            saveContent(updated);
             return updated;
         });
     }, []);
@@ -66,7 +87,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
             if (!Array.isArray(sectionData)) return prev;
 
             const updated = { ...prev, [section]: [...sectionData, item] };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            saveContent(updated);
             return updated;
         });
     }, []);
@@ -77,14 +98,14 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
             if (!Array.isArray(sectionData)) return prev;
 
             const updated = { ...prev, [section]: sectionData.filter((item: any) => item.id !== id) };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            saveContent(updated);
             return updated;
         });
     }, []);
 
     const resetContent = useCallback(() => {
         setContent(defaultContent);
-        localStorage.removeItem(STORAGE_KEY);
+        saveContent(defaultContent);
     }, []);
 
     return (
