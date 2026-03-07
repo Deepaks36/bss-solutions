@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, WorkflowStep } from '../types';
 
 interface WorkflowEditModalProps {
@@ -109,7 +110,6 @@ function WorkflowEditModal({ step, onSave, onClose, dark }: WorkflowEditModalPro
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateWorkflowStep: (id: string, field: keyof WorkflowStep, value: string) => void;
   onAddWorkflowStep: (step: WorkflowStep) => void;
@@ -120,18 +120,17 @@ function StepCard({
   step,
   index,
   dark,
-  editMode,
   onEdit,
   onDelete,
 }: {
   step: WorkflowStep;
   index: number;
   dark: boolean;
-  editMode: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.15);
+  const { editMode } = useSite();
 
   return (
     <div
@@ -180,8 +179,9 @@ function StepCard({
   );
 }
 
-export function Workflow({ content, dark, editMode, onUpdate, onUpdateWorkflowStep, onAddWorkflowStep, onDeleteWorkflowStep }: Props) {
+export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStep, onAddWorkflowStep, onDeleteWorkflowStep }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -212,7 +212,6 @@ export function Workflow({ content, dark, editMode, onUpdate, onUpdateWorkflowSt
               value={content.workflowTitle}
               onSave={(v) => onUpdate('workflowTitle', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </h2>
@@ -221,7 +220,6 @@ export function Workflow({ content, dark, editMode, onUpdate, onUpdateWorkflowSt
               value={content.workflowTagline}
               onSave={(v) => onUpdate('workflowTagline', v)}
               as="p"
-              editMode={editMode}
               dark={dark}
               className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
             />
@@ -235,7 +233,6 @@ export function Workflow({ content, dark, editMode, onUpdate, onUpdateWorkflowSt
               step={step}
               index={i}
               dark={dark}
-              editMode={editMode}
               onEdit={() => setEditingStep(step)}
               onDelete={() => onDeleteWorkflowStep(step.id)}
             />

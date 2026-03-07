@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { ImagePlus } from 'lucide-react';
+import { useSite } from '../context/SiteContext';
 
 interface EditableImageProps {
     src: string;
@@ -9,7 +10,6 @@ interface EditableImageProps {
     width?: number;
     height?: number;
     fill?: boolean;
-    editMode: boolean;
 }
 
 export function EditableImage({
@@ -20,8 +20,8 @@ export function EditableImage({
     width,
     height,
     fill = false,
-    editMode,
 }: EditableImageProps) {
+    const { editMode } = useSite();
     const fileRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

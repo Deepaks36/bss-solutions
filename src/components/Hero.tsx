@@ -7,11 +7,10 @@ import { SiteContent } from '../types';
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
 }
 
-export function Hero({ content, dark, editMode, onUpdate }: Props) {
+export function Hero({ content, dark, onUpdate }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
 
   return (
@@ -50,7 +49,6 @@ export function Hero({ content, dark, editMode, onUpdate }: Props) {
                 onSave={(v) => onUpdate('heroTitle', v)}
                 as="span"
                 className="block"
-                editMode={editMode}
                 dark={dark}
               />
             </h1>
@@ -61,7 +59,6 @@ export function Hero({ content, dark, editMode, onUpdate }: Props) {
                 onSave={(v) => onUpdate('heroSubtitle', v)}
                 as="p"
                 multiline
-                editMode={editMode}
                 dark={dark}
               />
             </div>
@@ -76,7 +73,6 @@ export function Hero({ content, dark, editMode, onUpdate }: Props) {
                   value={content.heroCta}
                   onSave={(v) => onUpdate('heroCta', v)}
                   as="span"
-                  editMode={editMode}
                   dark={dark}
                 />
                 <ArrowRight className="w-4 h-4" />
@@ -97,7 +93,6 @@ export function Hero({ content, dark, editMode, onUpdate }: Props) {
                 value={content.heroStat}
                 onSave={(v) => onUpdate('heroStat', v)}
                 as="span"
-                editMode={editMode}
                 dark={dark}
               />
             </div>
@@ -123,7 +118,6 @@ export function Hero({ content, dark, editMode, onUpdate }: Props) {
                 src="https://bsyssolutions.com/wp-content/uploads/2022/08/viber_image_2022-08-18_17-35-16-097.jpg"
                 alt="IT Solutions"
                 onSave={(_v) => {/* In a real app, you'd save this to a server or state */ }}
-                editMode={editMode}
                 className="relative rounded-3xl shadow-2xl w-full object-cover"
               />
             </div>

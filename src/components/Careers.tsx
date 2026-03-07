@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Briefcase, MapPin, Clock, Plus, Pencil, Trash2, X, Save } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, JobPosition } from '../types';
 
 interface Props {
     content: SiteContent;
     dark: boolean;
-    editMode: boolean;
     onUpdate: (key: keyof SiteContent, value: string) => void;
     onUpdatePosition: (id: string, field: keyof JobPosition, value: string) => void;
     onAddPosition: (position: JobPosition) => void;
@@ -18,18 +18,17 @@ function PositionCard({
     position,
     index,
     dark,
-    editMode,
     onUpdatePosition,
     onDeletePosition,
 }: {
     position: JobPosition;
     index: number;
     dark: boolean;
-    editMode: boolean;
     onUpdatePosition: (id: string, field: keyof JobPosition, value: string) => void;
     onDeletePosition: (id: string) => void;
 }) {
     const { ref, visible } = useAnimateOnScroll(0.1);
+    const { editMode } = useSite();
     const [isEditing, setIsEditing] = useState(false);
 
     return (
@@ -140,13 +139,13 @@ function PositionCard({
 export function Careers({
     content,
     dark,
-    editMode,
     onUpdate,
     onUpdatePosition,
     onAddPosition,
     onDeletePosition,
 }: Props) {
     const { ref, visible } = useAnimateOnScroll(0.1);
+    const { editMode } = useSite();
     const [isAdding, setIsAdding] = useState(false);
     const [newPos, setNewPos] = useState({
         title: '',
@@ -179,7 +178,6 @@ export function Careers({
                             value={content.careersTagline}
                             onSave={(v) => onUpdate('careersTagline', v)}
                             as="span"
-                            editMode={editMode}
                             dark={dark}
                         />
                     </span>
@@ -188,7 +186,6 @@ export function Careers({
                             value={content.careersTitle}
                             onSave={(v) => onUpdate('careersTitle', v)}
                             as="span"
-                            editMode={editMode}
                             dark={dark}
                         />
                     </h2>
@@ -198,7 +195,6 @@ export function Careers({
                             onSave={(v) => onUpdate('careersSubtitle', v)}
                             as="p"
                             multiline
-                            editMode={editMode}
                             dark={dark}
                             className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
                         />
@@ -212,7 +208,6 @@ export function Careers({
                             position={pos}
                             index={i}
                             dark={dark}
-                            editMode={editMode}
                             onUpdatePosition={onUpdatePosition}
                             onDeletePosition={onDeletePosition}
                         />

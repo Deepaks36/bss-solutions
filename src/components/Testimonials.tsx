@@ -7,12 +7,11 @@ import { SiteContent, Testimonial } from '../types';
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateTestimonial: (id: string, field: keyof Testimonial, value: string) => void;
 }
 
-export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestimonial }: Props) {
+export function Testimonials({ content, dark, onUpdate, onUpdateTestimonial }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
   const [current, setCurrent] = useState(0);
 
@@ -25,8 +24,8 @@ export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestim
     <section
       id="testimonials"
       className={`py-24 relative overflow-hidden transition-colors duration-300 ${dark
-          ? 'bg-gradient-to-br from-blue-950 via-gray-900 to-gray-950'
-          : 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800'
+        ? 'bg-gradient-to-br from-blue-950 via-gray-900 to-gray-950'
+        : 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800'
         }`}
     >
       {/* Background decoration */}
@@ -40,25 +39,21 @@ export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestim
           ref={ref}
           className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
-          <span className="inline-block text-sm font-bold uppercase tracking-widest text-white/60 mb-3">
-            <EditableText
-              value={content.testimonialsTagline}
-              onSave={(v) => onUpdate('testimonialsTagline', v)}
-              as="span"
-              editMode={editMode}
-              dark={dark}
-            />
-          </span>
-          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
-            <EditableText
-              value={content.testimonialsTitle}
-              onSave={(v) => onUpdate('testimonialsTitle', v)}
-              as="h2"
-              editMode={editMode}
-              dark={dark}
-            />
-          </h2>
-          <p className="text-white/60 mt-3">Over 25 years working in IT services developing software applications and mobile apps for clients all over the world.</p>
+          <EditableText
+            value={content.testimonialsTagline}
+            onSave={(v) => onUpdate('testimonialsTagline', v)}
+            as="span"
+            dark={dark}
+            className="inline-block text-sm font-bold uppercase tracking-widest text-white/60 mb-3"
+          />
+          <EditableText
+            value={content.testimonialsTitle}
+            onSave={(v) => onUpdate('testimonialsTitle', v)}
+            as="h2"
+            dark={dark}
+            className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-6"
+          />
+          <p className="text-white/60 mt-3">Over 25 years working in IT services developing software applications and mobile apps for clients over the world.</p>
         </div>
 
         {/* Testimonial card */}
@@ -74,7 +69,6 @@ export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestim
               onSave={(v) => onUpdateTestimonial(t.id, 'quote', v)}
               as="blockquote"
               multiline
-              editMode={editMode}
               dark={dark}
               className="text-lg sm:text-xl text-white font-light leading-relaxed italic"
             />
@@ -89,7 +83,6 @@ export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestim
               value={t.name}
               onSave={(v) => onUpdateTestimonial(t.id, 'name', v)}
               as="p"
-              editMode={editMode}
               dark={dark}
               className="text-white font-bold"
             />
@@ -97,7 +90,6 @@ export function Testimonials({ content, dark, editMode, onUpdate, onUpdateTestim
               value={t.role}
               onSave={(v) => onUpdateTestimonial(t.id, 'role', v)}
               as="p"
-              editMode={editMode}
               dark={dark}
               className="text-white/60 text-sm"
             />

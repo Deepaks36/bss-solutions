@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { EditableImage } from './EditableImage';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, Technology } from '../types';
 
 interface TechnologyEditModalProps {
@@ -44,8 +45,8 @@ function TechnologyEditModal({ tech, onSave, onClose, dark }: TechnologyEditModa
             <button
               onClick={() => fileRef.current?.click()}
               className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-sm transition-colors ${dark
-                  ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
-                  : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
+                ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
+                : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
                 }`}
             >
               {image ? (
@@ -98,18 +99,18 @@ function TechnologyEditModal({ tech, onSave, onClose, dark }: TechnologyEditModa
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateTechnology: (id: string, field: keyof Technology, value: string) => void;
   onAddTechnology: (tech: Technology) => void;
   onDeleteTechnology: (id: string) => void;
 }
 
-export function About({ content, dark, editMode, onUpdate, onUpdateTechnology, onAddTechnology, onDeleteTechnology }: Props) {
+export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechnology, onDeleteTechnology }: Props) {
   const { ref: textRef, visible: textVisible } = useAnimateOnScroll(0.1);
   const { ref: imgRef, visible: imgVisible } = useAnimateOnScroll(0.1);
   const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
 
+  const { editMode } = useSite();
   const [editingTech, setEditingTech] = useState<Technology | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -144,7 +145,6 @@ export function About({ content, dark, editMode, onUpdate, onUpdateTechnology, o
                 value={content.aboutTitle}
                 onSave={(v) => onUpdate('aboutTitle', v)}
                 as="span"
-                editMode={editMode}
                 dark={dark}
               />
             </h2>
@@ -154,7 +154,6 @@ export function About({ content, dark, editMode, onUpdate, onUpdateTechnology, o
                 onSave={(v) => onUpdate('aboutBody', v)}
                 as="p"
                 multiline
-                editMode={editMode}
                 dark={dark}
               />
             </div>
@@ -178,7 +177,6 @@ export function About({ content, dark, editMode, onUpdate, onUpdateTechnology, o
                 src="https://keenitsolutions.com/products/wordpress/braintech/wp-content/uploads/2020/12/about.png"
                 alt="About BSS"
                 onSave={(_v) => {/* Save to state/server */ }}
-                editMode={editMode}
                 className="relative rounded-2xl w-full"
               />
             </div>

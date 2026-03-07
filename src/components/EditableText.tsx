@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Pencil } from 'lucide-react';
+import { useSite } from '../context/SiteContext';
 
 interface EditableTextProps {
     value: string;
@@ -7,8 +8,7 @@ interface EditableTextProps {
     as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'blockquote';
     className?: string;
     multiline?: boolean;
-    editMode: boolean;
-    dark: boolean;
+    dark?: boolean; // Keep optional if needed for coloring, or get from context if added there
 }
 
 export function EditableText({
@@ -17,9 +17,9 @@ export function EditableText({
     as: Tag = 'p',
     className = '',
     multiline = false,
-    editMode,
-    dark,
+    dark = false,
 }: EditableTextProps) {
+    const { editMode } = useSite();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
     const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);

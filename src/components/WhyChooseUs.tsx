@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, WhyItem } from '../types';
 
 interface WhyItemEditModalProps {
@@ -44,8 +45,8 @@ function WhyItemEditModal({ item, onSave, onClose, dark }: WhyItemEditModalProps
             <button
               onClick={() => fileRef.current?.click()}
               className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-sm transition-colors ${dark
-                  ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
-                  : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
+                ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
+                : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
                 }`}
             >
               {image ? (
@@ -109,7 +110,6 @@ function WhyItemEditModal({ item, onSave, onClose, dark }: WhyItemEditModalProps
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateWhyItem: (id: string, field: keyof WhyItem, value: string) => void;
   onAddWhyItem: (item: WhyItem) => void;
@@ -120,18 +120,17 @@ function WhyCard({
   item,
   index,
   dark,
-  editMode,
   onEdit,
   onDelete,
 }: {
   item: WhyItem;
   index: number;
   dark: boolean;
-  editMode: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
 
   return (
     <div
@@ -174,8 +173,9 @@ function WhyCard({
   );
 }
 
-export function WhyChooseUs({ content, dark, editMode, onUpdate, onUpdateWhyItem, onAddWhyItem, onDeleteWhyItem }: Props) {
+export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItem, onAddWhyItem, onDeleteWhyItem }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
   const [editingItem, setEditingItem] = useState<WhyItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -206,7 +206,6 @@ export function WhyChooseUs({ content, dark, editMode, onUpdate, onUpdateWhyItem
               value={content.whyTitle}
               onSave={(v) => onUpdate('whyTitle', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </h2>
@@ -219,7 +218,6 @@ export function WhyChooseUs({ content, dark, editMode, onUpdate, onUpdateWhyItem
               item={item}
               index={i}
               dark={dark}
-              editMode={editMode}
               onEdit={() => setEditingItem(item)}
               onDelete={() => onDeleteWhyItem(item.id)}
             />

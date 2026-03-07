@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, Service } from '../types';
 
 interface ServiceEditModalProps {
@@ -44,8 +45,8 @@ function ServiceEditModal({ service, onSave, onClose, dark }: ServiceEditModalPr
             <button
               onClick={() => fileRef.current?.click()}
               className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-sm transition-colors ${dark
-                  ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
-                  : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
+                ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
+                : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
                 }`}
             >
               {icon ? (
@@ -109,7 +110,6 @@ function ServiceEditModal({ service, onSave, onClose, dark }: ServiceEditModalPr
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateService: (id: string, field: keyof Service, value: string) => void;
   onAddService: (service: Service) => void;
@@ -119,19 +119,18 @@ interface Props {
 function ServiceCard({
   service,
   dark,
-  editMode,
   onEdit,
   onDelete,
   delay,
 }: {
   service: Service;
   dark: boolean;
-  editMode: boolean;
   onEdit: () => void;
   onDelete: () => void;
   delay: number;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
 
   return (
     <div
@@ -172,8 +171,9 @@ function ServiceCard({
   );
 }
 
-export function Services({ content, dark, editMode, onUpdate, onUpdateService, onAddService, onDeleteService }: Props) {
+export function Services({ content, dark, onUpdate, onUpdateService, onAddService, onDeleteService }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -204,7 +204,6 @@ export function Services({ content, dark, editMode, onUpdate, onUpdateService, o
               value={content.servicesTagline}
               onSave={(v) => onUpdate('servicesTagline', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </span>
@@ -213,7 +212,6 @@ export function Services({ content, dark, editMode, onUpdate, onUpdateService, o
               value={content.servicesTitle}
               onSave={(v) => onUpdate('servicesTitle', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </h2>
@@ -223,7 +221,6 @@ export function Services({ content, dark, editMode, onUpdate, onUpdateService, o
               onSave={(v) => onUpdate('servicesSubtitle', v)}
               as="p"
               multiline
-              editMode={editMode}
               dark={dark}
               className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
             />
@@ -236,7 +233,6 @@ export function Services({ content, dark, editMode, onUpdate, onUpdateService, o
               key={service.id}
               service={service}
               dark={dark}
-              editMode={editMode}
               onEdit={() => setEditingService(service)}
               onDelete={() => onDeleteService(service.id)}
               delay={i * 60}

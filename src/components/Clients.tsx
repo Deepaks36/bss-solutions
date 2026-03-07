@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, Client } from '../types';
 import { EditableText } from './EditableText';
 
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onAddClient: (client: Client) => void;
   onUpdateClient: (id: string, field: keyof Client, value: string) => void;
   onDeleteClient: (id: string) => void;
@@ -57,8 +57,8 @@ function ClientEditModal({
           <button
             onClick={() => fileRef.current?.click()}
             className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-sm transition-colors ${dark
-                ? 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-blue-500/50 hover:bg-gray-800'
-                : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-500/50 hover:bg-gray-100'
+              ? 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-blue-500/50 hover:bg-gray-800'
+              : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-500/50 hover:bg-gray-100'
               }`}
           >
             {image ? (
@@ -84,8 +84,8 @@ function ClientEditModal({
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter client name"
             className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${dark
-                ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500'
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+              ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500'
+              : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
               }`}
           />
         </div>
@@ -117,8 +117,9 @@ function ClientEditModal({
   );
 }
 
-export function Clients({ content, dark, editMode, onAddClient, onUpdateClient, onDeleteClient, onUpdate }: Props) {
+export function Clients({ content, dark, onAddClient, onUpdateClient, onDeleteClient, onUpdate }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.05);
+  const { editMode } = useSite(); // Use useSite for editMode
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -149,20 +150,16 @@ export function Clients({ content, dark, editMode, onAddClient, onUpdateClient, 
             value={content.testimonialsTitle}
             onSave={(val) => onUpdate('testimonialsTitle', val)}
             as="h2"
-            editMode={editMode}
             dark={dark}
             className={`text-3xl font-bold sm:text-4xl ${dark ? 'text-white' : 'text-gray-900'}`}
           />
-          <div className="mt-3">
-            <EditableText
-              value={content.servicesSubtitle}
-              onSave={(val) => onUpdate('servicesSubtitle', val)}
-              as="p"
-              editMode={editMode}
-              dark={dark}
-              className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
-            />
-          </div>
+          <EditableText
+            value={content.servicesSubtitle}
+            onSave={(val) => onUpdate('servicesSubtitle', val)}
+            as="p"
+            dark={dark}
+            className={`text-lg mt-3 ${dark ? 'text-gray-400' : 'text-gray-500'}`}
+          />
         </div>
 
         {/* Client Grid */}
@@ -171,8 +168,8 @@ export function Clients({ content, dark, editMode, onAddClient, onUpdateClient, 
             <div
               key={client.id}
               className={`group relative flex flex-col items-center justify-center rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${dark
-                  ? 'bg-gray-900/60 border-gray-800 hover:border-blue-500/50 hover:bg-gray-900 hover:shadow-blue-900/10'
-                  : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-500/5'
+                ? 'bg-gray-900/60 border-gray-800 hover:border-blue-500/50 hover:bg-gray-900 hover:shadow-blue-900/10'
+                : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-500/5'
                 }`}
               style={{ transitionDelay: `${i * 30}ms` }}
             >
@@ -216,13 +213,12 @@ export function Clients({ content, dark, editMode, onAddClient, onUpdateClient, 
             </div>
           ))}
 
-          {/* Add Client Button */}
           {editMode && (
             <button
               onClick={() => setIsAdding(true)}
               className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-6 transition-all hover:-translate-y-1 ${dark
-                  ? 'border-gray-800 bg-gray-900/40 text-gray-500 hover:border-blue-500/50 hover:bg-gray-900 hover:text-blue-500'
-                  : 'border-gray-200 bg-white text-gray-400 hover:border-blue-500/50 hover:bg-gray-100 hover:text-blue-600'
+                ? 'border-gray-800 bg-gray-900/40 text-gray-500 hover:border-blue-500/50 hover:bg-gray-900 hover:text-blue-500'
+                : 'border-gray-200 bg-white text-gray-400 hover:border-blue-500/50 hover:bg-gray-100 hover:text-blue-600'
                 }`}
             >
               <div className="rounded-full bg-blue-600/10 p-2 group-hover:bg-blue-600/20 transition-colors">

@@ -279,10 +279,10 @@ export const defaultContent: SiteContent = {
     },
   ],
   technologies: [
-    { id: "tech1", name: "React", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/React-icon.png" },
-    { id: "tech2", name: "Node.js", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Node-js-icon.png" },
-    { id: "tech3", name: "TypeScript", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/TypeScript-icon.png" },
-    { id: "tech4", name: "Azure", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Azure-icon.png" },
-    { id: "tech5", name: "Docker", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Docker-icon.png" },
+    { id: "tech1", name: "React", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg" },
+    { id: "tech2", name: "Node.js", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg" },
+    { id: "tech3", name: "TypeScript", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/typescript.svg" },
+    { id: "tech4", name: "Azure", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/microsoftazure.svg" },
+    { id: "tech5", name: "Docker", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg" },
   ],
 };

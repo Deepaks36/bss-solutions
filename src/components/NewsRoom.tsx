@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { ArrowRight, Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
+import { useSite } from '../context/SiteContext';
 import { SiteContent, NewsItem } from '../types';
 
 interface NewsItemEditModalProps {
@@ -44,8 +45,8 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
             <button
               onClick={() => fileRef.current?.click()}
               className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-sm transition-colors ${dark
-                  ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
-                  : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
+                ? 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-blue-500 hover:bg-gray-800'
+                : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-600 hover:bg-gray-100'
                 }`}
             >
               {image ? (
@@ -115,7 +116,6 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
   onUpdateNewsItem: (id: string, field: keyof NewsItem, value: string) => void;
   onAddNewsItem: (item: NewsItem) => void;
@@ -126,18 +126,17 @@ function NewsCard({
   item,
   index,
   dark,
-  editMode,
   onEdit,
   onDelete,
 }: {
   item: NewsItem;
   index: number;
   dark: boolean;
-  editMode: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
 
   return (
     <div
@@ -186,8 +185,9 @@ function NewsCard({
   );
 }
 
-export function NewsRoom({ content, dark, editMode, onUpdate, onUpdateNewsItem, onAddNewsItem, onDeleteNewsItem }: Props) {
+export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItem, onAddNewsItem, onDeleteNewsItem }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const { editMode } = useSite();
   const [editingItem, setEditingItem] = useState<NewsItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -219,7 +219,6 @@ export function NewsRoom({ content, dark, editMode, onUpdate, onUpdateNewsItem, 
               value={content.newsTitle}
               onSave={(v) => onUpdate('newsTitle', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </h2>
@@ -228,7 +227,6 @@ export function NewsRoom({ content, dark, editMode, onUpdate, onUpdateNewsItem, 
               value={content.newsTagline}
               onSave={(v) => onUpdate('newsTagline', v)}
               as="p"
-              editMode={editMode}
               dark={dark}
               className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
             />
@@ -242,7 +240,6 @@ export function NewsRoom({ content, dark, editMode, onUpdate, onUpdateNewsItem, 
               item={item}
               index={i}
               dark={dark}
-              editMode={editMode}
               onEdit={() => setEditingItem(item)}
               onDelete={() => onDeleteNewsItem(item.id)}
             />

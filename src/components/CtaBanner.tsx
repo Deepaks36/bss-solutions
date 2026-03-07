@@ -6,11 +6,10 @@ import { SiteContent } from '../types';
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
 }
 
-export function CtaBanner({ content, dark, editMode, onUpdate }: Props) {
+export function CtaBanner({ content, dark, onUpdate }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.2);
 
   return (
@@ -23,8 +22,8 @@ export function CtaBanner({ content, dark, editMode, onUpdate }: Props) {
           }`}
       >
         <div className={`rounded-3xl p-14 relative overflow-hidden ${dark
-            ? 'bg-gradient-to-br from-blue-900/60 to-purple-900/40 border border-blue-700/40'
-            : 'bg-gradient-to-br from-blue-600 to-indigo-700'
+          ? 'bg-gradient-to-br from-blue-900/60 to-purple-900/40 border border-blue-700/40'
+          : 'bg-gradient-to-br from-blue-600 to-indigo-700'
           }`}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
@@ -36,7 +35,6 @@ export function CtaBanner({ content, dark, editMode, onUpdate }: Props) {
                 value={content.ctaBannerText}
                 onSave={(v) => onUpdate('ctaBannerText', v)}
                 as="span"
-                editMode={editMode}
                 dark={dark}
               />
             </h2>

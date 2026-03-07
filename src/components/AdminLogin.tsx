@@ -50,9 +50,9 @@ export function AdminLogin({ onLogin, onClose, dark }: Props) {
           <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-600/30">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">Admin Login</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Login</h2>
           <p className={`text-sm mt-1 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Sign in to access the admin panel
+            Sign in to access the panel
           </p>
         </div>
 
@@ -110,9 +110,9 @@ export function AdminLogin({ onLogin, onClose, dark }: Props) {
           </button>
         </form>
 
-        <p className={`text-xs text-center mt-5 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
+        {/* <p className={`text-xs text-center mt-5 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
           Credentials: admin / admin123
-        </p>
+        </p> */}
       </div>
     </div>
   );

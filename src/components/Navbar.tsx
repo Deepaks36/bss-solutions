@@ -128,7 +128,7 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                     }`}
                 >
                   <Shield className="w-3.5 h-3.5" />
-                  Admin
+                  Login
                 </button>
               )}
 
