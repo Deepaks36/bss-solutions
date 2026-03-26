@@ -117,7 +117,7 @@ interface Props {
   content: SiteContent;
   dark: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
-  onUpdateNewsItem: (id: string, field: keyof NewsItem, value: string) => void;
+  onUpdateNewsItemAtomic: (id: string, updates: Partial<NewsItem>) => void;
   onAddNewsItem: (item: NewsItem) => void;
   onDeleteNewsItem: (id: string) => void;
 }
@@ -141,7 +141,7 @@ function NewsCard({
   return (
     <div
       ref={ref}
-      className={`group relative rounded-2xl overflow-hidden border transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      className={`group relative rounded-2xl overflow-hidden border transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
         } ${dark
           ? 'bg-gray-800/60 border-gray-700 hover:border-blue-500/50 hover:shadow-blue-900/20'
           : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-100'
@@ -185,7 +185,7 @@ function NewsCard({
   );
 }
 
-export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItem, onAddNewsItem, onDeleteNewsItem }: Props) {
+export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItemAtomic, onAddNewsItem, onDeleteNewsItem }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
   const { editMode } = useSite();
   const [editingItem, setEditingItem] = useState<NewsItem | null>(null);
@@ -193,10 +193,12 @@ export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItem, onAddNewsI
 
   const handleSave = (data: NewsItem) => {
     if (editingItem) {
-      onUpdateNewsItem(data.id, 'title', data.title);
-      onUpdateNewsItem(data.id, 'excerpt', data.excerpt);
-      onUpdateNewsItem(data.id, 'image', data.image);
-      onUpdateNewsItem(data.id, 'date', data.date);
+      onUpdateNewsItemAtomic(data.id, {
+        title: data.title,
+        excerpt: data.excerpt,
+        image: data.image,
+        date: data.date
+      });
     } else {
       onAddNewsItem(data);
     }
@@ -212,7 +214,7 @@ export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItem, onAddNewsI
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`text-center mb-16 transition-all duration-700 ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 ${dark ? 'text-white' : 'text-gray-900'}`}>
             <EditableText

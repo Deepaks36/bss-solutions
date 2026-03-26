@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Briefcase, MapPin, Clock, Plus, Pencil, Trash2, X, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Briefcase, MapPin, Clock, X, ChevronRight, Pencil, Trash2, Plus, Save } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
-import { SiteContent, JobPosition } from '../types';
+import { JobPosition, SiteContent } from '../types';
 
 interface Props {
     content: SiteContent;
     dark: boolean;
     onUpdate: (key: keyof SiteContent, value: string) => void;
-    onUpdatePosition: (id: string, field: keyof JobPosition, value: string) => void;
+    onUpdatePositionAtomic: (id: string, updates: Partial<JobPosition>) => void;
     onAddPosition: (position: JobPosition) => void;
     onDeletePosition: (id: string) => void;
 }
@@ -18,18 +18,34 @@ function PositionCard({
     position,
     index,
     dark,
-    onUpdatePosition,
+    onUpdatePositionAtomic,
     onDeletePosition,
 }: {
     position: JobPosition;
     index: number;
     dark: boolean;
-    onUpdatePosition: (id: string, field: keyof JobPosition, value: string) => void;
+    onUpdatePositionAtomic: (id: string, updates: Partial<JobPosition>) => void;
     onDeletePosition: (id: string) => void;
 }) {
     const { ref, visible } = useAnimateOnScroll(0.1);
     const { editMode } = useSite();
     const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState(position);
+
+    useEffect(() => {
+        setEditData(position);
+    }, [position]);
+
+    const handleSave = () => {
+        onUpdatePositionAtomic(position.id, {
+            title: editData.title,
+            department: editData.department,
+            location: editData.location,
+            type: editData.type,
+            description: editData.description
+        });
+        setIsEditing(false);
+    };
 
     return (
         <div
@@ -45,43 +61,43 @@ function PositionCard({
                 <div className="space-y-4">
                     <input
                         type="text"
-                        value={position.title}
-                        onChange={(e) => onUpdatePosition(position.id, 'title', e.target.value)}
+                        value={editData.title}
+                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
                         className={`w-full rounded-lg border p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                         placeholder="Job Title"
                     />
                     <div className="grid grid-cols-2 gap-2">
                         <input
                             type="text"
-                            value={position.department}
-                            onChange={(e) => onUpdatePosition(position.id, 'department', e.target.value)}
+                            value={editData.department}
+                            onChange={(e) => setEditData({ ...editData, department: e.target.value })}
                             className={`rounded-lg border p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                             placeholder="Department"
                         />
                         <input
                             type="text"
-                            value={position.location}
-                            onChange={(e) => onUpdatePosition(position.id, 'location', e.target.value)}
+                            value={editData.location}
+                            onChange={(e) => setEditData({ ...editData, location: e.target.value })}
                             className={`rounded-lg border p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                             placeholder="Location"
                         />
                     </div>
                     <input
                         type="text"
-                        value={position.type}
-                        onChange={(e) => onUpdatePosition(position.id, 'type', e.target.value)}
+                        value={editData.type}
+                        onChange={(e) => setEditData({ ...editData, type: e.target.value })}
                         className={`w-full rounded-lg border p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                         placeholder="Job Type"
                     />
                     <textarea
-                        value={position.description}
-                        onChange={(e) => onUpdatePosition(position.id, 'description', e.target.value)}
+                        value={editData.description}
+                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                         className={`w-full rounded-lg border p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                         placeholder="Description"
                         rows={3}
                     />
                     <button
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleSave}
                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
                         <Save className="h-4 w-4" /> Save Changes
@@ -128,7 +144,7 @@ function PositionCard({
                         </p>
                     </div>
                     <button className={`mt-6 inline-flex items-center text-sm font-semibold transition-all hover:gap-2 ${dark ? 'text-blue-400' : 'text-blue-600'}`}>
-                        View Details <X className="h-4 w-4 rotate-45" />
+                        View Details <ChevronRight className="h-4 w-4" />
                     </button>
                 </>
             )}
@@ -136,39 +152,36 @@ function PositionCard({
     );
 }
 
-export function Careers({
-    content,
-    dark,
-    onUpdate,
-    onUpdatePosition,
-    onAddPosition,
-    onDeletePosition,
-}: Props) {
+export function Careers({ content, dark, onUpdate, onUpdatePositionAtomic, onAddPosition, onDeletePosition }: Props) {
     const { ref, visible } = useAnimateOnScroll(0.1);
     const { editMode } = useSite();
     const [isAdding, setIsAdding] = useState(false);
-    const [newPos, setNewPos] = useState({
+    const [newPos, setNewPos] = useState<Partial<JobPosition>>({
         title: '',
         department: '',
         location: '',
         type: '',
-        description: '',
+        description: ''
     });
 
     const handleAdd = () => {
-        if (newPos.title && newPos.department) {
-            onAddPosition({
-                id: Date.now().toString(),
-                ...newPos,
-            });
-            setNewPos({ title: '', department: '', location: '', type: '', description: '' });
-            setIsAdding(false);
-        }
+        if (!newPos.title) return;
+        const position: JobPosition = {
+            id: `p${Date.now()}`,
+            title: newPos.title || 'New Position',
+            department: newPos.department || 'General',
+            location: newPos.location || 'Remote',
+            type: newPos.type || 'Full-time',
+            description: newPos.description || '',
+        };
+        onAddPosition(position);
+        setIsAdding(false);
+        setNewPos({ title: '', department: '', location: '', type: '', description: '' });
     };
 
     return (
-        <section id="careers" className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-950' : 'bg-gray-50'}`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="careers" className={`py-24 relative overflow-hidden ${dark ? 'bg-black' : 'bg-gray-50'}`}>
+            <div className="container mx-auto px-4 relative z-10">
                 <div
                     ref={ref}
                     className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
@@ -177,7 +190,7 @@ export function Careers({
                         <EditableText
                             value={content.careersTagline}
                             onSave={(v) => onUpdate('careersTagline', v)}
-                            as="span"
+                            className=""
                             dark={dark}
                         />
                     </span>
@@ -185,7 +198,7 @@ export function Careers({
                         <EditableText
                             value={content.careersTitle}
                             onSave={(v) => onUpdate('careersTitle', v)}
-                            as="span"
+                            className=""
                             dark={dark}
                         />
                     </h2>
@@ -193,10 +206,9 @@ export function Careers({
                         <EditableText
                             value={content.careersSubtitle}
                             onSave={(v) => onUpdate('careersSubtitle', v)}
-                            as="p"
+                            className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
                             multiline
                             dark={dark}
-                            className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
                         />
                     </div>
                 </div>
@@ -208,7 +220,7 @@ export function Careers({
                             position={pos}
                             index={i}
                             dark={dark}
-                            onUpdatePosition={onUpdatePosition}
+                            onUpdatePositionAtomic={onUpdatePositionAtomic}
                             onDeletePosition={onDeletePosition}
                         />
                     ))}

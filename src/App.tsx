@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { Services } from './components/Services';
+import { Products } from './components/Services';
 import { About } from './components/About';
 import { Workflow } from './components/Workflow';
 import { WhyChooseUs } from './components/WhyChooseUs';
@@ -17,7 +17,7 @@ import { AdminToolbar } from './components/AdminToolbar';
 import { useScrollSpy } from './hooks/useScrollSpy';
 import { useSite } from './context/SiteContext';
 
-const SECTION_IDS = ['home', 'services', 'about', 'workflow', 'why', 'clients', 'news', 'careers', 'contact'];
+const SECTION_IDS = ['home', 'products', 'about', 'workflow', 'why', 'companies', 'news', 'careers', 'contact'];
 
 export default function App() {
   const [dark, setDark] = useState(false);
@@ -30,6 +30,7 @@ export default function App() {
     setEditMode,
     updateContent,
     updateSectionItem,
+    updateSectionItemAtomic,
     addItemToSection,
     deleteItemFromSection
   } = useSite();
@@ -65,11 +66,11 @@ export default function App() {
           dark={dark}
           onUpdate={updateContent}
         />
-        <Services
+        <Products
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdateService={(id, field, value) => updateSectionItem('services', id, field, value)}
+          onUpdateServiceAtomic={(id, updates) => updateSectionItemAtomic('services', id, updates)}
           onAddService={(service) => addItemToSection('services', service)}
           onDeleteService={(id) => deleteItemFromSection('services', id)}
         />
@@ -77,7 +78,7 @@ export default function App() {
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdateTechnology={(id, field, value) => updateSectionItem('technologies', id, field, value)}
+          onUpdateTechnologyAtomic={(id, updates) => updateSectionItemAtomic('technologies', id, updates)}
           onAddTechnology={(tech) => addItemToSection('technologies', tech)}
           onDeleteTechnology={(id) => deleteItemFromSection('technologies', id)}
         />
@@ -85,7 +86,7 @@ export default function App() {
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdateWorkflowStep={(id, field, value) => updateSectionItem('workflow', id, field, value)}
+          onUpdateWorkflowStepAtomic={(id, updates) => updateSectionItemAtomic('workflow', id, updates)}
           onAddWorkflowStep={(step) => addItemToSection('workflow', step)}
           onDeleteWorkflowStep={(id) => deleteItemFromSection('workflow', id)}
         />
@@ -93,7 +94,7 @@ export default function App() {
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdateWhyItem={(id, field, value) => updateSectionItem('whyItems', id, field, value)}
+          onUpdateWhyItemAtomic={(id, updates) => updateSectionItemAtomic('whyItems', id, updates)}
           onAddWhyItem={(item) => addItemToSection('whyItems', item)}
           onDeleteWhyItem={(id) => deleteItemFromSection('whyItems', id)}
         />
@@ -102,20 +103,22 @@ export default function App() {
           dark={dark}
           onUpdate={updateContent}
           onUpdateTestimonial={(id, field, value) => updateSectionItem('testimonials', id, field, value)}
+          onAddTestimonial={(testimonial) => addItemToSection('testimonials', testimonial)}
+          onDeleteTestimonial={(id) => deleteItemFromSection('testimonials', id)}
         />
         <Clients
           content={content}
           dark={dark}
-          onAddClient={(client) => addItemToSection('clients', client)}
-          onUpdateClient={(id, field, value) => updateSectionItem('clients', id, field, value)}
-          onDeleteClient={(id) => deleteItemFromSection('clients', id)}
           onUpdate={updateContent}
+          onUpdateClientAtomic={(id, updates) => updateSectionItemAtomic('clients', id, updates)}
+          onAddClient={(client) => addItemToSection('clients', client)}
+          onDeleteClient={(id) => deleteItemFromSection('clients', id)}
         />
         <NewsRoom
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdateNewsItem={(id, field, value) => updateSectionItem('news', id, field, value)}
+          onUpdateNewsItemAtomic={(id, updates) => updateSectionItemAtomic('news', id, updates)}
           onAddNewsItem={(item) => addItemToSection('news', item)}
           onDeleteNewsItem={(id) => deleteItemFromSection('news', id)}
         />
@@ -123,7 +126,7 @@ export default function App() {
           content={content}
           dark={dark}
           onUpdate={updateContent}
-          onUpdatePosition={(id, field, value) => updateSectionItem('positions', id, field, value)}
+          onUpdatePositionAtomic={(id, updates) => updateSectionItemAtomic('positions', id, updates)}
           onAddPosition={(position) => addItemToSection('positions', position)}
           onDeletePosition={(id) => deleteItemFromSection('positions', id)}
         />
@@ -135,7 +138,7 @@ export default function App() {
         <Contact
           content={content}
           dark={dark}
-          onUpdate={updateContent} editMode={false}        />
+          onUpdate={updateContent} />
       </main>
 
       <Footer dark={dark} />

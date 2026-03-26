@@ -100,12 +100,12 @@ interface Props {
   content: SiteContent;
   dark: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
-  onUpdateTechnology: (id: string, field: keyof Technology, value: string) => void;
+  onUpdateTechnologyAtomic: (id: string, updates: Partial<Technology>) => void;
   onAddTechnology: (tech: Technology) => void;
   onDeleteTechnology: (id: string) => void;
 }
 
-export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechnology, onDeleteTechnology }: Props) {
+export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAddTechnology, onDeleteTechnology }: Props) {
   const { ref: textRef, visible: textVisible } = useAnimateOnScroll(0.1);
   const { ref: imgRef, visible: imgVisible } = useAnimateOnScroll(0.1);
   const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
@@ -116,8 +116,10 @@ export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechno
 
   const handleSaveTech = (data: Technology) => {
     if (editingTech) {
-      onUpdateTechnology(data.id, 'name', data.name);
-      onUpdateTechnology(data.id, 'image', data.image);
+      onUpdateTechnologyAtomic(data.id, {
+        name: data.name,
+        image: data.image
+      });
     } else {
       onAddTechnology(data);
     }
@@ -135,7 +137,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechno
           {/* Text */}
           <div
             ref={textRef}
-            className={`transition-all duration-700 ${textVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}
+            className={`transition-all duration-700 ${textVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}
           >
             <span className={`inline-block text-sm font-bold uppercase tracking-widest mb-3 ${dark ? 'text-blue-400' : 'text-blue-600'}`}>
               World&apos;s exceptional IT-based corporation!
@@ -169,14 +171,14 @@ export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechno
           {/* Image */}
           <div
             ref={imgRef}
-            className={`transition-all duration-700 delay-200 ${imgVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
+            className={`transition-all duration-700 delay-200 ${imgVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
           >
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-600/20 to-purple-600/10 blur-xl" />
               <EditableImage
-                src="https://keenitsolutions.com/products/wordpress/braintech/wp-content/uploads/2020/12/about.png"
+                src={content.aboutImage}
                 alt="About BSS"
-                onSave={(_v) => {/* Save to state/server */ }}
+                onSave={(v) => onUpdate('aboutImage', v)}
                 className="relative rounded-2xl w-full"
               />
             </div>
@@ -186,7 +188,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnology, onAddTechno
         {/* Tech Stack */}
         <div
           ref={techRef}
-          className={`transition-all duration-700 ${techVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <p className={`text-center text-sm font-bold uppercase tracking-widest mb-8 ${dark ? 'text-gray-400' : 'text-gray-400'}`}>
             Technology Index — What We Use For Our Valued Customers

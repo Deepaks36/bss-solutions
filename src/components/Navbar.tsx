@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Sun, Moon, LogOut, Edit3, Eye, Shield } from 'lucide-react';
 
 interface Props {
@@ -14,11 +14,11 @@ interface Props {
 
 const navLinks = [
   { id: 'home', label: 'Home' },
-  { id: 'services', label: 'Services' },
+  { id: 'products', label: 'Products' },
   { id: 'about', label: 'About' },
   { id: 'workflow', label: 'Workflow' },
   { id: 'why', label: 'Why Us' },
-  { id: 'clients', label: 'Clients' },
+  { id: 'companies', label: 'Companies' },
   { id: 'news', label: 'Newsroom' },
   { id: 'contact', label: 'Reach Out' },
 ];

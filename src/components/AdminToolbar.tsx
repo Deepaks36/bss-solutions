@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RotateCcw, AlertTriangle } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 

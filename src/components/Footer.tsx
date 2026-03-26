@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import { Facebook, Twitter, Linkedin, Instagram, MapPin, Mail, Phone } from 'lucide-react';
 
 interface Props {

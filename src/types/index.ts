@@ -60,8 +60,10 @@ export interface SiteContent {
   heroSubtitle: string;
   heroCta: string;
   heroStat: string;
+  heroImage: string;
   aboutTitle: string;
   aboutBody: string;
+  aboutImage: string;
   servicesTagline: string;
   servicesTitle: string;
   servicesSubtitle: string;

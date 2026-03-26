@@ -6,9 +6,11 @@ export const defaultContent: SiteContent = {
     "Brilliant Systems Solutions will transverse your business across the world by outsourcing your requirements to a leading IT software development company around the globe. We help clients launch next-generation products with robust, Advanced features, User-Friendly applications.",
   heroCta: "Let's Live Your Project Today!",
   heroStat: "Successfully Completed & Delivered 300+ Projects!",
+  heroImage: "https://bsyssolutions.com/wp-content/uploads/2022/08/viber_image_2022-08-18_17-35-16-097.jpg",
   aboutTitle: "About Us",
   aboutBody:
     "Brilliant Systems Solution Pvt. Ltd is a tech-leading IT consulting and software development company in the Digital Era! We have provisioned our esteemed clients with the Best-Suite Software Solutions. We mainly focus on ERP Development, Implementation, and integration. Our journey began out of the passion for a unique monarch in the industry.",
+  aboutImage: "https://keenitsolutions.com/products/wordpress/braintech/wp-content/uploads/2020/12/about.png",
   servicesTagline: "We Are Best",
   servicesTitle: "Our Services & Solution For Your Innovative Ideas!",
   servicesSubtitle:

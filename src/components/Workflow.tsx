@@ -111,7 +111,7 @@ interface Props {
   content: SiteContent;
   dark: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
-  onUpdateWorkflowStep: (id: string, field: keyof WorkflowStep, value: string) => void;
+  onUpdateWorkflowStepAtomic: (id: string, updates: Partial<WorkflowStep>) => void;
   onAddWorkflowStep: (step: WorkflowStep) => void;
   onDeleteWorkflowStep: (id: string) => void;
 }
@@ -135,7 +135,7 @@ function StepCard({
   return (
     <div
       ref={ref}
-      className={`group relative rounded-3xl border p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      className={`group relative rounded-3xl border p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         } ${dark
           ? 'bg-gray-900 border-gray-800 hover:border-blue-500/50 hover:shadow-blue-900/20'
           : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-100/50'
@@ -179,7 +179,7 @@ function StepCard({
   );
 }
 
-export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStep, onAddWorkflowStep, onDeleteWorkflowStep }: Props) {
+export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, onAddWorkflowStep, onDeleteWorkflowStep }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
   const { editMode } = useSite();
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
@@ -187,9 +187,11 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStep, onAddW
 
   const handleSave = (data: WorkflowStep) => {
     if (editingStep) {
-      onUpdateWorkflowStep(data.id, 'title', data.title);
-      onUpdateWorkflowStep(data.id, 'description', data.description);
-      onUpdateWorkflowStep(data.id, 'icon', data.icon);
+      onUpdateWorkflowStepAtomic(data.id, {
+        title: data.title,
+        description: data.description,
+        icon: data.icon
+      });
     } else {
       onAddWorkflowStep(data);
     }
@@ -205,7 +207,7 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStep, onAddW
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`text-center mb-16 transition-all duration-700 ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 ${dark ? 'text-white' : 'text-gray-900'}`}>
             <EditableText

@@ -111,7 +111,7 @@ interface Props {
   content: SiteContent;
   dark: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
-  onUpdateWhyItem: (id: string, field: keyof WhyItem, value: string) => void;
+  onUpdateWhyItemAtomic: (id: string, updates: Partial<WhyItem>) => void;
   onAddWhyItem: (item: WhyItem) => void;
   onDeleteWhyItem: (id: string) => void;
 }
@@ -173,7 +173,7 @@ function WhyCard({
   );
 }
 
-export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItem, onAddWhyItem, onDeleteWhyItem }: Props) {
+export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, onAddWhyItem, onDeleteWhyItem }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
   const { editMode } = useSite();
   const [editingItem, setEditingItem] = useState<WhyItem | null>(null);
@@ -181,9 +181,11 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItem, onAddWhy
 
   const handleSave = (data: WhyItem) => {
     if (editingItem) {
-      onUpdateWhyItem(data.id, 'title', data.title);
-      onUpdateWhyItem(data.id, 'description', data.description);
-      onUpdateWhyItem(data.id, 'image', data.image);
+      onUpdateWhyItemAtomic(data.id, {
+        title: data.title,
+        description: data.description,
+        image: data.image
+      });
     } else {
       onAddWhyItem(data);
     }

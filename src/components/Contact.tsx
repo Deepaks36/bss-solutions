@@ -4,14 +4,15 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { SiteContent } from '../types';
 
+
 interface Props {
   content: SiteContent;
   dark: boolean;
-  editMode: boolean;
   onUpdate: (key: keyof SiteContent, value: string) => void;
 }
 
-export function Contact({ content, dark, editMode, onUpdate }: Props) {
+export function Contact({ content, dark, onUpdate }: Props) {
+
   const { ref, visible } = useAnimateOnScroll(0.1);
   const [sent, setSent] = useState(false);
 
@@ -40,7 +41,6 @@ export function Contact({ content, dark, editMode, onUpdate }: Props) {
               value={content.contactTitle}
               onSave={(v) => onUpdate('contactTitle', v)}
               as="span"
-              editMode={editMode}
               dark={dark}
             />
           </h2>
@@ -49,7 +49,6 @@ export function Contact({ content, dark, editMode, onUpdate }: Props) {
               value={content.contactTagline}
               onSave={(v) => onUpdate('contactTagline', v)}
               as="p"
-              editMode={editMode}
               dark={dark}
               className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
             />
@@ -69,7 +68,6 @@ export function Contact({ content, dark, editMode, onUpdate }: Props) {
                   onSave={(v) => onUpdate('contactAddress', v)}
                   as="p"
                   multiline
-                  editMode={editMode}
                   dark={dark}
                 />
               </div>
@@ -90,7 +88,6 @@ export function Contact({ content, dark, editMode, onUpdate }: Props) {
                       value={text}
                       onSave={(v) => onUpdate(key as keyof SiteContent, v)}
                       as="p"
-                      editMode={editMode}
                       dark={dark}
                       className={`text-sm ${dark ? 'text-gray-400' : 'text-gray-500'}`}
                     />
