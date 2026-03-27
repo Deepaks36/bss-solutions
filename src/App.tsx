@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { Products } from './components/Services';
+import { Products } from './components/Products';
 import { About } from './components/About';
 import { Workflow } from './components/Workflow';
 import { WhyChooseUs } from './components/WhyChooseUs';
@@ -69,7 +69,6 @@ export default function App() {
         <Products
           content={content}
           dark={dark}
-          onUpdate={updateContent}
           onUpdateServiceAtomic={(id, updates) => updateSectionItemAtomic('services', id, updates)}
           onAddService={(service) => addItemToSection('services', service)}
           onDeleteService={(id) => deleteItemFromSection('services', id)}

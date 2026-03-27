@@ -7,6 +7,22 @@ export const defaultContent: SiteContent = {
   heroCta: "Let's Live Your Project Today!",
   heroStat: "Successfully Completed & Delivered 300+ Projects!",
   heroImage: "https://bsyssolutions.com/wp-content/uploads/2022/08/viber_image_2022-08-18_17-35-16-097.jpg",
+  heroHighlights: [
+    { id: "hh1", label: "Enterprise HR platforms" },
+    { id: "hh2", label: "Cloud-native product engineering" },
+    { id: "hh3", label: "AI-driven workflow automation" },
+  ],
+  heroStats: [
+    { id: "hs1", value: "4.9/5", label: "Client rating" },
+    { id: "hs2", value: "60+", label: "Team members" },
+    { id: "hs3", value: "200+", label: "Projects done" },
+  ],
+  heroProofItems: [
+    { id: "hp1", label: "HR Metrics" },
+    { id: "hp2", label: "BSOL ERP Suite" },
+    { id: "hp3", label: "AI Chatbot" },
+    { id: "hp4", label: "Knowledgebase AI" },
+  ],
   aboutTitle: "About Us",
   aboutBody:
     "Brilliant Systems Solution Pvt. Ltd is a tech-leading IT consulting and software development company in the Digital Era! We have provisioned our esteemed clients with the Best-Suite Software Solutions. We mainly focus on ERP Development, Implementation, and integration. Our journey began out of the passion for a unique monarch in the industry.",
@@ -35,67 +51,53 @@ export const defaultContent: SiteContent = {
   services: [
     {
       id: "s1",
-      title: "Software Development Services",
-      description:
-        "Leverage our expertise in creating custom software to accomplish your business objectives, disrupt your sector, and impress your clients.",
+      title: "HR Metrics",
+      description: "Track attendance, performance, payroll signals, and workforce analytics in a single dashboard.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Software-Development-Services-1.png",
+      accent: "from-blue-600 to-cyan-500",
+      image: "https://images.pexels.com/photos/7108815/pexels-photo-7108815.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      bullets: ["People analytics", "Payroll insights", "Employee performance"]
     },
     {
       id: "s2",
-      title: "IT Consulting Services",
-      description:
-        "The best minds at Brilliant System Solutions to create an encyclopedic IT strategy for a digital and technological transformation of your company.",
+      title: "BSOL ERP Suite",
+      description: "Unify finance, operations, procurement, and reporting in one secure enterprise platform.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/IT-Consulting-Services.png",
+      accent: "from-indigo-600 to-violet-500",
+      bullets: ["Finance workflows", "Inventory control", "Operational reporting"]
     },
     {
       id: "s3",
-      title: "Web Development Services",
-      description:
-        "With the best web app development company in Maldives, unearth robust, scalable architecture that supports high-performance requirements.",
+      title: "AI Functional Chatbot",
+      description: "Answer employee and customer questions instantly with AI-assisted workflows and support routing.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png",
+      accent: "from-emerald-600 to-teal-500",
+      bullets: ["24/7 assistance", "Smart routing", "Conversation history"]
     },
     {
       id: "s4",
-      title: "Mobile Apps Development",
-      description:
-        "Our mobile development teams produce solutions that work flawlessly on all major operating systems and thousands of different mobile devices.",
+      title: "Ask Me - Corporate Knowledgebase AI",
+      description: "Turn policies, SOPs, and documents into a secure internal assistant for teams.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Mobile-Apps-Development-Services.png",
+      accent: "from-amber-500 to-orange-500",
+      bullets: ["Private knowledge base", "Document search", "Role-based access"]
     },
     {
       id: "s5",
       title: "ERP Systems Implementations",
-      description:
-        "We are here to build customized and advanced ERP Systems for multifarious industry verticals with skilled and experienced developers.",
+      description: "We are here to build customized and advanced ERP Systems for multifarious industry verticals with skilled and experienced developers.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/POS-Software-Development-Services.png",
+      accent: "from-rose-600 to-pink-500",
+      bullets: ["Custom ERP", "Integration", "Migration"]
     },
     {
       id: "s6",
       title: "HR & Payroll Consulting",
-      description:
-        "Our HR & Payroll Consulting services will optimize every human resource task and overall HR goals of an organization.",
+      description: "Our HR & Payroll Consulting services will optimize every human resource task and overall HR goals of an organization.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/HR-Management-Software.png",
-    },
-    {
-      id: "s7",
-      title: "SEO Services",
-      description:
-        "We have done SEO services for more than 50+ successful clients. All our team members are Google-certified marketers.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/SEO-Services.png",
-    },
-    {
-      id: "s8",
-      title: "Digital Marketing Services",
-      description:
-        "Our company offers the best-in-class digital marketing services. We have an expert team handling social media to Google ads.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Digital-Marketing-Services.png",
-    },
-    {
-      id: "s9",
-      title: "Graphic Designing Services",
-      description:
-        "We offer the best-in-market graphic designing services. Our designer has designed 100+ web and mobile app frameworks.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Graphic-Designing-Services.png",
-    },
+      accent: "from-purple-600 to-fuchsia-500",
+      bullets: ["Payroll optimization", "Task automation", "HR strategy"]
+    }
   ],
 
   workflow: [

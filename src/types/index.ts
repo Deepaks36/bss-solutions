@@ -9,6 +9,25 @@ export interface Service {
   title: string;
   description: string;
   icon: string;
+  image?: string;
+  accent?: string;
+  bullets?: string[];
+}
+
+export interface HomeHighlight {
+  id: string;
+  label: string;
+}
+
+export interface HomeStat {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export interface HomeProofItem {
+  id: string;
+  label: string;
 }
 
 export interface WorkflowStep {
@@ -61,6 +80,9 @@ export interface SiteContent {
   heroCta: string;
   heroStat: string;
   heroImage: string;
+  heroHighlights: HomeHighlight[];
+  heroStats: HomeStat[];
+  heroProofItems: HomeProofItem[];
   aboutTitle: string;
   aboutBody: string;
   aboutImage: string;
