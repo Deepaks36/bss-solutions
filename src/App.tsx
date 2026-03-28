@@ -192,7 +192,7 @@ export default function App() {
       )}
 
       {showLoginToast && (
-        <div className="fixed bottom-4 right-4 z-[200] bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-2xl font-bold flex items-center gap-2 animate-[slideIn_0.3s_ease-out]">
+        <div className="fixed top-24 right-4 z-[200] bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-2xl font-bold flex items-center gap-2 animate-[slideIn_0.3s_ease-out]">
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
             <CheckCircle className="w-4 h-4" />
           </div>

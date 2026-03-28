@@ -29,13 +29,13 @@ export function MessagesModal({ dark, onClose }: Props) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-start p-6">
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${dark ? 'bg-[#0A0F1C] border border-slate-800' : 'bg-white'}`}>
+      <div className={`relative w-full max-w-sm max-h-[85vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden animate-[slideInLeft_0.3s_ease-out] ${dark ? 'bg-[#0A0F1C] border border-slate-800' : 'bg-white'}`}>
         {/* Header */}
         <div className={`flex items-center justify-between px-6 py-4 border-b ${dark ? 'border-slate-800 bg-slate-900/50' : 'border-slate-100 bg-slate-50'}`}>
           <div className="flex items-center gap-3">
@@ -43,8 +43,8 @@ export function MessagesModal({ dark, onClose }: Props) {
               <Inbox className="w-5 h-5" />
             </div>
             <div>
-              <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>Unverified Reach Out Messages</h3>
-              <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>New messages pending verification from clients</p>
+              <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>Notifications</h3>
+              <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>New messages</p>
             </div>
           </div>
           <button 

@@ -13,7 +13,7 @@ interface Props {
 
 export function Contact({ content, dark, onUpdate }: Props) {
 
-  const { ref, visible } = useAnimateOnScroll(0.1);
+  const { ref, visible } = useAnimateOnScroll(0.1); 
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,13 +32,16 @@ export function Contact({ content, dark, onUpdate }: Props) {
     setError('');
 
     try {
-      const res = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+        const res = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
 
-      if (!res.ok) throw new Error('Failed to send message');
+        const data = await res.json();
+        console.log('Server response:', data);
+
+        if (!res.ok) throw new Error(data.error || 'Failed to send message');
 
       setSent(true);
       setFormData({ name: '', email: '', subject: '', message: '' });

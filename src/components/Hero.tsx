@@ -10,7 +10,7 @@ interface Props {
   onUpdate: (key: keyof SiteContent, value: string) => void;
 }
 
-const defaultHeroImage = 'https://images.pexels.com/photos/7108815/pexels-photo-7108815.jpeg?auto=compress&cs=tinysrgb&w=1200';
+const defaultHeroImage = '/src/assets/images/hero/hero-main.jpg';
 
 const defaultHighlights: HomeHighlight[] = [
   { id: 'hh1', label: 'Enterprise HR platforms' },
@@ -64,10 +64,10 @@ function HomeEditModal({
   const [heroStat, setHeroStat] = useState(content.heroStat);
   const [heroCenterBadgeLabel, setHeroCenterBadgeLabel] = useState(content.heroCenterBadgeLabel || 'Trusted Leaders');
   const [heroImage, setHeroImage] = useState(content.heroImage || defaultHeroImage);
-  const [heroTopLeftImage, setHeroTopLeftImage] = useState(content.heroTopLeftImage || 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&h=400');
+  const [heroTopLeftImage, setHeroTopLeftImage] = useState(content.heroTopLeftImage || '/src/assets/images/hero/hero-top-left.jpg');
   const [heroTopLeftBadgeTop, setHeroTopLeftBadgeTop] = useState(content.heroTopLeftBadgeTop || 'Growth rate');
   const [heroTopLeftBadgeBottom, setHeroTopLeftBadgeBottom] = useState(content.heroTopLeftBadgeBottom || '+340% Velocity');
-  const [heroBottomRightImage, setHeroBottomRightImage] = useState(content.heroBottomRightImage || 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&h=400');
+  const [heroBottomRightImage, setHeroBottomRightImage] = useState(content.heroBottomRightImage || '/src/assets/images/hero/hero-bottom-right.jpg');
   const [heroBottomRightBadgeTop, setHeroBottomRightBadgeTop] = useState(content.heroBottomRightBadgeTop || 'System Status');
   const [heroBottomRightBadgeBottom, setHeroBottomRightBadgeBottom] = useState(content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed');
 
@@ -275,7 +275,7 @@ function HomeEditModal({
 
 export function Hero({ content, dark, onUpdate }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.12);
-  const { editMode, updateContent } = useSite();
+  const { editMode } = useSite();
   const [isEditing, setIsEditing] = useState(false);
 
   const heroHighlights = content.heroHighlights?.length ? content.heroHighlights : defaultHighlights;
@@ -300,21 +300,21 @@ export function Hero({ content, dark, onUpdate }: Props) {
     heroStats: HomeStat[];
     heroProofItems: HomeProofItem[];
   }) => {
-    updateContent('heroTitle', data.heroTitle);
-    updateContent('heroSubtitle', data.heroSubtitle);
-    updateContent('heroCta', data.heroCta);
-    updateContent('heroStat', data.heroStat);
-    updateContent('heroCenterBadgeLabel', data.heroCenterBadgeLabel || '');
-    updateContent('heroImage', data.heroImage);
-    updateContent('heroTopLeftImage', data.heroTopLeftImage || '');
-    updateContent('heroTopLeftBadgeTop', data.heroTopLeftBadgeTop || '');
-    updateContent('heroTopLeftBadgeBottom', data.heroTopLeftBadgeBottom || '');
-    updateContent('heroBottomRightImage', data.heroBottomRightImage || '');
-    updateContent('heroBottomRightBadgeTop', data.heroBottomRightBadgeTop || '');
-    updateContent('heroBottomRightBadgeBottom', data.heroBottomRightBadgeBottom || '');
-    updateContent('heroHighlights', data.heroHighlights);
-    updateContent('heroStats', data.heroStats);
-    updateContent('heroProofItems', data.heroProofItems);
+    onUpdate('heroTitle', data.heroTitle);
+    onUpdate('heroSubtitle', data.heroSubtitle);
+    onUpdate('heroCta', data.heroCta);
+    onUpdate('heroStat', data.heroStat);
+    onUpdate('heroCenterBadgeLabel', data.heroCenterBadgeLabel || '');
+    onUpdate('heroImage', data.heroImage);
+    onUpdate('heroTopLeftImage', data.heroTopLeftImage || '');
+    onUpdate('heroTopLeftBadgeTop', data.heroTopLeftBadgeTop || '');
+    onUpdate('heroTopLeftBadgeBottom', data.heroTopLeftBadgeBottom || '');
+    onUpdate('heroBottomRightImage', data.heroBottomRightImage || '');
+    onUpdate('heroBottomRightBadgeTop', data.heroBottomRightBadgeTop || '');
+    onUpdate('heroBottomRightBadgeBottom', data.heroBottomRightBadgeBottom || '');
+    onUpdate('heroHighlights', data.heroHighlights as any);
+    onUpdate('heroStats', data.heroStats as any);
+    onUpdate('heroProofItems', data.heroProofItems as any);
     setIsEditing(false);
   };
 
@@ -395,11 +395,11 @@ export function Hero({ content, dark, onUpdate }: Props) {
             `}</style>
 
             {/* Top Left Card */}
-            <div className="absolute top-4 left-0 w-[40%] md:w-[38%] z-10">
+            <div className="absolute top-4 left-0 w-[40%] md:w-[38%] z-10 hidden lg:block">
               <div className={`animate-float-1 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
                 <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
                   <img
-                    src={content.heroTopLeftImage || "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&h=400"}
+                    src={content.heroTopLeftImage || "/src/assets/images/hero/hero-top-left.jpg"}
                     alt="Teamwork"
                     className="h-full w-full object-cover"
                   />
@@ -413,11 +413,11 @@ export function Hero({ content, dark, onUpdate }: Props) {
             </div>
 
             {/* Bottom Right Card */}
-            <div className="absolute bottom-4 right-0 w-[40%] md:w-[38%] z-10">
+            <div className="absolute bottom-4 right-0 w-[40%] md:w-[38%] z-10 hidden lg:block">
               <div className={`animate-float-3 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
                 <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
                   <img
-                    src={content.heroBottomRightImage || "https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&h=400"}
+                    src={content.heroBottomRightImage || "/src/assets/images/hero/hero-bottom-right.jpg"}
                     alt="Technology"
                     className="h-full w-full object-cover"
                   />
@@ -434,7 +434,7 @@ export function Hero({ content, dark, onUpdate }: Props) {
             </div>
 
             {/* Center Main Card (using heroImage) */}
-            <div className="absolute top-1/2 left-1/2 w-[45%] md:w-[42%] -translate-x-1/2 -translate-y-1/2 z-20">
+            <div className="absolute top-1/2 left-1/2 w-[70%] sm:w-[50%] lg:w-[42%] -translate-x-1/2 -translate-y-1/2 z-20">
               <div className={`animate-float-2 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/40' : 'border-white/80 bg-white/80 shadow-xl shadow-slate-200/80 backdrop-blur-md'}`}>
                 <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
                   <img
@@ -466,9 +466,9 @@ export function Hero({ content, dark, onUpdate }: Props) {
         </div>
 
         {/* Stats & Proof Ribbon */}
-        <div className={`mt-24 lg:mt-32 grid gap-6 rounded-3xl border p-8 sm:grid-cols-2 lg:grid-cols-4 ${dark ? 'border-slate-800 bg-slate-900/50 backdrop-blur-md' : 'border-slate-200 bg-white/60 shadow-xl shadow-slate-200/50 backdrop-blur-md'}`}>
+        <div className={`mt-24 lg:mt-32 grid gap-6 rounded-3xl border p-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${dark ? 'border-slate-800 bg-slate-900/50 backdrop-blur-md' : 'border-slate-200 bg-white/60 shadow-xl shadow-slate-200/50 backdrop-blur-md'}`}>
           {heroStats.map((stat, i) => (
-            <div key={stat.id} className={`flex flex-col justify-center border-b pb-6 sm:border-b-0 sm:pb-0 ${i !== heroStats.length - 1 ? 'lg:border-r lg:border-slate-200 lg:dark:border-slate-800' : ''}`}>
+            <div key={stat.id} className={`flex flex-col justify-center border-b pb-6 sm:border-b-0 sm:pb-0 ${i !== heroStats.length - 1 ? 'sm:border-r border-slate-200 dark:border-slate-800' : ''}`}>
               <div className="text-3xl font-black text-blue-600">{stat.value}</div>
               <div className={`mt-2 text-sm font-bold uppercase tracking-wide ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</div>
             </div>

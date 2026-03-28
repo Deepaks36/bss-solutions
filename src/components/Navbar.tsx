@@ -174,7 +174,7 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
               ) : (
                 <button
                   onClick={onShowLogin}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${dark
+                  className={`hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${dark
                     ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
@@ -233,6 +233,21 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                 >
                   Reach Out Admin
                 </button>
+              )}
+              {!isAdmin && (
+                 <button
+                   onClick={() => {
+                     onShowLogin();
+                     setMenuOpen(false);
+                   }}
+                   className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-bold transition-all ${dark
+                     ? 'text-gray-300 hover:bg-gray-800'
+                     : 'text-gray-600 hover:bg-gray-100'
+                     }`}
+                 >
+                   <Shield className="w-4 h-4" />
+                   Admin Login
+                 </button>
               )}
             </nav>
           </div>

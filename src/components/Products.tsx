@@ -227,10 +227,10 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
         </div>
 
         <div
-          className="grid gap-6 lg:grid-cols-[340px_1fr] lg:gap-10 items-stretch"
+          className="grid gap-6 grid-cols-1 lg:grid-cols-[340px_1fr] lg:gap-10 items-start"
         >
           {/* Left Side: Product List */}
-          <div className={`relative flex h-full min-h-[400px] flex-col overflow-hidden rounded-[2rem] border ${dark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-white/40'} shadow-sm`}>
+          <div className={`relative flex flex-col overflow-hidden rounded-[2rem] border ${dark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-white/40'} shadow-sm h-[300px] lg:h-full lg:min-h-[400px]`}>
             <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto p-3 custom-scrollbar">
               {hasProducts ? content.services.map((item, index) => {
                 const isActive = index === safeActiveIndex;

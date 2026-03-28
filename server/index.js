@@ -2,23 +2,53 @@ import express from 'express';
 import cors from 'cors';
 import db from './db.js';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const appSettingsPath = path.resolve(__dirname, '../appsettings.json');
+let appSettings = { BackendPort: 3001, Smtp: {} };
+if (fs.existsSync(appSettingsPath)) {
+  try {
+    appSettings = { ...appSettings, ...JSON.parse(fs.readFileSync(appSettingsPath, 'utf-8')) };
+  } catch (e) {
+    console.error('Error parsing appsettings.json:', e);
+  }
+}
 
 const app = express();
-const PORT = 3001;
+const PORT = appSettings.BackendPort || 3001;
+
+const SMTP_HOST = appSettings.Smtp?.Host || process.env.SMTP_HOST;
+const SMTP_PORT = Number(appSettings.Smtp?.Port || process.env.SMTP_PORT || 587);
+const SMTP_USER = appSettings.Smtp?.User || process.env.SMTP_USER;
+const SMTP_PASS = appSettings.Smtp?.Pass || process.env.SMTP_PASS;
+const SMTP_FROM = appSettings.Smtp?.From || process.env.SMTP_FROM || 'no-reply@bsyssolutions.com';
+const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT_TO_EMAIL || 'info@bsyssolutions.com';
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
-const SMTP_USER = process.env.SMTP_USER;
-const SMTP_PASS = process.env.SMTP_PASS;
-const SMTP_FROM = process.env.SMTP_FROM || 'no-reply@bsyssolutions.com';
-const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'info@bsyssolutions.com';
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+console.log('--- SERVER STARTUP ---');
+console.log('Target Port:', PORT);
+console.log('SMTP Configured:', !!SMTP_HOST && !!SMTP_USER && !!SMTP_PASS);
+console.log('SMTP Host:', SMTP_HOST);
+console.log('SMTP User:', SMTP_USER);
+console.log('--- END STARTUP ---');
 
 let transporter = null;
 
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+  console.log('Initializing SMTP transporter for:', SMTP_HOST, 'port:', SMTP_PORT);
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
@@ -27,25 +57,21 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
+    debug: true,
+    logger: true
   });
-} else {
-  // Setup mock email transporter
-  nodemailer.createTestAccount((err, account) => {
-    if (err) {
-      console.error('Failed to create a testing account. ' + err.message);
-      return;
+  
+  // Verify configuration
+  transporter.verify(function(error, success) {
+    if (error) {
+      console.log('SMTP Verification Failed:', error);
+    } else {
+      console.log('SMTP Server is ready to take our messages');
     }
-    transporter = nodemailer.createTransport({
-      host: account.smtp.host,
-      port: account.smtp.port,
-      secure: account.smtp.secure,
-      auth: {
-        user: account.user,
-        pass: account.pass
-      }
-    });
-    console.log('Mock email transporter initialized.');
   });
+  console.log('SMTP transporter created successfully.');
+} else {
+  console.log('SMTP configuration incomplete. Host:', !!SMTP_HOST, 'User:', !!SMTP_USER, 'Pass:', !!SMTP_PASS);
 }
 
 function serializeMessage(row) {
@@ -99,26 +125,41 @@ app.post('/api/messages', async (req, res) => {
     let warning = null;
 
     if (transporter) {
-      const info1 = await transporter.sendMail({
-        from: SMTP_FROM,
-        to: CONTACT_TO_EMAIL,
-        replyTo: email.trim(),
-        subject: `New Reach Out submission from ${name.trim()}`,
-        text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
-      });
+      try {
+        console.log(`Email trigger started for: ${email.trim()}`);
+        console.log(`Transporter status: ${transporter ? 'Initialized' : 'Null'}`);
+        
+        // info1: Internal Notification for Admin
+        const info1 = await transporter.sendMail({
+          from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
+          sender: SMTP_USER,
+          replyTo: email.trim(),
+          to: CONTACT_TO_EMAIL,
+          subject: `New Reach Out submission from ${name.trim()}`,
+          text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
+        });
+        console.log('Admin notification response:', info1.response);
+        console.log('Admin notification mail triggered. MessageId:', info1.messageId);
 
-      const info2 = await transporter.sendMail({
-        from: SMTP_FROM,
-        to: email.trim(),
-        subject: 'We received your Reach Out request',
-        text: `Hello ${name.trim()},\n\nThank you for contacting BSS Solutions. We received your message and our team will review it shortly.\n\nSubject: ${(subject || 'General inquiry').trim()}\n\nBest regards,\nBSS Solutions`,
-      });
+        // info2: Confirmation for User
+        const info2 = await transporter.sendMail({
+          from: `"BSS Solutions Support" <${SMTP_USER}>`,
+          sender: SMTP_USER,
+          to: email.trim(),
+          subject: 'We received your Reach Out request',
+          text: `Hello ${name.trim()},\n\nThank you for contacting BSS Solutions. We received your message and our team will review it shortly.\n\nSubject: ${(subject || 'General inquiry').trim()}\n\nBest regards,\nBSS Solutions`,
+        });
+        console.log('User confirmation response:', info2.response);
+        console.log('User confirmation mail triggered. MessageId:', info2.messageId);
 
-      console.log('Message sent: %s', info1.messageId);
-      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info1));
-      
-      emailSent = true;
+        emailSent = true;
+      } catch (mailError) {
+        console.error('Email delivery process failed!');
+        console.error('Error stack:', mailError);
+        warning = `The submission was saved, but email delivery failed: ${mailError.message}`;
+      }
     } else {
+      console.log('Mail triggered but transporter is NULL. Check config.');
       warning = 'SMTP is not configured yet. The submission was saved successfully, but email delivery is disabled until mail settings are added.';
     }
 
@@ -172,6 +213,25 @@ app.patch('/api/messages/:id/verify', (req, res) => {
 
   try {
     const stmt = db.prepare('UPDATE messages SET verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+    const result = stmt.run(id);
+
+    if (!result.changes) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const row = db.prepare('SELECT * FROM messages WHERE id = ?').get(id);
+    res.json({ success: true, message: serializeMessage(row) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Unverify (Revert) a message
+app.patch('/api/messages/:id/unverify', (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const stmt = db.prepare('UPDATE messages SET verified = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
     const result = stmt.run(id);
 
     if (!result.changes) {

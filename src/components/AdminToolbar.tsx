@@ -29,7 +29,7 @@ export function AdminToolbar() {
                     className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                 >
                     <RotateCcw className="h-3.5 w-3.5" />
-                    Reset
+                    Revert Changes
                 </button>
             </div>
 
@@ -42,8 +42,8 @@ export function AdminToolbar() {
                                 <AlertTriangle className="h-5 w-5 text-red-600" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">Reset All Content?</h3>
-                                <p className="text-sm text-gray-500">This will restore default content and clear all your changes.</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Revert All Changes?</h3>
+                                <p className="text-sm text-gray-500">This will restore the original default content and clear all your recent modifications.</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -51,7 +51,7 @@ export function AdminToolbar() {
                                 onClick={handleReset}
                                 className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
                             >
-                                Reset Everything
+                                Revert Everything
                             </button>
                             <button
                                 onClick={() => setShowReset(false)}
