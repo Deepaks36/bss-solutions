@@ -4,6 +4,15 @@ export interface Client {
   image: string;
 }
 
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  created_at: string;
+}
+
 export interface Service {
   id: string;
   title: string;
@@ -79,7 +88,14 @@ export interface SiteContent {
   heroSubtitle: string;
   heroCta: string;
   heroStat: string;
+  heroCenterBadgeLabel?: string;
   heroImage: string;
+  heroTopLeftImage?: string;
+  heroTopLeftBadgeTop?: string;
+  heroTopLeftBadgeBottom?: string;
+  heroBottomRightImage?: string;
+  heroBottomRightBadgeTop?: string;
+  heroBottomRightBadgeBottom?: string;
   heroHighlights: HomeHighlight[];
   heroStats: HomeStat[];
   heroProofItems: HomeProofItem[];

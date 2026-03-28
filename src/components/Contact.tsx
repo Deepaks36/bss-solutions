@@ -14,16 +14,39 @@ interface Props {
 export function Contact({ content, dark, onUpdate }: Props) {
 
   const { ref, visible } = useAnimateOnScroll(0.1);
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const inputCls = dark
     ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500'
     : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-600';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
+    if (!formData.name || !formData.email || !formData.message) return;
+    
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Failed to send message');
+
+      setSent(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setSent(false), 5000);
+    } catch (err) {
+      setError('Failed to send message. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,34 +130,58 @@ export function Contact({ content, dark, onUpdate }: Props) {
               onSubmit={handleSubmit}
               className={`rounded-2xl border p-8 space-y-5 ${dark ? 'bg-gray-800/60 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
             >
+              {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-500/10 rounded-xl border border-red-500/20">
+                  {error}
+                </div>
+              )}
               <div className="grid sm:grid-cols-2 gap-4">
-                {['Your Name', 'Email Address'].map((ph) => (
-                  <div key={ph}>
-                    <input
-                      type={ph.includes('Email') ? 'email' : 'text'}
-                      placeholder={ph}
-                      required
-                      className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
-                    />
-                  </div>
-                ))}
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
+                />
               </div>
               <input
                 type="text"
                 placeholder="Subject"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
               />
               <textarea
                 placeholder="Your Message"
                 rows={5}
                 required
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 className={`w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none transition-all ${inputCls}`}
               />
               <button
                 type="submit"
-                className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2"
+                disabled={loading || sent}
+                className={`w-full py-4 rounded-xl text-white font-semibold text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  sent 
+                  ? 'bg-emerald-500 shadow-emerald-500/25' 
+                  : loading 
+                    ? 'bg-blue-400 cursor-not-allowed shadow-blue-400/25' 
+                    : 'bg-blue-600 hover:bg-blue-700 active:scale-95 shadow-blue-600/25'
+                }`}
               >
-                {sent ? (
+                {loading ? (
+                  <>Sending...</>
+                ) : sent ? (
                   <>Message Sent!</>
                 ) : (
                   <><Send className="w-4 h-4" /> Send Message</>

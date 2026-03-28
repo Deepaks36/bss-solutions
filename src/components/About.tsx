@@ -191,14 +191,15 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
           className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <p className={`text-center text-sm font-bold uppercase tracking-widest mb-8 ${dark ? 'text-gray-400' : 'text-gray-400'}`}>
-            Technology Index — What We Use For Our Valued Customers
+            Our Products & Services
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-5 max-w-4xl mx-auto">
             {content.technologies.map((tech, i) => (
               <div
                 key={tech.id}
-                className={`group relative flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default ${dark ? 'bg-gray-800/60 border-gray-700 hover:border-blue-500' : 'bg-gray-50 border-gray-100 hover:border-blue-200'
-                  }`}
+                className={`group relative flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default text-center ${
+                  dark ? 'bg-gray-800/60 border-gray-700 hover:border-blue-500' : 'bg-gray-50 border-gray-100 hover:border-blue-200'
+                }`}
                 style={{ transitionDelay: `${i * 40}ms` }}
               >
                 {editMode && (
@@ -218,7 +219,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                   </div>
                 )}
                 <img src={tech.image} alt={tech.name} className="w-10 h-10 object-contain mb-1" />
-                <span className={`text-xs font-bold text-center ${dark ? 'text-gray-300' : 'text-gray-700'}`}>{tech.name}</span>
+                <span className={`text-xs font-bold text-center leading-snug ${dark ? 'text-gray-300' : 'text-gray-700'}`}>{tech.name}</span>
               </div>
             ))}
 

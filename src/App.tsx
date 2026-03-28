@@ -14,6 +14,7 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminToolbar } from './components/AdminToolbar';
+import { MessagesModal } from './components/MessagesModal';
 import { useScrollSpy } from './hooks/useScrollSpy';
 import { useSite } from './context/SiteContext';
 
@@ -22,6 +23,7 @@ const SECTION_IDS = ['home', 'products', 'about', 'workflow', 'why', 'companies'
 export default function App() {
   const [dark, setDark] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   const {
     content,
     isAdmin,
@@ -56,6 +58,7 @@ export default function App() {
         isAdmin={isAdmin}
         editMode={editMode}
         onToggleEdit={() => setEditMode(!editMode)}
+        onShowMessages={() => setShowMessages(true)}
         onShowLogin={() => setShowLogin(true)}
         onLogout={handleLogout}
       />
@@ -148,6 +151,13 @@ export default function App() {
           onLogin={handleLogin}
           onClose={() => setShowLogin(false)}
           dark={dark}
+        />
+      )}
+
+      {showMessages && (
+        <MessagesModal
+          dark={dark}
+          onClose={() => setShowMessages(false)}
         />
       )}
     </div>

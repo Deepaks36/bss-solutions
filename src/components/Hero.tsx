@@ -45,7 +45,14 @@ function HomeEditModal({
     heroSubtitle: string;
     heroCta: string;
     heroStat: string;
+    heroCenterBadgeLabel?: string;
     heroImage: string;
+    heroTopLeftImage?: string;
+    heroTopLeftBadgeTop?: string;
+    heroTopLeftBadgeBottom?: string;
+    heroBottomRightImage?: string;
+    heroBottomRightBadgeTop?: string;
+    heroBottomRightBadgeBottom?: string;
     heroHighlights: HomeHighlight[];
     heroStats: HomeStat[];
     heroProofItems: HomeProofItem[];
@@ -55,7 +62,15 @@ function HomeEditModal({
   const [heroSubtitle, setHeroSubtitle] = useState(content.heroSubtitle);
   const [heroCta, setHeroCta] = useState(content.heroCta);
   const [heroStat, setHeroStat] = useState(content.heroStat);
+  const [heroCenterBadgeLabel, setHeroCenterBadgeLabel] = useState(content.heroCenterBadgeLabel || 'Trusted Leaders');
   const [heroImage, setHeroImage] = useState(content.heroImage || defaultHeroImage);
+  const [heroTopLeftImage, setHeroTopLeftImage] = useState(content.heroTopLeftImage || 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&h=400');
+  const [heroTopLeftBadgeTop, setHeroTopLeftBadgeTop] = useState(content.heroTopLeftBadgeTop || 'Growth rate');
+  const [heroTopLeftBadgeBottom, setHeroTopLeftBadgeBottom] = useState(content.heroTopLeftBadgeBottom || '+340% Velocity');
+  const [heroBottomRightImage, setHeroBottomRightImage] = useState(content.heroBottomRightImage || 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&h=400');
+  const [heroBottomRightBadgeTop, setHeroBottomRightBadgeTop] = useState(content.heroBottomRightBadgeTop || 'System Status');
+  const [heroBottomRightBadgeBottom, setHeroBottomRightBadgeBottom] = useState(content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed');
+
   const [heroHighlights, setHeroHighlights] = useState<HomeHighlight[]>(content.heroHighlights?.length ? content.heroHighlights : defaultHighlights);
   const [heroStats, setHeroStats] = useState<HomeStat[]>(content.heroStats?.length ? content.heroStats : defaultStats);
   const [heroProofItems, setHeroProofItems] = useState<HomeProofItem[]>(content.heroProofItems?.length ? content.heroProofItems : defaultProofItems);
@@ -63,16 +78,16 @@ function HomeEditModal({
   const [newStatValue, setNewStatValue] = useState('');
   const [newStatLabel, setNewStatLabel] = useState('');
   const [newProofItem, setNewProofItem] = useState('');
-  const [filePreview, setFilePreview] = useState(heroImage);
-  const imageRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file?: File) => {
+  const mainImageRef = useRef<HTMLInputElement>(null);
+  const topLeftImageRef = useRef<HTMLInputElement>(null);
+  const bottomRightImageRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (file: File | undefined, setter: (val: string) => void) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const value = ev.target?.result as string;
-      setHeroImage(value);
-      setFilePreview(value);
+      setter(ev.target?.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -111,26 +126,62 @@ function HomeEditModal({
               <textarea value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} rows={4} className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-200 bg-white text-slate-900'}`} />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-1">
               <div>
                 <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-slate-500'}`}>CTA label</label>
                 <input value={heroCta} onChange={(e) => setHeroCta(e.target.value)} className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-200 bg-white text-slate-900'}`} />
               </div>
-              <div>
-                <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Support text</label>
-                <input value={heroStat} onChange={(e) => setHeroStat(e.target.value)} className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${dark ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-200 bg-white text-slate-900'}`} />
+            </div>
+
+            <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
+              <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Center Card</h4>
+              <div className="space-y-4">
+                <input ref={mainImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroImage)} className="hidden" />
+                <button
+                  onClick={() => mainImageRef.current?.click()}
+                  className={`flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}
+                >
+                  {heroImage ? <img src={heroImage} alt="Center Hero preview" className={`h-full w-full object-contain ${dark ? 'bg-black/30' : 'bg-slate-100'}`} /> : <><ImagePlus className="h-6 w-6" /><span className="ml-2 text-sm font-medium">Upload Image</span></>}
+                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <input value={heroCenterBadgeLabel} onChange={(e) => setHeroCenterBadgeLabel(e.target.value)} placeholder="Badge label" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                  <input value={heroStat} onChange={(e) => setHeroStat(e.target.value)} placeholder="Badge value" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Hero image</label>
-              <input ref={imageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0])} className="hidden" />
-              <button
-                onClick={() => imageRef.current?.click()}
-                className={`flex h-40 w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${dark ? 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-blue-500' : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-500'}`}
-              >
-                {filePreview ? <img src={filePreview} alt="Hero preview" className="h-full w-full object-cover" /> : <><ImagePlus className="h-6 w-6" /><span className="ml-2 text-sm font-medium">Upload image</span></>}
-              </button>
+            <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
+              <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Top-Left Card</h4>
+              <div className="space-y-4">
+                <input ref={topLeftImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroTopLeftImage)} className="hidden" />
+                <button
+                  onClick={() => topLeftImageRef.current?.click()}
+                  className={`flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}
+                >
+                  {heroTopLeftImage ? <img src={heroTopLeftImage} alt="Top Left" className={`h-full w-full object-contain ${dark ? 'bg-black/30' : 'bg-slate-100'}`} /> : <span className="text-sm">Upload Image</span>}
+                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <input value={heroTopLeftBadgeTop} onChange={(e) => setHeroTopLeftBadgeTop(e.target.value)} placeholder="Badge label" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                  <input value={heroTopLeftBadgeBottom} onChange={(e) => setHeroTopLeftBadgeBottom(e.target.value)} placeholder="Badge value" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                </div>
+              </div>
+            </div>
+
+            <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
+              <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Bottom-Right Card</h4>
+              <div className="space-y-4">
+                <input ref={bottomRightImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroBottomRightImage)} className="hidden" />
+                <button
+                  onClick={() => bottomRightImageRef.current?.click()}
+                  className={`flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}
+                >
+                  {heroBottomRightImage ? <img src={heroBottomRightImage} alt="Bottom Right" className={`h-full w-full object-contain ${dark ? 'bg-black/30' : 'bg-slate-100'}`} /> : <span className="text-sm">Upload Image</span>}
+                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <input value={heroBottomRightBadgeTop} onChange={(e) => setHeroBottomRightBadgeTop(e.target.value)} placeholder="Badge label" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                  <input value={heroBottomRightBadgeBottom} onChange={(e) => setHeroBottomRightBadgeBottom(e.target.value)} placeholder="Badge value" className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${dark ? 'border-slate-600 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-900'}`} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -210,7 +261,7 @@ function HomeEditModal({
             Cancel
           </button>
           <button
-            onClick={() => onSave({ heroTitle, heroSubtitle, heroCta, heroStat, heroImage, heroHighlights, heroStats, heroProofItems })}
+            onClick={() => onSave({ heroTitle, heroSubtitle, heroCta, heroStat, heroCenterBadgeLabel, heroImage, heroTopLeftImage, heroTopLeftBadgeTop, heroTopLeftBadgeBottom, heroBottomRightImage, heroBottomRightBadgeTop, heroBottomRightBadgeBottom, heroHighlights, heroStats, heroProofItems })}
             className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-black text-white transition-all hover:bg-blue-700"
           >
             <Check className="h-4 w-4" />
@@ -237,7 +288,14 @@ export function Hero({ content, dark, onUpdate }: Props) {
     heroSubtitle: string;
     heroCta: string;
     heroStat: string;
+    heroCenterBadgeLabel?: string;
     heroImage: string;
+    heroTopLeftImage?: string;
+    heroTopLeftBadgeTop?: string;
+    heroTopLeftBadgeBottom?: string;
+    heroBottomRightImage?: string;
+    heroBottomRightBadgeTop?: string;
+    heroBottomRightBadgeBottom?: string;
     heroHighlights: HomeHighlight[];
     heroStats: HomeStat[];
     heroProofItems: HomeProofItem[];
@@ -246,7 +304,14 @@ export function Hero({ content, dark, onUpdate }: Props) {
     updateContent('heroSubtitle', data.heroSubtitle);
     updateContent('heroCta', data.heroCta);
     updateContent('heroStat', data.heroStat);
+    updateContent('heroCenterBadgeLabel', data.heroCenterBadgeLabel || '');
     updateContent('heroImage', data.heroImage);
+    updateContent('heroTopLeftImage', data.heroTopLeftImage || '');
+    updateContent('heroTopLeftBadgeTop', data.heroTopLeftBadgeTop || '');
+    updateContent('heroTopLeftBadgeBottom', data.heroTopLeftBadgeBottom || '');
+    updateContent('heroBottomRightImage', data.heroBottomRightImage || '');
+    updateContent('heroBottomRightBadgeTop', data.heroBottomRightBadgeTop || '');
+    updateContent('heroBottomRightBadgeBottom', data.heroBottomRightBadgeBottom || '');
     updateContent('heroHighlights', data.heroHighlights);
     updateContent('heroStats', data.heroStats);
     updateContent('heroProofItems', data.heroProofItems);
@@ -256,153 +321,170 @@ export function Hero({ content, dark, onUpdate }: Props) {
   return (
     <section
       id="home"
-      className={`relative overflow-hidden pt-28 pb-20 transition-colors duration-300 ${dark ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900'}`}
+      className={`relative pt-32 pb-16 lg:pt-40 lg:pb-24 transition-colors duration-300 ${dark ? 'bg-[#0A0F1C] text-white' : 'bg-slate-50 text-slate-900'}`}
     >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -left-24 top-8 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="absolute right-0 top-24 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" />
+      {/* Background subtleties */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-[100px]" />
+        <div className="absolute top-40 -left-40 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[80px]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <div
-          ref={ref}
-          className={`transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
-        >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-            <Sparkles className="h-4 w-4" />
-            Available for new projects
-          </div>
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
 
-          <h1 className={`max-w-xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl ${dark ? 'text-white' : 'text-slate-950'}`}>
-            {content.heroTitle}
-          </h1>
+          {/* Content Column */}
+          <div
+            ref={ref}
+            className={`transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
+          >
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
+              <Sparkles className="h-4 w-4" />
+              Empowering Enterprises Digitally
+            </div>
 
-          <p className={`mt-6 max-w-xl text-lg leading-8 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>
-            {content.heroSubtitle}
-          </p>
+            <h1 className={`text-4xl sm:text-5xl lg:text-[4rem] font-black leading-[1.1] tracking-tight ${dark ? 'text-white' : 'text-slate-950'}`}>
+              {content.heroTitle}
+            </h1>
 
-          <div className="mt-8 flex flex-wrap gap-4">
-            <a
-              href="#contact"
-              onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-transform hover:-translate-y-0.5"
-            >
-              {content.heroCta}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="#products"
-              onClick={(e) => { e.preventDefault(); document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className={`inline-flex items-center gap-2 rounded-2xl border px-6 py-3.5 text-sm font-semibold transition-colors ${dark
-                ? 'border-slate-700 bg-slate-900 text-slate-200 hover:border-blue-500 hover:text-white'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-blue-500 hover:text-blue-600'
-              }`}
-            >
-              View Products
-            </a>
-          </div>
+            <p className={`mt-6 max-w-lg text-lg leading-relaxed ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {content.heroSubtitle}
+            </p>
 
-          <div className="mt-8 flex flex-wrap gap-3 text-sm">
-            {heroHighlights.map((item) => (
-              <div
-                key={item.id}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 ${dark ? 'bg-white/5 text-slate-300' : 'bg-white text-slate-600 shadow-sm ring-1 ring-slate-200'}`}
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <button
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-700 hover:shadow-blue-600/40"
               >
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                {item.label}
-              </div>
-            ))}
+                {content.heroCta}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                className={`inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border-2 px-8 text-sm font-bold transition-all ${dark
+                  ? 'border-slate-700 bg-transparent text-slate-300 hover:border-slate-500 hover:text-white'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                  }`}
+              >
+                View Solutions
+              </button>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className={`mt-12 flex flex-wrap items-center gap-x-6 gap-y-4 border-t pt-8 ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+              {heroHighlights.map((item) => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <CheckCircle2 className={`h-5 w-5 ${dark ? 'text-blue-500' : 'text-blue-600'}`} />
+                  <span className={`text-sm font-semibold ${dark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {heroStats.map((stat) => (
-              <div
-                key={stat.id}
-                className={`rounded-2xl border p-4 ${dark ? 'border-slate-800 bg-slate-900/70' : 'border-white bg-white/90 shadow-[0_10px_35px_rgba(15,23,42,0.08)]'}`}
-              >
-                <div className="text-2xl font-black text-blue-600">{stat.value}</div>
-                <div className={`mt-1 text-xs uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</div>
+          {/* Visual Column */}
+          <div className={`relative h-[550px] sm:h-[600px] lg:h-[650px] w-full transition-all duration-1000 delay-200 ${visible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`}>
+            <style>{`
+              @keyframes floatY {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-15px); }
+              }
+              .animate-float-1 { animation: floatY 6s ease-in-out infinite; }
+              .animate-float-2 { animation: floatY 7s ease-in-out infinite 1.5s; }
+              .animate-float-3 { animation: floatY 8s ease-in-out infinite 3s; }
+            `}</style>
+
+            {/* Top Left Card */}
+            <div className="absolute top-4 left-0 w-[40%] md:w-[38%] z-10">
+              <div className={`animate-float-1 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
+                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+                  <img
+                    src={content.heroTopLeftImage || "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&h=400"}
+                    alt="Teamwork"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-4 left-3 right-3 text-white">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-emerald-400 font-bold mb-0.5">{content.heroTopLeftBadgeTop || 'Growth rate'}</p>
+                    <p className="text-[13px] sm:text-sm font-black leading-tight">{content.heroTopLeftBadgeBottom || '+340% Velocity'}</p>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Bottom Right Card */}
+            <div className="absolute bottom-4 right-0 w-[40%] md:w-[38%] z-10">
+              <div className={`animate-float-3 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
+                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+                  <img
+                    src={content.heroBottomRightImage || "https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&h=400"}
+                    alt="Technology"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-4 left-3 right-3 text-white">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-blue-300 font-bold">{content.heroBottomRightBadgeTop || 'System Status'}</p>
+                    </div>
+                    <p className="text-[13px] sm:text-sm font-black leading-tight">{content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Main Card (using heroImage) */}
+            <div className="absolute top-1/2 left-1/2 w-[45%] md:w-[42%] -translate-x-1/2 -translate-y-1/2 z-20">
+              <div className={`animate-float-2 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/40' : 'border-white/80 bg-white/80 shadow-xl shadow-slate-200/80 backdrop-blur-md'}`}>
+                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+                  <img
+                    src={heroImage}
+                    alt="Corporate Technology"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                  {/* Perfectly Integrated Trust Badge */}
+                  <div className="absolute bottom-4 left-3 right-3 text-white">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
+                        <Check className="h-3 w-3" />
+                      </div>
+                      <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-blue-300 font-black leading-tight">
+                        {content.heroCenterBadgeLabel || 'Trusted Leaders'}
+                      </p>
+                    </div>
+                    <p className="text-xs sm:text-[15px] font-black leading-snug sm:leading-tight line-clamp-2">
+                      {content.heroStat}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <div className={`relative transition-all duration-700 delay-200 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
-          <div className="relative mx-auto max-w-xl">
-            <div className={`rounded-[2rem] border p-5 shadow-2xl backdrop-blur ${dark ? 'border-slate-800 bg-slate-900/85' : 'border-white bg-white/85'}`}>
-              <div className="flex items-start gap-4">
-                <img
-                  src={heroImage}
-                  alt="Home hero"
-                  className="h-28 w-28 rounded-2xl object-cover shadow-lg"
-                />
-                <div className="flex-1">
-                  <span className="inline-flex rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-600">
-                    Home Overview
-                  </span>
-                  <h3 className={`mt-3 text-2xl font-black ${dark ? 'text-white' : 'text-slate-950'}`}>
-                    {content.heroStat}
-                  </h3>
-                  <p className={`mt-1 text-sm ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Full-stack capabilities built for enterprise scale.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {heroProofItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                    {item.label}
-                  </div>
-                ))}
-              </div>
+        {/* Stats & Proof Ribbon */}
+        <div className={`mt-24 lg:mt-32 grid gap-6 rounded-3xl border p-8 sm:grid-cols-2 lg:grid-cols-4 ${dark ? 'border-slate-800 bg-slate-900/50 backdrop-blur-md' : 'border-slate-200 bg-white/60 shadow-xl shadow-slate-200/50 backdrop-blur-md'}`}>
+          {heroStats.map((stat, i) => (
+            <div key={stat.id} className={`flex flex-col justify-center border-b pb-6 sm:border-b-0 sm:pb-0 ${i !== heroStats.length - 1 ? 'lg:border-r lg:border-slate-200 lg:dark:border-slate-800' : ''}`}>
+              <div className="text-3xl font-black text-blue-600">{stat.value}</div>
+              <div className={`mt-2 text-sm font-bold uppercase tracking-wide ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</div>
             </div>
+          ))}
 
-            <div className={`ml-10 -mt-6 rounded-[1.75rem] border p-5 shadow-2xl ${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-white'}`}>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className={`text-xs uppercase tracking-[0.25em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Growth</p>
-                  <h4 className={`mt-2 text-xl font-black ${dark ? 'text-white' : 'text-slate-950'}`}>
-                    Product velocity and delivery confidence
-                  </h4>
-                </div>
-                <div className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-right">
-                  <div className="text-sm font-bold text-emerald-500">+340%</div>
-                  <div className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Growth</div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                {heroStats.slice(0, 2).map((stat) => (
-                  <div key={stat.id} className={`rounded-2xl p-4 ${dark ? 'bg-slate-800/80' : 'bg-slate-50'}`}>
-                    <div className="text-xs uppercase tracking-wider text-slate-500">{stat.label}</div>
-                    <div className="mt-2 text-2xl font-black text-blue-600">{stat.value}</div>
-                  </div>
-                ))}
-              </div>
+          <div className={`flex flex-col justify-center lg:pl-6`}>
+            <div className={`text-xs font-bold uppercase tracking-widest ${dark ? 'text-blue-500' : 'text-blue-600'}`}>
+              Core Solutions
             </div>
-
-            <div className={`ml-20 -mt-6 rounded-[1.75rem] border p-5 shadow-2xl ${dark ? 'border-slate-800 bg-slate-900/95' : 'border-slate-100 bg-white'}`}>
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-black text-white shadow-lg shadow-blue-600/30">
-                  Home
+            <div className={`mt-3 space-y-2 text-sm font-semibold ${dark ? 'text-slate-300' : 'text-slate-700'}`}>
+              {heroProofItems.slice(0, 3).map((item) => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                  {item.label}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className={`text-xs uppercase tracking-[0.25em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Associated highlights</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {heroHighlights.map((item) => (
-                      <span
-                        key={item.id}
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${dark ? 'bg-white/5 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
-                      >
-                        {item.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -411,7 +493,7 @@ export function Hero({ content, dark, onUpdate }: Props) {
       {editMode && (
         <button
           onClick={() => setIsEditing(true)}
-          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-xl shadow-blue-600/30 transition-all hover:bg-blue-700"
+          className="absolute bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-xl shadow-blue-600/30 transition-all hover:bg-blue-700"
         >
           <Pencil className="h-4 w-4" />
           Edit Home Section

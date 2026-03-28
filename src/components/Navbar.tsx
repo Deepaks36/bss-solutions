@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, LogOut, Edit3, Eye, Shield } from 'lucide-react';
+import { Sun, Moon, LogOut, Edit3, Eye, Shield, Bell } from 'lucide-react';
 
 interface Props {
   activeSection: string;
@@ -8,6 +8,7 @@ interface Props {
   isAdmin: boolean;
   editMode: boolean;
   onToggleEdit: () => void;
+  onShowMessages: () => void;
   onShowLogin: () => void;
   onLogout: () => void;
 }
@@ -18,12 +19,12 @@ const navLinks = [
   { id: 'about', label: 'About' },
   { id: 'workflow', label: 'Workflow' },
   { id: 'why', label: 'Why Us' },
-  { id: 'companies', label: 'Companies' },
+  { id: 'companies', label: 'Clients' },
   { id: 'news', label: 'Newsroom' },
   { id: 'contact', label: 'Reach Out' },
 ];
 
-export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, onToggleEdit, onShowLogin, onLogout }: Props) {
+export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, onToggleEdit, onShowMessages, onShowLogin, onLogout }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -98,6 +99,16 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
               {/* Admin controls */}
               {isAdmin ? (
                 <>
+                  <button
+                    onClick={onShowMessages}
+                    className={`p-2 rounded-xl transition-all duration-200 ${dark
+                      ? 'bg-blue-900/40 text-blue-400 hover:bg-blue-900/60'
+                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                      }`}
+                    aria-label="View Messages"
+                  >
+                    <Bell className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={onToggleEdit}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${editMode

@@ -7,6 +7,12 @@ export const defaultContent: SiteContent = {
   heroCta: "Let's Live Your Project Today!",
   heroStat: "Successfully Completed & Delivered 300+ Projects!",
   heroImage: "https://bsyssolutions.com/wp-content/uploads/2022/08/viber_image_2022-08-18_17-35-16-097.jpg",
+  heroTopLeftImage: "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&h=400",
+  heroTopLeftBadgeTop: "Growth rate",
+  heroTopLeftBadgeBottom: "+340% Velocity",
+  heroBottomRightImage: "https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&h=400",
+  heroBottomRightBadgeTop: "System Status",
+  heroBottomRightBadgeBottom: "100% Uptime Guaranteed",
   heroHighlights: [
     { id: "hh1", label: "Enterprise HR platforms" },
     { id: "hh2", label: "Cloud-native product engineering" },
@@ -51,52 +57,44 @@ export const defaultContent: SiteContent = {
   services: [
     {
       id: "s1",
-      title: "HR Metrics",
+      title: "BSOL ERP",
+      description: "Unify finance, operations, procurement, and reporting in one secure enterprise platform.",
+      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/IT-Consulting-Services.png",
+      accent: "from-blue-600 to-cyan-500",
+      bullets: ["Finance workflows", "Inventory control", "Operational reporting"]
+    },
+    {
+      id: "s2",
+      title: "HRMetrics",
       description: "Track attendance, performance, payroll signals, and workforce analytics in a single dashboard.",
       icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Software-Development-Services-1.png",
-      accent: "from-blue-600 to-cyan-500",
+      accent: "from-indigo-600 to-violet-500",
       image: "https://images.pexels.com/photos/7108815/pexels-photo-7108815.jpeg?auto=compress&cs=tinysrgb&w=1200",
       bullets: ["People analytics", "Payroll insights", "Employee performance"]
     },
     {
-      id: "s2",
-      title: "BSOL ERP Suite",
-      description: "Unify finance, operations, procurement, and reporting in one secure enterprise platform.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/IT-Consulting-Services.png",
-      accent: "from-indigo-600 to-violet-500",
-      bullets: ["Finance workflows", "Inventory control", "Operational reporting"]
-    },
-    {
       id: "s3",
-      title: "AI Functional Chatbot",
-      description: "Answer employee and customer questions instantly with AI-assisted workflows and support routing.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png",
+      title: "GoBoat",
+      description: "A comprehensive boat booking and fleet management solution for your maritime needs.",
+      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Mobile-Apps-Development-Services.png",
       accent: "from-emerald-600 to-teal-500",
-      bullets: ["24/7 assistance", "Smart routing", "Conversation history"]
+      bullets: ["Fleet tracking", "Booking automation", "Customer management"]
     },
     {
       id: "s4",
-      title: "Ask Me - Corporate Knowledgebase AI",
-      description: "Turn policies, SOPs, and documents into a secure internal assistant for teams.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Mobile-Apps-Development-Services.png",
+      title: "FariCampus",
+      description: "Streamline campus operations, student management, and academic tracking with an intelligent campus solution.",
+      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/POS-Software-Development-Services.png",
       accent: "from-amber-500 to-orange-500",
-      bullets: ["Private knowledge base", "Document search", "Role-based access"]
+      bullets: ["Student portals", "Academic tracking", "Resource scheduling"]
     },
     {
       id: "s5",
-      title: "ERP Systems Implementations",
-      description: "We are here to build customized and advanced ERP Systems for multifarious industry verticals with skilled and experienced developers.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/POS-Software-Development-Services.png",
+      title: "AI Chatbot Koya",
+      description: "Answer employee and customer questions instantly with AI-assisted workflows and support routing.",
+      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png",
       accent: "from-rose-600 to-pink-500",
-      bullets: ["Custom ERP", "Integration", "Migration"]
-    },
-    {
-      id: "s6",
-      title: "HR & Payroll Consulting",
-      description: "Our HR & Payroll Consulting services will optimize every human resource task and overall HR goals of an organization.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/HR-Management-Software.png",
-      accent: "from-purple-600 to-fuchsia-500",
-      bullets: ["Payroll optimization", "Task automation", "HR strategy"]
+      bullets: ["24/7 assistance", "Smart routing", "Conversation history"]
     }
   ],
 
@@ -283,10 +281,13 @@ export const defaultContent: SiteContent = {
     },
   ],
   technologies: [
-    { id: "tech1", name: "React", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg" },
-    { id: "tech2", name: "Node.js", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg" },
-    { id: "tech3", name: "TypeScript", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/typescript.svg" },
-    { id: "tech4", name: "Azure", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/microsoftazure.svg" },
-    { id: "tech5", name: "Docker", image: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg" },
+    { id: "tech1", name: "Software Development", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Software-Development-Services-1.png" },
+    { id: "tech2", name: "Mobile App Development", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Mobile-Apps-Development-Services.png" },
+    { id: "tech3", name: "Web Development", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png" },
+    { id: "tech4", name: "IT Consulting", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/IT-Consulting-Services.png" },
+    { id: "tech5", name: "UI/UX Design", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/UI-UX-Design-Services.png" },
+    { id: "tech6", name: "ERP Solutions", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/POS-Software-Development-Services.png" },
+    { id: "tech7", name: "HR & Payroll", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/HR-Management-Software.png" },
+    { id: "tech8", name: "AI & Chatbots", image: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png" },
   ],
 };
