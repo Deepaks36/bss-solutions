@@ -18,6 +18,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
 
   const inputCls = dark
     ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500'
@@ -41,6 +42,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
 
       setSent(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
+      setShowPopup(true);
       setTimeout(() => setSent(false), 5000);
     } catch (err) {
       setError('Failed to send message. Please try again later.');
@@ -50,8 +52,9 @@ export function Contact({ content, dark, onUpdate }: Props) {
   };
 
   return (
-    <section
-      id="contact"
+    <>
+      <section
+        id="contact"
       className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-900' : 'bg-white'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -192,5 +195,26 @@ export function Contact({ content, dark, onUpdate }: Props) {
         </div>
       </div>
     </section>
+      
+      {showPopup && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out]">
+          <div className={`relative w-full max-w-sm p-6 text-center rounded-3xl shadow-2xl ${dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 mb-6">
+              <Send className="h-8 w-8 text-emerald-600" />
+            </div>
+            <h3 className="text-xl font-black mb-2">Message Sent!</h3>
+            <p className={`text-sm mb-6 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+              Thank you for reaching out. We have received your message and will get back to you shortly.
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg active:scale-95"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

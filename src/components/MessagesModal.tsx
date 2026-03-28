@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Mail, Clock, MessageSquare, Inbox } from 'lucide-react';
+import { X, Mail, Clock, Inbox } from 'lucide-react';
 import { ContactMessage } from '../types';
 
 interface Props {
@@ -18,7 +18,7 @@ export function MessagesModal({ dark, onClose }: Props) {
         const res = await fetch('/api/messages');
         if (!res.ok) throw new Error('Failed to fetch messages');
         const data = await res.json();
-        setMessages(data);
+        setMessages(data.filter((m: ContactMessage) => !m.verified));
       } catch (err) {
         setError('Error loading messages. Please check if the server is running.');
       } finally {
@@ -43,8 +43,8 @@ export function MessagesModal({ dark, onClose }: Props) {
               <Inbox className="w-5 h-5" />
             </div>
             <div>
-              <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>Contact Submissions</h3>
-              <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Inbox for all Reach Out form submissions</p>
+              <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>Unverified Reach Out Messages</h3>
+              <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>New messages pending verification from clients</p>
             </div>
           </div>
           <button 
@@ -69,48 +69,27 @@ export function MessagesModal({ dark, onClose }: Props) {
           ) : messages.length === 0 ? (
             <div className={`flex flex-col items-center justify-center py-20 text-center ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               <Mail className="w-12 h-12 mb-4 opacity-20" />
-              <p className="font-medium">No messages yet</p>
-              <p className="text-sm mt-1">When users submit the contact form, they will appear here.</p>
+              <p className="font-medium">No new unverified messages</p>
+              <p className="text-sm mt-1">When users submit the contact form, they will appear here until verified.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {messages.map((msg) => (
                 <div 
                   key={msg.id} 
-                  className={`p-5 rounded-2xl border transition-colors ${dark ? 'border-slate-800 bg-slate-800/20 hover:bg-slate-800/40' : 'border-slate-100 bg-white hover:bg-slate-50 shadow-sm'}`}
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${dark ? 'border-slate-800 bg-slate-800/20 hover:bg-slate-800/40' : 'border-slate-100 bg-white hover:bg-slate-50 shadow-sm'}`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${dark ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600'}`}>
-                        {msg.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <h4 className={`font-bold text-sm flex items-center gap-2 ${dark ? 'text-white' : 'text-slate-900'}`}>
-                          {msg.name}
-                        </h4>
-                        <div className={`flex items-center gap-1.5 text-xs mt-0.5 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-                          <Mail className="w-3 h-3" />
-                          <a href={`mailto:${msg.email}`} className="hover:text-blue-500 transition-colors">{msg.email}</a>
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${dark ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600'}`}>
+                      {msg.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className={`flex items-center gap-1.5 text-xs font-semibold ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
-                      <Clock className="w-3 h-3" />
-                      {new Date(msg.created_at).toLocaleString()}
-                    </div>
+                    <h4 className={`font-bold text-lg ${dark ? 'text-white' : 'text-slate-900'}`}>
+                      {msg.name}
+                    </h4>
                   </div>
-                  
-                  <div className={`pl-0 sm:pl-13 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    {msg.subject && (
-                      <div className="mb-2 text-sm font-semibold flex items-center gap-2">
-                        <span className={`w-1.5 h-1.5 rounded-full ${dark ? 'bg-blue-500' : 'bg-blue-600'}`} />
-                        {msg.subject}
-                      </div>
-                    )}
-                    <div className={`p-4 rounded-xl text-sm leading-relaxed ${dark ? 'bg-slate-900/50 text-slate-300' : 'bg-slate-50 text-slate-600'}`}>
-                      <MessageSquare className="w-4 h-4 mb-2 opacity-50" />
-                      {msg.message}
-                    </div>
+                  <div className={`flex items-center gap-1.5 text-sm font-semibold ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                    <Clock className="w-4 h-4" />
+                    {new Date(msg.created_at).toLocaleString()}
                   </div>
                 </div>
               ))}

@@ -1,0 +1,15 @@
+<svg width="600" height="450" viewBox="0 0 600 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="450" rx="36" fill="url(#bg)"/>
+  <rect x="44" y="48" width="512" height="356" rx="28" fill="rgba(255,255,255,0.08)"/>
+  <text x="60" y="110" fill="white" font-size="42" font-family="Arial, sans-serif" font-weight="700">GoBoat</text>
+  <text x="60" y="148" fill="#CCFBF1" font-size="20" font-family="Arial, sans-serif">Fleet and booking control</text>
+  <path d="M90 280H510L470 326H130L90 280Z" fill="rgba(255,255,255,0.9)"/>
+  <path d="M300 168L362 248H238L300 168Z" fill="rgba(240,253,250,0.95)"/>
+  <path d="M84 354C120 334 156 334 192 354C228 374 264 374 300 354C336 334 372 334 408 354C444 374 480 374 516 354" stroke="rgba(255,255,255,0.82)" stroke-width="14" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#059669"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+</svg>

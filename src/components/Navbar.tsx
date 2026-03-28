@@ -11,6 +11,8 @@ interface Props {
   onShowMessages: () => void;
   onShowLogin: () => void;
   onLogout: () => void;
+  adminView?: 'main' | 'reach-out';
+  onSetAdminView?: (view: 'main' | 'reach-out') => void;
 }
 
 const navLinks = [
@@ -24,9 +26,28 @@ const navLinks = [
   { id: 'contact', label: 'Reach Out' },
 ];
 
-export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, onToggleEdit, onShowMessages, onShowLogin, onLogout }: Props) {
+export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, onToggleEdit, onShowMessages, onShowLogin, onLogout, adminView, onSetAdminView }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unverifiedCount, setUnverifiedCount] = useState(0);
+
+  useEffect(() => {
+    if (isAdmin) {
+      const fetchCount = async () => {
+        try {
+          const res = await fetch('/api/messages');
+          if (res.ok) {
+            const data = await res.json();
+            setUnverifiedCount(data.filter((m: any) => !m.verified).length);
+          }
+        } catch (e) {}
+      };
+      fetchCount();
+      // Poll every 30 seconds
+      const interval = setInterval(fetchCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -35,7 +56,14 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
   }, []);
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    if (adminView === 'reach-out' && onSetAdminView) {
+      onSetAdminView('main');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
     setMenuOpen(false);
   };
 
@@ -75,11 +103,19 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                 <button
                   key={link.id}
                   onClick={() => scrollTo(link.id)}
-                  className={`${linkBase} ${activeSection === link.id ? linkActive : linkInactive}`}
+                  className={`${linkBase} ${activeSection === link.id && adminView !== 'reach-out' ? linkActive : linkInactive}`}
                 >
                   {link.label}
                 </button>
               ))}
+              {isAdmin && onSetAdminView && (
+                <button
+                  onClick={() => onSetAdminView('reach-out')}
+                  className={`${linkBase} ${adminView === 'reach-out' ? linkActive : linkInactive} font-bold`}
+                >
+                  Reach Out Admin
+                </button>
+              )}
             </nav>
 
             {/* Actions */}
@@ -101,13 +137,18 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                 <>
                   <button
                     onClick={onShowMessages}
-                    className={`p-2 rounded-xl transition-all duration-200 ${dark
+                    className={`relative p-2 rounded-xl transition-all duration-200 ${dark
                       ? 'bg-blue-900/40 text-blue-400 hover:bg-blue-900/60'
                       : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                       }`}
                     aria-label="View Messages"
                   >
                     <Bell className="w-4 h-4" />
+                    {unverifiedCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                        {unverifiedCount > 99 ? '99+' : unverifiedCount}
+                      </span>
+                    )}
                   </button>
                   <button
                     onClick={onToggleEdit}
@@ -167,7 +208,7 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                 <button
                   key={link.id}
                   onClick={() => scrollTo(link.id)}
-                  className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeSection === link.id
+                  className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeSection === link.id && adminView !== 'reach-out'
                     ? 'bg-blue-600 text-white'
                     : dark
                       ? 'text-gray-300 hover:bg-gray-800'
@@ -177,6 +218,22 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
                   {link.label}
                 </button>
               ))}
+              {isAdmin && onSetAdminView && (
+                <button
+                  onClick={() => {
+                    onSetAdminView('reach-out');
+                    setMenuOpen(false);
+                  }}
+                  className={`text-left px-3 py-2 rounded-lg text-sm font-bold transition-all ${adminView === 'reach-out'
+                    ? 'bg-blue-600 text-white'
+                    : dark
+                      ? 'text-yellow-500 hover:bg-gray-800'
+                      : 'text-blue-700 hover:bg-blue-50'
+                    }`}
+                >
+                  Reach Out Admin
+                </button>
+              )}
             </nav>
           </div>
         )}

@@ -59,7 +59,7 @@ export const defaultContent: SiteContent = {
       id: "s1",
       title: "BSOL ERP",
       description: "Unify finance, operations, procurement, and reporting in one secure enterprise platform.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/IT-Consulting-Services.png",
+      icon: "/src/assets/products/sol-erp-icon.png",
       accent: "from-blue-600 to-cyan-500",
       bullets: ["Finance workflows", "Inventory control", "Operational reporting"]
     },
@@ -67,16 +67,16 @@ export const defaultContent: SiteContent = {
       id: "s2",
       title: "HRMetrics",
       description: "Track attendance, performance, payroll signals, and workforce analytics in a single dashboard.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Software-Development-Services-1.png",
+      icon: "/src/assets/products/hrmetrics-icon.png",
       accent: "from-indigo-600 to-violet-500",
-      image: "https://images.pexels.com/photos/7108815/pexels-photo-7108815.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      image: "/src/assets/products/hrmetrics-image.jpg",
       bullets: ["People analytics", "Payroll insights", "Employee performance"]
     },
     {
       id: "s3",
       title: "GoBoat",
       description: "A comprehensive boat booking and fleet management solution for your maritime needs.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Mobile-Apps-Development-Services.png",
+      icon: "/src/assets/products/goboat-icon.png",
       accent: "from-emerald-600 to-teal-500",
       bullets: ["Fleet tracking", "Booking automation", "Customer management"]
     },
@@ -84,7 +84,7 @@ export const defaultContent: SiteContent = {
       id: "s4",
       title: "FariCampus",
       description: "Streamline campus operations, student management, and academic tracking with an intelligent campus solution.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/POS-Software-Development-Services.png",
+      icon: "/src/assets/products/faricampus-icon.png",
       accent: "from-amber-500 to-orange-500",
       bullets: ["Student portals", "Academic tracking", "Resource scheduling"]
     },
@@ -92,7 +92,7 @@ export const defaultContent: SiteContent = {
       id: "s5",
       title: "AI Chatbot Koya",
       description: "Answer employee and customer questions instantly with AI-assisted workflows and support routing.",
-      icon: "https://bsyssolutions.com/wp-content/uploads/2022/08/Web-Development-Services.png",
+      icon: "/src/assets/products/chatbot-koya-icon.png",
       accent: "from-rose-600 to-pink-500",
       bullets: ["24/7 assistance", "Smart routing", "Conversation history"]
     }

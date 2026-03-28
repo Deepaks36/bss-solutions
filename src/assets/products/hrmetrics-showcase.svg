@@ -1,0 +1,17 @@
+<svg width="600" height="450" viewBox="0 0 600 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="450" rx="36" fill="url(#bg)"/>
+  <rect x="48" y="48" width="504" height="354" rx="28" fill="rgba(255,255,255,0.08)"/>
+  <text x="64" y="112" fill="white" font-size="42" font-family="Arial, sans-serif" font-weight="700">HRMetrics</text>
+  <text x="64" y="150" fill="#EDE9FE" font-size="20" font-family="Arial, sans-serif">Workforce analytics dashboard</text>
+  <rect x="64" y="202" width="104" height="132" rx="22" fill="rgba(255,255,255,0.14)"/>
+  <rect x="188" y="236" width="104" height="98" rx="22" fill="rgba(255,255,255,0.1)"/>
+  <rect x="312" y="176" width="104" height="158" rx="22" fill="rgba(255,255,255,0.16)"/>
+  <rect x="436" y="218" width="84" height="116" rx="22" fill="rgba(255,255,255,0.1)"/>
+  <path d="M88 190L186 166L274 190L386 146L488 178" stroke="#F5F3FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4338CA"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+</svg>

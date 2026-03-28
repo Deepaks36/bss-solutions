@@ -1,0 +1,19 @@
+<svg width="600" height="450" viewBox="0 0 600 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="450" rx="36" fill="url(#bg)"/>
+  <rect x="42" y="42" width="516" height="366" rx="28" fill="rgba(255,255,255,0.08)"/>
+  <text x="60" y="110" fill="white" font-size="42" font-family="Arial, sans-serif" font-weight="700">BSOL ERP</text>
+  <text x="60" y="150" fill="#DBEAFE" font-size="20" font-family="Arial, sans-serif">Enterprise planning and operations</text>
+  <rect x="60" y="196" width="145" height="92" rx="22" fill="rgba(255,255,255,0.16)"/>
+  <rect x="224" y="196" width="145" height="92" rx="22" fill="rgba(255,255,255,0.12)"/>
+  <rect x="388" y="196" width="152" height="92" rx="22" fill="rgba(255,255,255,0.18)"/>
+  <rect x="60" y="312" width="480" height="44" rx="16" fill="rgba(255,255,255,0.14)"/>
+  <circle cx="500" cy="112" r="44" fill="rgba(255,255,255,0.18)"/>
+  <path d="M478 92H516C523.18 92 529 97.8203 529 105C529 112.18 523.18 118 516 118H478V92Z" fill="white" fill-opacity="0.92"/>
+  <path d="M478 120H524" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0891B2"/>
+    </linearGradient>
+  </defs>
+</svg>

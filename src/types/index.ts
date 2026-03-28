@@ -11,6 +11,8 @@ export interface ContactMessage {
   subject: string;
   message: string;
   created_at: string;
+  updated_at?: string;
+  verified: boolean;
 }
 
 export interface Service {

@@ -1,0 +1,20 @@
+<svg width="600" height="450" viewBox="0 0 600 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="450" rx="36" fill="url(#bg)"/>
+  <rect x="42" y="42" width="516" height="366" rx="28" fill="rgba(255,255,255,0.08)"/>
+  <text x="60" y="110" fill="white" font-size="40" font-family="Arial, sans-serif" font-weight="700">AI Chatbot Koya</text>
+  <text x="60" y="148" fill="#FFE4E6" font-size="20" font-family="Arial, sans-serif">AI assistance and support routing</text>
+  <rect x="108" y="174" width="384" height="132" rx="34" fill="rgba(255,255,255,0.92)"/>
+  <path d="M182 306L154 360L220 320" fill="rgba(255,255,255,0.92)"/>
+  <circle cx="220" cy="240" r="18" fill="#FB7185"/>
+  <circle cx="300" cy="240" r="18" fill="#FB7185"/>
+  <circle cx="380" cy="240" r="18" fill="#FB7185"/>
+  <rect x="60" y="340" width="164" height="28" rx="14" fill="rgba(255,255,255,0.2)"/>
+  <rect x="242" y="340" width="138" height="28" rx="14" fill="rgba(255,255,255,0.14)"/>
+  <rect x="398" y="340" width="142" height="28" rx="14" fill="rgba(255,255,255,0.18)"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E11D48"/>
+      <stop offset="1" stop-color="#DB2777"/>
+    </linearGradient>
+  </defs>
+</svg>
