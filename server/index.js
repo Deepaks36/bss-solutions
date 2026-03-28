@@ -126,20 +126,15 @@ app.post('/api/messages', async (req, res) => {
 
     if (transporter) {
       try {
-        console.log(`Email trigger started for: ${email.trim()}`);
-        console.log(`Transporter status: ${transporter ? 'Initialized' : 'Null'}`);
-        
-        // info1: Internal Notification for Admin
-        const info1 = await transporter.sendMail({
-          from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
-          sender: SMTP_USER,
-          replyTo: email.trim(),
-          to: CONTACT_TO_EMAIL,
-          subject: `New Reach Out submission from ${name.trim()}`,
-          text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
-        });
-        console.log('Admin notification response:', info1.response);
-        console.log('Admin notification mail triggered. MessageId:', info1.messageId);
+        // // info1: Internal Notification for Admin
+        // const info1 = await transporter.sendMail({
+        //   from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
+        //   sender: SMTP_USER,
+        //   replyTo: email.trim(),
+        //   to: CONTACT_TO_EMAIL,
+        //   subject: `New Reach Out submission from ${name.trim()}`,
+        //   text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
+        // });
 
         // info2: Confirmation for User
         const info2 = await transporter.sendMail({
@@ -267,6 +262,10 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   if (transporter) {
     console.log('SMTP transport configured for Reach Out emails.');
+    transporter.verify((error) => {
+      if (error) console.error('SMTP Verification Failed:', error.message);
+      else console.log('SMTP Server is ready to take our messages');
+    });
   } else {
     console.log('SMTP not configured. Reach Out submissions will still be saved to the database.');
   }
