@@ -34,7 +34,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 if (res.ok) {
                     const data = await res.json();
                     setContent(data);
-                    console.log('✅ Backend connected: Site content successfully retrieved from DB');
                 } else if (res.status === 404) {
                     // Seed initial data if DB is empty
                     await fetch(API_URL, {
@@ -63,7 +62,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 const errorData = await res.json().catch(() => ({}));
                 throw new Error(errorData.error || 'Server error');
             }
-            console.log('Content saved successfully');
         } catch (e) {
             console.error('Failed to save content:', e);
             if (e instanceof TypeError && e.message === 'Failed to fetch') {

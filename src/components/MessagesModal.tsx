@@ -29,13 +29,13 @@ export function MessagesModal({ dark, onClose }: Props) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-start p-6">
+    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 sm:p-6">
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      <div className={`relative w-full max-w-sm max-h-[85vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden animate-[slideInLeft_0.3s_ease-out] ${dark ? 'bg-[#0A0F1C] border border-slate-800' : 'bg-white'}`}>
+      <div className={`relative w-full max-w-sm max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden animate-slide-in-right ${dark ? 'bg-[#0A0F1C] border border-slate-800' : 'bg-white'}`}>
         {/* Header */}
         <div className={`flex items-center justify-between px-6 py-4 border-b ${dark ? 'border-slate-800 bg-slate-900/50' : 'border-slate-100 bg-slate-50'}`}>
           <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export function MessagesModal({ dark, onClose }: Props) {
           {loading ? (
             <div className="flex flex-col items-center justify-center h-40 gap-4">
               <div className="w-8 h-8 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-              <p className={`text-sm ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Loading messages...</p>
+              <p className={`text-sm ${dark ? 'text-slate-400' : 'text-slate-50'}`}>Loading messages...</p>
             </div>
           ) : error ? (
             <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm">
@@ -77,19 +77,24 @@ export function MessagesModal({ dark, onClose }: Props) {
               {messages.map((msg) => (
                 <div 
                   key={msg.id} 
-                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${dark ? 'border-slate-800 bg-slate-800/20 hover:bg-slate-800/40' : 'border-slate-100 bg-white hover:bg-slate-50 shadow-sm'}`}
+                  className={`flex flex-col p-3.5 rounded-2xl border transition-colors ${dark ? 'border-slate-800 bg-slate-800/20 hover:bg-slate-800/40' : 'border-slate-100 bg-white hover:bg-slate-50 shadow-sm'}`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${dark ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600'}`}>
-                      {msg.name.charAt(0).toUpperCase()}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${dark ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600'}`}>
+                        {msg.name.charAt(0).toUpperCase()}
+                      </div>
+                      <h4 className={`font-bold text-sm ${dark ? 'text-white' : 'text-slate-900'}`}>
+                        {msg.name}
+                      </h4>
                     </div>
-                    <h4 className={`font-bold text-lg ${dark ? 'text-white' : 'text-slate-900'}`}>
-                      {msg.name}
-                    </h4>
+                    <div className={`flex items-center gap-1.5 text-[10px] font-semibold ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                      <Clock className="w-3 h-3" />
+                      {new Date(msg.created_at).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className={`flex items-center gap-1.5 text-sm font-semibold ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
-                    <Clock className="w-4 h-4" />
-                    {new Date(msg.created_at).toLocaleString()}
+                  <div className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-600'} line-clamp-1 italic`}>
+                    {msg.subject || 'No Subject'}
                   </div>
                 </div>
               ))}

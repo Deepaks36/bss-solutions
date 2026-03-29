@@ -68,12 +68,23 @@ export function AdminMessagesPage({ dark }: Props) {
     try {
       const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      setMessages(messages.filter((m) => m.id !== id));
+      
+      const newMessages = messages.filter((m) => m.id !== id);
+      setMessages(newMessages);
+      
+      // Fix pagination if the current page becomes empty
+      const newTotalItems = newMessages.length;
+      const newTotalPages = Math.ceil(newTotalItems / itemsPerPage);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
+      
       setDeleteConfirm(null);
     } catch (err) {
       alert('Error deleting message.');
     }
   };
+
 
   const handleVerify = async (id: number) => {
     try {
@@ -137,8 +148,10 @@ export function AdminMessagesPage({ dark }: Props) {
       return matchesSearch && matchesGlobalStatus;
     }
     
-    return matchesName && matchesEmail && matchesSubject && matchesStatus;
+    // Grid mode: combine global search with column filters
+    return matchesSearch && matchesName && matchesEmail && matchesSubject && matchesStatus;
   });
+
 
   const sortedMessages = [...filteredMessages].sort((a, b) => {
     if (!sortConfig.direction) return 0;
@@ -189,7 +202,7 @@ export function AdminMessagesPage({ dark }: Props) {
 
   return (
     <div className={`min-h-screen pt-24 pb-16 ${dark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-black">Reach Out Details</h1>
@@ -249,11 +262,11 @@ export function AdminMessagesPage({ dark }: Props) {
         ) : (
           <>
             {viewMode === 'card' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {displayedMessages.map((msg) => (
                   <div key={msg.id} className={`flex flex-col rounded-2xl border transition-all ${dark ? 'border-slate-800 bg-slate-900 hover:border-slate-700' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'} ${msg.verified ? 'opacity-70' : ''}`}>
-                    <div className={`p-4 flex-1 ${dark ? 'border-b border-slate-800' : 'border-b border-slate-100'}`}>
-                      <div className="flex justify-between items-start mb-4">
+                    <div className={`p-3.5 flex-1 ${dark ? 'border-b border-slate-800' : 'border-b border-slate-100'}`}>
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex-1 min-w-0 pr-2">
                           <h3 className="font-bold truncate text-base" title={msg.name}>{msg.name}</h3>
                           <p className={`text-xs truncate mt-0.5 ${dark ? 'text-slate-400' : 'text-slate-500'} font-medium`} title={msg.email}>{msg.email}</p>
@@ -331,10 +344,10 @@ export function AdminMessagesPage({ dark }: Props) {
                 <thead className={`sticky top-0 z-30 ${dark ? 'bg-slate-950/90 backdrop-blur-md' : 'bg-slate-50/90 backdrop-blur-md'}`}>
                   {/* Sorting Header Row */}
                   <tr>
-                    <th className={`px-4 py-3 font-black border-b ${dark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-500'} uppercase tracking-wider text-[10px]`}>
+                    <th className={`px-3 py-2.5 font-black border-b ${dark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-500'} uppercase tracking-wider text-[10px]`}>
                       Actions
                     </th>
-                    <th className={`px-4 py-3 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
                         onClick={() => requestSort('verified')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'verified' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
@@ -344,7 +357,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         {sortConfig.key !== 'verified' && <ArrowUpDown className="w-3 h-3 opacity-30"/>}
                       </button>
                     </th>
-                    <th className={`px-4 py-3 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
                         onClick={() => requestSort('name')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'name' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
@@ -354,7 +367,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         {sortConfig.key !== 'name' && <ArrowUpDown className="w-3 h-3 opacity-30"/>}
                       </button>
                     </th>
-                    <th className={`px-4 py-3 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
                         onClick={() => requestSort('email')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'email' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
@@ -364,7 +377,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         {sortConfig.key !== 'email' && <ArrowUpDown className="w-3 h-3 opacity-30"/>}
                       </button>
                     </th>
-                    <th className={`px-4 py-3 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
                         onClick={() => requestSort('subject')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'subject' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
@@ -374,7 +387,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         {sortConfig.key !== 'subject' && <ArrowUpDown className="w-3 h-3 opacity-30"/>}
                       </button>
                     </th>
-                    <th className={`px-4 py-3 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
                         onClick={() => requestSort('created_at')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'created_at' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
@@ -387,12 +400,12 @@ export function AdminMessagesPage({ dark }: Props) {
                   </tr>
                   {/* Filtering Header Row */}
                   <tr className={`${dark ? 'bg-slate-900/50' : 'bg-white'}`}>
-                    <th className="px-4 py-2 border-b border-r dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b border-r dark:border-slate-800 border-slate-100">
                       <div className="flex items-center justify-center">
                         <Filter className="w-3 h-3 opacity-20" />
                       </div>
                     </th>
-                    <th className="px-4 py-2 border-b dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
                       <select 
                         value={columnFilters.status}
                         onChange={(e) => setColumnFilters({...columnFilters, status: e.target.value})}
@@ -403,7 +416,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         <option value="verified">Verified</option>
                       </select>
                     </th>
-                    <th className="px-4 py-2 border-b dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
                       <input 
                         type="text" 
                         placeholder="Filter name..."
@@ -412,7 +425,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         className={`w-full text-[10px] py-1 px-2 rounded-md border outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-200 focus:border-blue-500'}`}
                       />
                     </th>
-                    <th className="px-4 py-2 border-b dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
                       <input 
                         type="text" 
                         placeholder="Filter email..."
@@ -421,7 +434,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         className={`w-full text-[10px] py-1 px-2 rounded-md border outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-200 focus:border-blue-500'}`}
                       />
                     </th>
-                    <th className="px-4 py-2 border-b dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
                       <input 
                         type="text" 
                         placeholder="Filter subject..."
@@ -430,7 +443,7 @@ export function AdminMessagesPage({ dark }: Props) {
                         className={`w-full text-[10px] py-1 px-2 rounded-md border outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-200 focus:border-blue-500'}`}
                       />
                     </th>
-                    <th className="px-4 py-2 border-b dark:border-slate-800 border-slate-100">
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
                       <div className="w-full h-6 opacity-0" />
                     </th>
                   </tr>
@@ -438,7 +451,7 @@ export function AdminMessagesPage({ dark }: Props) {
                 <tbody className={`divide-y ${dark ? 'divide-slate-800/60' : 'divide-slate-100'}`}>
                   {displayedMessages.map((msg) => (
                     <tr key={msg.id} className={`transition-colors group ${dark ? 'hover:bg-slate-800/30' : 'hover:bg-slate-50'} ${msg.verified ? (dark ? 'opacity-70' : 'bg-slate-50/50') : ''}`}>
-                      <td className="px-4 py-2 relative">
+                      <td className="px-3 py-1.5 relative">
                         <button onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)} className={`p-1.5 rounded-lg transition-colors inline-flex z-20 relative text-slate-400 hover:text-slate-600 ${dark ? 'hover:bg-slate-800' : 'hover:bg-slate-200'}`}>
                           <MoreVertical className="w-5 h-5" />
                         </button>
@@ -489,18 +502,19 @@ export function AdminMessagesPage({ dark }: Props) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-1.5">
                         {msg.verified ? (
                           <span className="inline-flex items-center gap-1.5 font-bold text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter"><CheckCircle className="w-2.5 h-2.5"/> Verified</span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 font-bold text-[10px] text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter"><AlertTriangle className="w-2.5 h-2.5"/> Pending</span>
                         )}
                       </td>
-                      <td className="px-4 py-2 font-bold transition-colors group-hover:text-blue-500">{msg.name}</td>
-                      <td className="px-4 py-2 opacity-80">{msg.email}</td>
-                      <td className="px-4 py-2 max-w-[200px] truncate" title={msg.subject}>{msg.subject || '-'}</td>
-                      <td className="px-4 py-2 text-[10px] font-mono opacity-60">{new Date(msg.created_at).toLocaleString()}</td>
+                      <td className="px-3 py-1.5 font-bold transition-colors group-hover:text-blue-500">{msg.name}</td>
+                      <td className="px-3 py-1.5 opacity-80">{msg.email}</td>
+                      <td className="px-3 py-1.5 max-w-[200px] truncate" title={msg.subject}>{msg.subject || '-'}</td>
+                      <td className="px-3 py-1.5 text-[10px] font-mono opacity-60">{new Date(msg.created_at).toLocaleString()}</td>
                     </tr>
+
                   ))}
                 </tbody>
               </table>

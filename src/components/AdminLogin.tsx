@@ -13,15 +13,34 @@ export function AdminLogin({ onLogin, onClose, dark }: Props) {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [shaking, setShaking] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin123') {
-      onLogin();
-    } else {
-      setError('Invalid username or password');
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (res.ok) {
+        onLogin();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Invalid username or password');
+        setShaking(true);
+        setTimeout(() => setShaking(false), 500);
+      }
+    } catch (err) {
+      setError('Failed to connect to server');
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,9 +123,10 @@ export function AdminLogin({ onLogin, onClose, dark }: Props) {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25"
+            disabled={loading}
+            className={`w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

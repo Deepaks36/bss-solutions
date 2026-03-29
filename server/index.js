@@ -32,23 +32,13 @@ const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Request logger
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+// console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
 
-console.log('--- SERVER STARTUP ---');
-console.log('Target Port:', PORT);
-console.log('SMTP Configured:', !!SMTP_HOST && !!SMTP_USER && !!SMTP_PASS);
-console.log('SMTP Host:', SMTP_HOST);
-console.log('SMTP User:', SMTP_USER);
-console.log('--- END STARTUP ---');
+console.log(`\n--- BSS Solutions Server starting on port ${PORT} ---`);
 
 let transporter = null;
 
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-  console.log('Initializing SMTP transporter for:', SMTP_HOST, 'port:', SMTP_PORT);
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
@@ -57,21 +47,18 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
-    debug: true,
-    logger: true
+    debug: false,
+    logger: false
   });
-  
+
   // Verify configuration
-  transporter.verify(function(error, success) {
+  transporter.verify(function (error, success) {
     if (error) {
-      console.log('SMTP Verification Failed:', error);
-    } else {
-      console.log('SMTP Server is ready to take our messages');
+      // Silent error for dev
     }
   });
-  console.log('SMTP transporter created successfully.');
 } else {
-  console.log('SMTP configuration incomplete. Host:', !!SMTP_HOST, 'User:', !!SMTP_USER, 'Pass:', !!SMTP_PASS);
+  // Silent or minimal config warning
 }
 
 function serializeMessage(row) {
@@ -107,6 +94,18 @@ app.post('/api/content', (req, res) => {
   }
 });
 
+// Admin login
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const adminConfig = appSettings.Admin || { Username: 'admin', Password: 'password123' };
+
+  if (username === adminConfig.Username && password === adminConfig.Password) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
 // Create message and send email when SMTP is configured
 app.post('/api/messages', async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -126,15 +125,16 @@ app.post('/api/messages', async (req, res) => {
 
     if (transporter) {
       try {
-        // // info1: Internal Notification for Admin
-        // const info1 = await transporter.sendMail({
-        //   from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
-        //   sender: SMTP_USER,
-        //   replyTo: email.trim(),
-        //   to: CONTACT_TO_EMAIL,
-        //   subject: `New Reach Out submission from ${name.trim()}`,
-        //   text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
-        // });
+        // info1: Internal Notification for Admin
+        const info1 = await transporter.sendMail({
+          from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
+          sender: SMTP_USER,
+          replyTo: email.trim(),
+          to: CONTACT_TO_EMAIL,
+          subject: `New Reach Out submission from ${name.trim()}`,
+          text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
+        });
+        console.log('Internal notification mail triggered. MessageId:', info1.messageId);
 
         // info2: Confirmation for User
         const info2 = await transporter.sendMail({
@@ -259,14 +259,5 @@ app.delete('/api/messages/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  if (transporter) {
-    console.log('SMTP transport configured for Reach Out emails.');
-    transporter.verify((error) => {
-      if (error) console.error('SMTP Verification Failed:', error.message);
-      else console.log('SMTP Server is ready to take our messages');
-    });
-  } else {
-    console.log('SMTP not configured. Reach Out submissions will still be saved to the database.');
-  }
+  console.log(`\n🚀 Server running on http://localhost:${PORT}\n`);
 });
