@@ -135,39 +135,46 @@ function WhyCard({
   return (
     <div
       ref={ref}
-      className={`group relative rounded-2xl overflow-hidden border transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-        } ${dark
-          ? 'bg-gray-800/60 border-gray-700 hover:border-blue-500/50 hover:shadow-blue-900/20'
-          : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-100/50'
+      className={`group relative rounded-[2rem] overflow-hidden border transition-all duration-700 hover:shadow-2xl sticky flex flex-col
+        ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} 
+        ${dark
+          ? 'bg-gray-800/95 backdrop-blur-xl border-gray-700 hover:border-blue-500/50 shadow-black/50'
+          : 'bg-white/95 backdrop-blur-xl border-gray-100 hover:border-blue-200 shadow-gray-200/50'
         }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={{ 
+        top: `calc(10vh + ${index * 1.5}rem)`, 
+        transitionDelay: `${index * 50}ms`,
+        boxShadow: dark ? '0 -10px 40px -15px rgba(0,0,0,0.5)' : '0 -10px 40px -15px rgba(0,0,0,0.05)'
+      }}
     >
-      <div className="h-48 overflow-hidden relative">
-        <img
-          src={item.image}
-          alt={item.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        {editMode && (
-          <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={onEdit}
-              className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-110"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-2 rounded-xl bg-red-600 text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all hover:scale-110"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="p-6">
-        <h3 className={`font-bold text-lg mb-2 ${dark ? 'text-white' : 'text-gray-900'}`}>{item.title}</h3>
-        <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{item.description}</p>
+      <div className="flex flex-col sm:flex-row h-full">
+        <div className={`sm:w-1/3 h-40 sm:h-auto sm:min-h-[180px] overflow-hidden relative shrink-0 flex items-center justify-center p-6 ${dark ? 'bg-gray-800/50' : 'bg-gray-50/50'}`}>
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+          />
+          {editMode && (
+            <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={onEdit}
+                className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-110"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={onDelete}
+                className="p-2 rounded-xl bg-red-600 text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all hover:scale-110"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="p-6 sm:p-8 flex flex-col justify-center w-full">
+          <h3 className={`font-bold text-xl sm:text-2xl mb-3 leading-tight ${dark ? 'text-white' : 'text-gray-900'}`}>{item.title}</h3>
+          <p className={`text-sm sm:text-base leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{item.description}</p>
+        </div>
       </div>
     </div>
   );
@@ -196,46 +203,53 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, on
   return (
     <section
       id="why"
-      className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-900' : 'bg-white'}`}
+      className={`py-24 transition-colors duration-300 relative ${dark ? 'bg-gray-900' : 'bg-white'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          ref={ref}
-          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-        >
-          <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
-            <EditableText
-              value={content.whyTitle}
-              onSave={(v) => onUpdate('whyTitle', v)}
-              as="span"
-              dark={dark}
-            />
-          </h2>
-        </div>
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
+          <div
+            ref={ref}
+            className={`lg:w-1/3 lg:sticky lg:top-32 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          >
+            <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-8 leading-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
+              <EditableText
+                value={content.whyTitle}
+                onSave={(v) => onUpdate('whyTitle', v)}
+                as="span"
+                dark={dark}
+              />
+            </h2>
+            <div className={`w-20 h-2 rounded-full mb-8 bg-blue-600`}></div>
+            <p className={`text-lg leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Discover the core advantages that set us apart. We combine innovation, expertise, and dedication to deliver exceptional results.
+            </p>
+          </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {content.whyItems.map((item, i) => (
-            <WhyCard
-              key={item.id}
-              item={item}
-              index={i}
-              dark={dark}
-              onEdit={() => setEditingItem(item)}
-              onDelete={() => onDeleteWhyItem(item.id)}
-            />
-          ))}
+          <div className="lg:w-2/3 flex flex-col gap-12 pb-[20vh]">
+            {content.whyItems.map((item, i) => (
+              <WhyCard
+                key={item.id}
+                item={item}
+                index={i}
+                dark={dark}
+                onEdit={() => setEditingItem(item)}
+                onDelete={() => onDeleteWhyItem(item.id)}
+              />
+            ))}
 
-          {editMode && (
-            <button
-              onClick={() => setIsAdding(true)}
-              className={`flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group min-h-[300px] ${dark ? 'border-gray-700 hover:bg-blue-900/10' : 'border-gray-200'}`}
-            >
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${dark ? 'bg-gray-800 text-blue-400' : 'bg-white text-blue-600 shadow-sm'}`}>
-                <Plus className="h-8 w-8" />
-              </div>
-              <span className={`font-bold ${dark ? 'text-gray-300' : 'text-gray-700'}`}>Add Why Us Item</span>
-            </button>
-          )}
+            {editMode && (
+              <button
+                onClick={() => setIsAdding(true)}
+                className={`flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group min-h-[300px] sticky ${dark ? 'bg-gray-800/80 border-gray-700 hover:bg-blue-900/10 backdrop-blur-md' : 'bg-white/80 border-gray-200 backdrop-blur-md'}`}
+                style={{ top: `calc(10vh + ${content.whyItems.length * 1.5}rem)` }}
+              >
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${dark ? 'bg-gray-800 text-blue-400' : 'bg-white text-blue-600 shadow-sm'}`}>
+                  <Plus className="h-8 w-8" />
+                </div>
+                <span className={`font-bold ${dark ? 'text-gray-300' : 'text-gray-700'}`}>Add Why Us Item</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

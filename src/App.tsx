@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Products } from './components/Products';
 import { About } from './components/About';
+import { Services } from './components/Services';
 import { Workflow } from './components/Workflow';
 import { WhyChooseUs } from './components/WhyChooseUs';
 import { Clients } from './components/Clients';
@@ -20,7 +21,7 @@ import { useScrollSpy } from './hooks/useScrollSpy';
 import { useSite } from './context/SiteContext';
 import { CheckCircle } from 'lucide-react';
 
-const SECTION_IDS = ['home', 'products', 'about', 'workflow', 'why', 'companies', 'news', 'careers', 'contact'];
+const SECTION_IDS = ['home', 'products', 'about', 'services', 'workflow', 'why', 'companies', 'news', 'careers', 'contact'];
 
 export default function App() {
   const [dark, setDark] = useState(false);
@@ -111,6 +112,13 @@ export default function App() {
               onUpdateTechnologyAtomic={(id, updates) => updateSectionItemAtomic('technologies', id, updates)}
               onAddTechnology={(tech) => addItemToSection('technologies', tech)}
               onDeleteTechnology={(id) => deleteItemFromSection('technologies', id)}
+            />
+            <Services
+               content={content}
+               dark={dark}
+               onUpdateServiceAtomic={(id, updates) => updateSectionItemAtomic('services', id, updates)}
+               onAddService={(service) => addItemToSection('services', service)}
+               onDeleteService={(id) => deleteItemFromSection('services', id)}
             />
             <Workflow
               content={content}

@@ -58,43 +58,119 @@ export const defaultContent: SiteContent = {
     {
       id: "s1",
       title: "BSOL ERP",
-      description: "Unify finance, operations, procurement, and reporting in one secure enterprise platform.",
-      icon: "/src/assets/products/sol-erp-icon.png",
+      description: "A comprehensive enterprise resource planning platform designed to unify your finance, operations, procurement, and reporting into a single, high-performance secure ecosystem. Empower your business with robust data visibility and seamless automation across departments. Designed for scale, BSOL ERP bridges the gap between complex logistics and actionable business intelligence.",
+      icon: "/src/assets/images/products/bsol-erp-icon.svg",
+      image: "/src/assets/products/bsol_erp.png",
       accent: "from-blue-600 to-cyan-500",
-      bullets: ["Finance workflows", "Inventory control", "Operational reporting"]
+      bullets: ["Finance workflows", "Inventory control", "Operational reporting", "Real-time analytics", "Secure ecosystem", "Scalable architecture"]
     },
     {
       id: "s2",
-      title: "HRMetrics",
-      description: "Track attendance, performance, payroll signals, and workforce analytics in a single dashboard.",
-      icon: "/src/assets/products/hrmetrics-icon.png",
+      title: "HR Metrics",
+      description: "The ultimate workforce management dashboard. Track attendance, employee performance, payroll signals, and advanced people analytics with precision. Streamline HR operations from onboarding to retirement with a user-centric interface that simplifies complex personnel data into clear, manageable insights for leadership.",
+      icon: "/src/assets/images/products/hrmetrics-icon.svg",
+      image: "/src/assets/products/hrmetrics.png",
       accent: "from-indigo-600 to-violet-500",
-      image: "/src/assets/products/hrmetrics-image.jpg",
-      bullets: ["People analytics", "Payroll insights", "Employee performance"]
+      bullets: ["People analytics", "Payroll insights", "Employee performance", "Automated attendance", "HR operations", "Clear insights"]
     },
     {
       id: "s3",
       title: "GoBoat",
-      description: "A comprehensive boat booking and fleet management solution for your maritime needs.",
-      icon: "/src/assets/products/goboat-icon.png",
+      description: "Revolutionize your maritime operations with a complete boat booking and fleet management solution. From automated scheduling to real-time customer tracking, GoBoat handles the complex logistics of your sea-based business. Ensure your fleet is always at peak efficiency with integrated maintenance alerts and dynamic pricing models tailored for high-demand seasons.",
+      icon: "/src/assets/images/products/goboat-icon.svg",
+      image: "/src/assets/products/goboat.png",
       accent: "from-emerald-600 to-teal-500",
-      bullets: ["Fleet tracking", "Booking automation", "Customer management"]
+      bullets: ["Fleet tracking", "Booking automation", "Customer management", "Dynamic pricing", "Peak efficiency", "Maintenance alerts"]
     },
     {
       id: "s4",
       title: "FariCampus",
-      description: "Streamline campus operations, student management, and academic tracking with an intelligent campus solution.",
-      icon: "/src/assets/products/faricampus-icon.png",
+      description: "An intelligent school and campus management solution. Streamline everything from student portals and academic tracking to resource scheduling and faculty management. Designed for modern educational institutions, FariCampus fosters a digital-first learning environment that connects parents, teachers, and students in real-time for improved academic outcomes and administrative efficiency.",
+      icon: "/src/assets/images/products/faricampus-icon.svg",
+      image: "/src/assets/products/faricampus.png",
       accent: "from-amber-500 to-orange-500",
-      bullets: ["Student portals", "Academic tracking", "Resource scheduling"]
+      bullets: ["Student portals", "Academic tracking", "Resource scheduling", "Parent-Teacher communication", "Administrative efficiency", "Digital-first learning"]
     },
     {
       id: "s5",
       title: "AI Chatbot Koya",
-      description: "Answer employee and customer questions instantly with AI-assisted workflows and support routing.",
-      icon: "/src/assets/products/chatbot-koya-icon.png",
+      description: "Intelligent customer and employee support at your fingertips. Koya uses advanced AI to answer questions instantly, route support requests, and integrate seamlessly with your internal workflows and knowledge base. Reduce support volume by up to 60% while providing 24/7 instant assistance across all your digital channels, from web to mobile apps.",
+      icon: "/src/assets/images/products/ai-chatbot-koya-icon.svg",
+      image: "/src/assets/products/koya.png",
       accent: "from-rose-600 to-pink-500",
-      bullets: ["24/7 assistance", "Smart routing", "Conversation history"]
+      bullets: ["24/7 assistance", "Smart routing", "Conversation history", "Knowledge base integration", "AI-assisted workflows", "Digital channels"]
+    },
+    {
+      id: "s6",
+      title: "Mobile Apps Development",
+      description: "Produce mobile solutions that work flawlessly on all major operating systems and thousands of different mobile devices. We specialize in cross-platform and native developments.",
+      icon: "",
+      image: "",
+      accent: "from-blue-600 to-indigo-500",
+      bullets: ["iOS & Android", "Native Performance", "User Experience Focus", "Offline Capability", "Push Notifications", "Cloud Sync"]
+    },
+    {
+      id: "s7",
+      title: "Web CMS Development",
+      description: "Create scalable and secure content management solutions that empower your team to manage information without technical expertise. Tailored to your brand's unique needs.",
+      icon: "",
+      image: "",
+      accent: "from-cyan-600 to-blue-500",
+      bullets: ["Admin Dashboards", "SEO Optimized", "Fast Performance", "Easy Content Editing", "Media Management", "User Permissions"]
+    },
+    {
+      id: "s8",
+      title: "E-Commerce Solutions",
+      description: "Building high-conversion online stores that simplify the shopping journey. From interactive catalogs to secure payment gateways, we build end-to-end digital retail ecosystems.",
+      icon: "",
+      image: "",
+      accent: "from-emerald-600 to-teal-500",
+      bullets: ["Payment Gateways", "Inventory Sync", "Order Tracking", "Customer Retention", "Smooth Checkout", "Mobile Ready"]
+    },
+    {
+      id: "s9",
+      title: "UI/UX Design Studio",
+      description: "Visual logic and aesthetic excellence. We design interfaces that are not only beautiful but also intuitive, reducing friction and increasing user satisfaction across all platforms.",
+      icon: "",
+      image: "",
+      accent: "from-orange-500 to-amber-500",
+      bullets: ["User Research", "Wireframing", "Prototyping", "Design Systems", "Visual Identity", "Usability Testing"]
+    },
+    {
+      id: "s10",
+      title: "Cloud & DevOps",
+      description: "Accelerate your development cycle with robust cloud infrastructure and automated deployment pipelines. We ensure your environments are always available, secure, and scalable.",
+      icon: "",
+      image: "",
+      accent: "from-purple-600 to-fuchsia-500",
+      bullets: ["AWS/Azure/GCP", "CI/CD Pipelines", "Containerization", "Server Security", "Auto-scaling", "24/7 Monitoring"]
+    },
+    {
+      id: "s11",
+      title: "Custom CRM Solutions",
+      description: "Manage your customer relationships with surgical precision. We build custom CRM solutions that integrate your sales, support, and marketing into one single source of truth.",
+      icon: "",
+      image: "",
+      accent: "from-pink-600 to-rose-500",
+      bullets: ["Lead Management", "Sales Tracking", "Email Integration", "Report Generation", "Task Automation", "Team Collaboration"]
+    },
+    {
+      id: "s12",
+      title: "Software Development",
+      description: "Custom software development tailored to your specific business needs. We build robust, scalable, and secure applications using the latest industry standards and frameworks.",
+      icon: "",
+      image: "",
+      accent: "from-blue-600 to-cyan-500",
+      bullets: ["Custom Solutions", "Agile Methodology", "Code Quality", "Legacy Migration", "API Integration", "Ongoing Support"]
+    },
+    {
+      id: "s13",
+      title: "SEO Services",
+      description: "Improve your search engine rankings and drive organic traffic to your website. Our SEO specialists use data-driven strategies to increase your visibility and reach your target audience.",
+      icon: "",
+      image: "",
+      accent: "from-indigo-600 to-violet-500",
+      bullets: ["Keyword Research", "On-Page SEO", "Link Building", "Technical Audits", "Content Strategy", "Performance Tracking"]
     }
   ],
 

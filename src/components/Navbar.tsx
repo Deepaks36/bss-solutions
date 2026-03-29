@@ -69,11 +69,11 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
 
   const bg = scrolled
     ? dark
-      ? 'bg-gray-950/95 shadow-xl shadow-black/30 backdrop-blur-md'
-      : 'bg-white/95 shadow-xl shadow-gray-200/80 backdrop-blur-md'
+      ? 'bg-[#0A0F1C]/80 shadow-2xl shadow-black/40 backdrop-blur-xl border-b border-white/5'
+      : 'bg-white/80 shadow-xl shadow-blue-900/5 backdrop-blur-xl border-b border-slate-100'
     : dark
-      ? 'bg-transparent'
-      : 'bg-white/80 backdrop-blur-sm';
+      ? 'bg-transparent border-b border-transparent'
+      : 'bg-transparent border-b border-transparent';
 
   const linkBase = 'text-sm font-medium transition-all duration-200 px-1 py-0.5 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300';
   const linkActive = 'text-blue-600 after:w-full';
@@ -86,13 +86,14 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
       <div className="max-w-full px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#home" onClick={(e) => { e.preventDefault(); scrollTo('home'); }} className="flex items-center gap-2">
+          <a href="#home" onClick={(e) => { e.preventDefault(); scrollTo('home'); }} className="flex items-center gap-3 group">
             <img
               src="https://bsyssolutions.com/wp-content/uploads/2022/11/BSS-Logo.jpg"
               alt="BSS Logo"
-              className="h-12 w-auto rounded"
+              className="h-10 w-auto rounded-lg shadow-sm transition-transform duration-300 group-hover:scale-105"
             />
-            <span className="text-xl font-bold">BSS Solutions</span>
+            <span className="text-xl font-black tracking-tight hidden lg:block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Brilliant Systems Solutions</span>
+            <span className="text-xl font-black tracking-tight lg:hidden bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">BSS</span>
           </a>
 
           {/* Nav & Actions Grouped End */}

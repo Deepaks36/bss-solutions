@@ -97,7 +97,7 @@ app.post('/api/content', (req, res) => {
 // Admin login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const adminConfig = appSettings.Admin || { Username: 'admin', Password: 'password123' };
+  const adminConfig = appSettings.Admin;
 
   if (username === adminConfig.Username && password === adminConfig.Password) {
     res.json({ success: true });
@@ -127,7 +127,7 @@ app.post('/api/messages', async (req, res) => {
       try {
         // info1: Internal Notification for Admin
         const info1 = await transporter.sendMail({
-          from: `"${name.trim()} via BSS" <${SMTP_USER}>`, 
+          from: `"${name.trim()} via BSS" <${SMTP_USER}>`,
           sender: SMTP_USER,
           replyTo: email.trim(),
           to: CONTACT_TO_EMAIL,
