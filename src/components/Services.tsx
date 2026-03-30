@@ -27,7 +27,7 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
   const [isAdding, setIsAdding] = useState(false);
 
   // Filter for services only (exclude flagship products s1-s5)
-  const services = content.services.filter(s => !['s1', 's2', 's3', 's4', 's5'].includes(s.id));
+  const services = content.services;
   const serviceCount = services.length;
   const hasServices = serviceCount > 0;
 
@@ -95,12 +95,12 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
                       }`}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${item.accent ?? 'from-blue-600 to-cyan-500'} text-white shadow-sm transition-all duration-500 ${isActive ? 'scale-110 shadow-blue-500/40' : 'group-hover:scale-105'}`}>
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${item.accent || 'from-blue-600 to-cyan-500'} text-white shadow-sm transition-all duration-500 ${isActive ? 'scale-110 shadow-blue-500/40' : 'group-hover:scale-105'}`}>
                         {item.icon ? (
-                          <img 
-                            src={item.icon} 
-                            className="h-5 w-5 object-contain" 
-                            alt="" 
+                          <img
+                            src={item.icon}
+                            className="h-5 w-5 object-contain"
+                            alt=""
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display = 'none';
                               (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -149,12 +149,12 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
 
                 <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-8 w-full items-center">
                   <div className="flex flex-col justify-center">
-                    <div className={`inline-flex items-center gap-2 self-start rounded-full bg-gradient-to-r ${activeService.accent ?? 'from-blue-600 to-cyan-500'} px-4 py-2 text-xs font-bold text-white shadow-lg`}>
+                    <div className={`inline-flex items-center gap-2 self-start rounded-full bg-gradient-to-r ${activeService.accent || 'from-blue-600 to-cyan-500'} px-4 py-2 text-xs font-bold text-white shadow-lg`}>
                       {activeService.icon ? (
-                        <img 
-                          src={activeService.icon} 
-                          className="h-4 w-4 object-contain" 
-                          alt="" 
+                        <img
+                          src={activeService.icon}
+                          className="h-4 w-4 object-contain"
+                          alt=""
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                             (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -175,7 +175,7 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
                       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {activeService.bullets.map((bullet) => (
                           <div key={bullet} className={`flex items-center gap-3 text-sm font-bold ${dark ? 'text-slate-300' : 'text-slate-700'}`}>
-                            <span className={`h-2.5 w-2.5 shrink-0 rounded-full bg-gradient-to-r ${activeService.accent ?? 'from-blue-600 to-cyan-500'}`} />
+                            <span className={`h-2.5 w-2.5 shrink-0 rounded-full bg-gradient-to-r ${activeService.accent || 'from-blue-600 to-cyan-500'}`} />
                             {bullet}
                           </div>
                         ))}
@@ -197,15 +197,15 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
                         />
                       </div>
                     ) : null}
-                    <div className={`flex aspect-[4/3] w-full flex-col justify-between rounded-2xl bg-gradient-to-br ${activeService.accent ?? 'from-blue-600 to-cyan-500'} p-6 text-white shadow-xl ${activeService.image ? 'hidden' : ''}`}>
+                    <div className={`flex aspect-[4/3] w-full flex-col justify-between rounded-2xl bg-gradient-to-br ${activeService.accent || 'from-blue-600 to-cyan-500'} p-6 text-white shadow-xl ${activeService.image ? 'hidden' : ''}`}>
                       <div className="flex items-center justify-between">
                         <div className="rounded-full bg-white/20 px-4 py-2 text-xs font-bold backdrop-blur-md">Feature Highlight</div>
                         <div className="rounded-full bg-white/20 p-3 backdrop-blur-md">
                           {activeService.icon ? (
-                            <img 
-                              src={activeService.icon} 
-                              className="h-5 w-5 object-contain" 
-                              alt="" 
+                            <img
+                              src={activeService.icon}
+                              className="h-5 w-5 object-contain"
+                              alt=""
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
                                 (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -247,7 +247,16 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
           dark={dark}
           onSave={(data: Service) => {
             if (editingService) {
-              onUpdateServiceAtomic(data.id, data);
+              const updates: Partial<Service> = {};
+              if (data.title !== editingService.title) updates.title = data.title;
+              if (data.description !== editingService.description) updates.description = data.description;
+              if (data.icon !== editingService.icon) updates.icon = data.icon;
+              if (data.image !== editingService.image) updates.image = data.image;
+              if (JSON.stringify(data.bullets) !== JSON.stringify(editingService.bullets)) updates.bullets = data.bullets;
+
+              if (Object.keys(updates).length > 0) {
+                onUpdateServiceAtomic(data.id, updates);
+              }
             } else {
               onAddService(data);
             }

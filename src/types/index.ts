@@ -23,6 +23,10 @@ export interface Service {
   image?: string;
   accent?: string;
   bullets?: string[];
+  is_product?: boolean;
+  details?: string; // Extended product details (JSON)
+  detailsImage?: string; // Image for details view
+  type?: string; // Product type (e.g., ERP, Payroll, Booking, Hotel Management)
 }
 
 export interface HomeHighlight {
@@ -124,6 +128,7 @@ export interface SiteContent {
   careersTitle: string;
   careersSubtitle: string;
   services: Service[];
+  products: Service[];
   workflow: WorkflowStep[];
   testimonials: Testimonial[];
   news: NewsItem[];

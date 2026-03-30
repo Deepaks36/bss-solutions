@@ -71,9 +71,9 @@ function HomeEditModal({
   const [heroBottomRightBadgeTop, setHeroBottomRightBadgeTop] = useState(content.heroBottomRightBadgeTop || 'System Status');
   const [heroBottomRightBadgeBottom, setHeroBottomRightBadgeBottom] = useState(content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed');
 
-  const [heroHighlights, setHeroHighlights] = useState<HomeHighlight[]>(content.heroHighlights?.length ? content.heroHighlights : defaultHighlights);
-  const [heroStats, setHeroStats] = useState<HomeStat[]>(content.heroStats?.length ? content.heroStats : defaultStats);
-  const [heroProofItems, setHeroProofItems] = useState<HomeProofItem[]>(content.heroProofItems?.length ? content.heroProofItems : defaultProofItems);
+  const [heroHighlights, setHeroHighlights] = useState<HomeHighlight[]>(Array.isArray(content.heroHighlights) && content.heroHighlights.length ? content.heroHighlights : defaultHighlights);
+  const [heroStats, setHeroStats] = useState<HomeStat[]>(Array.isArray(content.heroStats) && content.heroStats.length ? content.heroStats : defaultStats);
+  const [heroProofItems, setHeroProofItems] = useState<HomeProofItem[]>(Array.isArray(content.heroProofItems) && content.heroProofItems.length ? content.heroProofItems : defaultProofItems);
   const [newHighlight, setNewHighlight] = useState('');
   const [newStatValue, setNewStatValue] = useState('');
   const [newStatLabel, setNewStatLabel] = useState('');
@@ -278,9 +278,9 @@ export function Hero({ content, dark, onUpdate }: Props) {
   const { editMode } = useSite();
   const [isEditing, setIsEditing] = useState(false);
 
-  const heroHighlights = content.heroHighlights?.length ? content.heroHighlights : defaultHighlights;
-  const heroStats = content.heroStats?.length ? content.heroStats : defaultStats;
-  const heroProofItems = content.heroProofItems?.length ? content.heroProofItems : defaultProofItems;
+  const heroHighlights = Array.isArray(content.heroHighlights) && content.heroHighlights.length ? content.heroHighlights : defaultHighlights;
+  const heroStats = Array.isArray(content.heroStats) && content.heroStats.length ? content.heroStats : defaultStats;
+  const heroProofItems = Array.isArray(content.heroProofItems) && content.heroProofItems.length ? content.heroProofItems : defaultProofItems;
   const heroImage = content.heroImage || defaultHeroImage;
 
   const saveHeroContent = (data: {

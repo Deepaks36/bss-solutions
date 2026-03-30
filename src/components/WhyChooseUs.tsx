@@ -188,11 +188,14 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, on
 
   const handleSave = (data: WhyItem) => {
     if (editingItem) {
-      onUpdateWhyItemAtomic(data.id, {
-        title: data.title,
-        description: data.description,
-        image: data.image
-      });
+      const updates: Partial<WhyItem> = {};
+      if (data.title !== editingItem.title) updates.title = data.title;
+      if (data.description !== editingItem.description) updates.description = data.description;
+      if (data.image !== editingItem.image) updates.image = data.image;
+      
+      if (Object.keys(updates).length > 0) {
+        onUpdateWhyItemAtomic(data.id, updates);
+      }
     } else {
       onAddWhyItem(data);
     }

@@ -33,6 +33,30 @@ function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps
     reader.readAsDataURL(file);
   };
 
+  const handleSave = () => {
+    if (!name.trim()) return;
+    
+    // For existing clients, only send what changed
+    if (client) {
+      const updates: Partial<Client> = {};
+      if (name.trim() !== client.name) updates.name = name.trim();
+      if (image !== client.image) updates.image = image;
+      
+      if (Object.keys(updates).length > 0) {
+        onSave({ ...client, ...updates });
+      } else {
+        onClose();
+      }
+    } else {
+      // New client - send full object
+      onSave({
+        id: `client-${Date.now()}`,
+        name: name.trim(),
+        image,
+      });
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl ${dark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-100'}`}>
@@ -80,15 +104,7 @@ function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps
             Cancel
           </button>
           <button
-            onClick={() => {
-              if (name.trim()) {
-                onSave({
-                  id: client?.id ?? `client-${Date.now()}`,
-                  name: name.trim(),
-                  image,
-                });
-              }
-            }}
+            onClick={handleSave}
             disabled={!name.trim()}
             className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-black text-white transition-all hover:bg-blue-700 disabled:opacity-50"
           >
@@ -191,7 +207,10 @@ export function Clients({ content, dark, onAddClient, onUpdateClientAtomic, onDe
           dark={dark}
           onSave={(data) => {
             if (editingClient) {
-              onUpdateClientAtomic(data.id, data);
+              const updates: Partial<Client> = {};
+              if (data.name !== editingClient.name) updates.name = data.name;
+              if (data.image !== editingClient.image) updates.image = data.image;
+              onUpdateClientAtomic(data.id, updates);
             } else {
               onAddClient(data);
             }

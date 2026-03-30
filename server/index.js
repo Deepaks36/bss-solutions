@@ -32,14 +32,6 @@ const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  if (req.method !== 'GET') {
-    console.log(`Payload size: ${JSON.stringify(req.body).length} characters`);
-  }
-  next();
-});
-
 console.log(`\n--- BSS Solutions Server starting on port ${PORT} ---`);
 
 let transporter = null;
@@ -78,22 +70,38 @@ function serializeMessage(row) {
 function getSiteContent() {
   const content = {};
 
-  // 1. Get settings (top-level strings)
+  // 1. Get settings (top-level strings and JSON arrays)
   const settings = db.prepare('SELECT * FROM site_settings').all();
   settings.forEach(s => {
-    content[s.key] = s.value;
+    try {
+      if (s.value.trim().startsWith('[') || s.value.trim().startsWith('{')) {
+        const parsed = JSON.parse(s.value);
+        // Ensure that for known array keys, we actually got an array
+        if (['heroHighlights', 'heroStats', 'heroProofItems'].includes(s.key) && !Array.isArray(parsed)) {
+          content[s.key] = [];
+        } else {
+          content[s.key] = parsed;
+        }
+      } else {
+        content[s.key] = s.value;
+      }
+    } catch (e) {
+      content[s.key] = s.value;
+    }
   });
 
-  // 2. Arrays of simple objects (Hero highlights, stats, proof items)
-  content.heroHighlights = db.prepare('SELECT * FROM hero_highlights').all();
-  content.heroStats = db.prepare('SELECT * FROM hero_stats').all();
-  content.heroProofItems = db.prepare('SELECT * FROM hero_proof_items').all();
-
-  // 3. Main sections
+  // 2. Main sections (Skip individual hero tables as they are now in site_settings)
   const services = db.prepare('SELECT * FROM services').all();
   content.services = services.map(s => ({
     ...s,
     bullets: s.bullets ? JSON.parse(s.bullets) : []
+  }));
+
+  const products = db.prepare('SELECT * FROM products').all();
+  content.products = products.map(p => ({
+    ...p,
+    bullets: p.bullets ? JSON.parse(p.bullets) : [],
+    details: p.details ? p.details : undefined
   }));
 
   content.workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
@@ -148,6 +156,11 @@ function saveSiteContent(content) {
     db.prepare('DELETE FROM services').run();
     const insService = db.prepare('INSERT INTO services (id, title, description, icon, image, accent, bullets) VALUES (?, ?, ?, ?, ?, ?, ?)');
     (data.services || []).forEach(s => insService.run(s.id, s.title, s.description, s.icon, s.image || '', s.accent || '', JSON.stringify(s.bullets || [])));
+
+    // Products
+    db.prepare('DELETE FROM products').run();
+    const insProduct = db.prepare('INSERT INTO products (id, title, description, icon, image, accent, bullets, type, details, detailsImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    (data.products || []).forEach(p => insProduct.run(p.id, p.title, p.description, p.icon, p.image || '', p.accent || '', JSON.stringify(p.bullets || []), p.type || '', p.details || '', p.detailsImage || ''));
 
     // Workflow
     db.prepare('DELETE FROM workflow').run();
@@ -222,13 +235,11 @@ app.patch('/api/content/settings', (req, res) => {
   const { key, value } = req.body;
   if (!key) return res.status(400).json({ error: 'Key is required' });
 
-  console.log(`PATCH /api/content/settings - Updating ${key}`);
   try {
     const stmt = db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
-    stmt.run(key, String(value));
+    stmt.run(key, (typeof value === 'object' && value !== null) ? JSON.stringify(value) : String(value));
     res.json({ success: true });
   } catch (error) {
-    console.error(`Error updating setting ${key}:`, error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -236,6 +247,7 @@ app.patch('/api/content/settings', (req, res) => {
 // Section whitelist to prevent arbitrary table access
 const SECTION_TABLE_MAP = {
   services: 'services',
+  products: 'products',
   workflow: 'workflow',
   testimonials: 'testimonials',
   news: 'news',
@@ -254,16 +266,15 @@ app.post('/api/content/sections/:section', (req, res) => {
   const table = SECTION_TABLE_MAP[section];
   if (!table) return res.status(400).json({ error: 'Invalid section' });
 
-  console.log(`POST /api/content/sections/${section} - Adding new item`);
   try {
     const item = req.body;
     const columns = Object.keys(item);
     const placeholders = columns.map(() => '?').join(', ');
     const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
     
-    // Convert arrays/objects to JSON strings
     const values = columns.map(col => {
       const val = item[col];
+      if (typeof val === 'boolean') return val ? 1 : 0;
       return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
     });
 
@@ -271,61 +282,55 @@ app.post('/api/content/sections/:section', (req, res) => {
     stmt.run(...values);
     res.json({ success: true });
   } catch (error) {
-    console.error(`Error adding to ${section}:`, error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Update item in section
-app.put('/api/content/sections/:section/:id', (req, res) => {
-  const { section, id } = req.params;
+// Update item in section - Now uses section-only URL for better display
+app.put('/api/content/sections/:section', (req, res) => {
+  const { section } = req.params;
   const table = SECTION_TABLE_MAP[section];
   if (!table) return res.status(400).json({ error: 'Invalid section' });
 
-  console.log(`PUT /api/content/sections/${section}/${id} - Updating item`);
   try {
-    const updates = req.body;
+    const { id, ...updates } = req.body;
+    if (!id) return res.status(400).json({ error: 'ID is required in body' });
+
     const columns = Object.keys(updates);
     const setClause = columns.map(col => `${col} = ?`).join(', ');
     const sql = `UPDATE ${table} SET ${setClause} WHERE id = ?`;
 
     const values = columns.map(col => {
       const val = updates[col];
+      if (typeof val === 'boolean') return val ? 1 : 0;
       return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
     });
 
     const stmt = db.prepare(sql);
     const result = stmt.run(...values, id);
     
-    if (result.changes === 0) {
-      console.warn(`Item ${id} not found in ${table}`);
-      return res.status(404).json({ error: 'Item not found' });
-    }
+    if (result.changes === 0) return res.status(404).json({ error: 'Item not found' });
     res.json({ success: true });
   } catch (error) {
-    console.error(`Error updating ${section}/${id}:`, error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Delete item from section
-app.delete('/api/content/sections/:section/:id', (req, res) => {
-  const { section, id } = req.params;
+// Delete item from section - Now uses section-only URL for better display
+app.delete('/api/content/sections/:section', (req, res) => {
+  const { section } = req.params;
+  const { id } = req.query;
   const table = SECTION_TABLE_MAP[section];
   if (!table) return res.status(400).json({ error: 'Invalid section' });
+  if (!id) return res.status(400).json({ error: 'ID is required' });
 
-  console.log(`DELETE /api/content/sections/${section}/${id} - Deleting item`);
   try {
     const stmt = db.prepare(`DELETE FROM ${table} WHERE id = ?`);
     const result = stmt.run(id);
     
-    if (result.changes === 0) {
-      console.warn(`Item ${id} not found in ${table}`);
-      return res.status(404).json({ error: 'Item not found' });
-    }
+    if (result.changes === 0) return res.status(404).json({ error: 'Item not found' });
     res.json({ success: true });
   } catch (error) {
-    console.error(`Error deleting from ${section}/${id}:`, error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -495,5 +500,5 @@ app.delete('/api/messages/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}\n`);
+  console.log(`\n Server running on http://localhost:${PORT}\n`);
 });

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Workflow } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, Workflow } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { SiteContent, Service } from '../types';
 import { useSite } from '../context/SiteContext';
 import { ServiceModal } from './ServiceModal';
+import { ProductDetailModal } from './ProductDetailModal';
 
 interface Props {
   content: SiteContent;
@@ -13,132 +14,63 @@ interface Props {
   onDeleteService: (id: string) => void;
 }
 
-// Full Detail Modal
-function ProductDetailModal({ product, dark, onClose }: { product: Service; dark: boolean; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-[fadeIn_0.3s_ease-out]" onClick={onClose}>
-      <div
-        className={`relative w-full max-w-4xl rounded-[2rem] border shadow-2xl overflow-hidden flex flex-col md:flex-row animate-[scaleIn_0.3s_ease-out] ${dark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-100'}`}
-        onClick={e => e.stopPropagation()}
-      >
-        <button onClick={onClose} className={`absolute top-6 right-6 z-[101] rounded-full p-2 transition-colors ${dark ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900'}`}>
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className={`md:w-2/5 relative flex items-center justify-center p-8 bg-gradient-to-br ${product.accent ?? 'from-blue-600 to-cyan-500'} text-white`}>
-          {product.image ? (
-            <div className="w-full relative">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="w-full h-auto object-cover rounded-xl shadow-2xl transition-opacity duration-300"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).parentElement?.classList.add('hidden');
-                  (e.target as HTMLImageElement).parentElement?.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-            </div>
-          ) : null}
-          <div className={`text-center ${product.image ? 'hidden' : ''}`}>
-            <div className="flex h-24 w-24 mx-auto items-center justify-center rounded-3xl bg-white/20 backdrop-blur-md shadow-2xl mb-6 overflow-hidden">
-              {product.icon ? (
-                <img
-                  src={product.icon}
-                  className="h-12 w-12 object-contain"
-                  alt=""
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <Workflow className={`h-12 w-12 ${product.icon ? 'hidden' : ''}`} />
-            </div>
-            <h3 className="text-3xl font-black tracking-tight">{product.title}</h3>
-          </div>
-        </div>
-
-        <div className={`md:w-3/5 p-8 md:p-12 flex flex-col justify-center`}>
-          <div className={`inline-flex items-center gap-2 self-start rounded-full bg-gradient-to-r ${product.accent ?? 'from-blue-600 to-cyan-500'} px-4 py-1.5 text-xs font-bold text-white shadow-lg mb-6`}>
-            <Workflow className="h-3 w-3" />
-            Product Details
-          </div>
-          <h3 className={`text-4xl font-black mb-6 ${dark ? 'text-white' : 'text-slate-900'}`}>{product.title}</h3>
-          <p className={`text-lg leading-relaxed mb-8 ${dark ? 'text-slate-400' : 'text-slate-600'}`}>{product.description}</p>
-          {product.bullets && product.bullets.length > 0 && (
-            <div>
-              <h4 className={`text-sm tracking-widest uppercase font-bold mb-4 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Key Features</h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {product.bullets.map(bullet => (
-                  <li key={bullet} className={`flex items-start gap-3 text-sm font-semibold ${dark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full bg-gradient-to-br mt-1 ${product.accent ?? 'from-blue-600 to-cyan-500'}`} />
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function Products({ content, dark, onUpdateServiceAtomic, onAddService, onDeleteService }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode, resetContent } = useSite();
+  const { editMode } = useSite();
   const [editingProduct, setEditingProduct] = useState<Service | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Service | null>(null);
+  const [displayedProducts, setDisplayedProducts] = useState<Service[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const PRODUCTS_PER_LOAD = 5;
 
-  // Strictly filter for the 5 flagship products only
-  const products = content.services.filter(s => ['s1', 's2', 's3', 's4', 's5'].includes(s.id));
+  // Use the dedicated products section
+  const products = content.products;
 
-  // DATA SYNC CHECK: If the database is stale (showing services instead of products), force a reset.
+  // Initialize displayed products
   useEffect(() => {
-    if (products.length > 0 && products[0].title !== 'BSOL ERP' && !editMode) {
-      console.log('Stale data detected in Products section. Syncing with defaults...');
-      resetContent();
-    }
-  }, [products, editMode, resetContent]);
+    setDisplayedProducts(products.slice(0, PRODUCTS_PER_LOAD));
+    setActiveProductId(products[0]?.id || null);
+  }, [products]);
 
+  // Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target.getAttribute('data-product-id')) {
             const id = entry.target.getAttribute('data-product-id');
             if (id) setActiveProductId(id);
           }
         });
+
+        // Check if the last product card is visible - load more if needed
+        const lastCard = document.querySelector('[data-product-id]:last-of-type');
+        if (lastCard && entries.some(e => e.target === lastCard && e.isIntersecting)) {
+          if (displayedProducts.length < products.length && !isLoadingMore) {
+            setIsLoadingMore(true);
+            // Simulate loading delay
+            setTimeout(() => {
+              const nextBatch = products.slice(0, displayedProducts.length + PRODUCTS_PER_LOAD);
+              setDisplayedProducts(nextBatch);
+              setIsLoadingMore(false);
+            }, 300);
+          }
+        }
       },
-      // Target the exact center of the viewport for precise name changing
-      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+      { threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
 
     const cards = document.querySelectorAll('.product-card-scroll');
     cards.forEach(card => observer.observe(card));
 
     return () => observer.disconnect();
-  }, [products]);
-
-  // Ensure initial state is correct
-  useEffect(() => {
-    if (!activeProductId && products.length > 0) {
-      setActiveProductId(products[0].id);
-    }
-  }, [products, activeProductId]);
-
-  // Clean activeProductId if it no longer exists
-  useEffect(() => {
-    if (activeProductId && !products.find(p => p.id === activeProductId)) {
-      setActiveProductId(products[0]?.id || null);
-    }
-  }, [products, activeProductId]);
+  }, [displayedProducts, products, isLoadingMore]);
 
   // Get active product name for right side
-  const activeProduct = products.find(p => p.id === activeProductId) || products[0];
+  const activeProduct = displayedProducts.find(p => p.id === activeProductId) || displayedProducts[0];
 
   return (
     <section id="products" className={`relative py-12 transition-colors duration-300 ${dark ? 'bg-slate-950' : 'bg-slate-50'}`}>
@@ -157,15 +89,15 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
 
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 relative">
           {/* Left Side: Scrolling Stacked Cards */}
-          <div className="w-full lg:w-1/2 flex flex-col pb-12">
-            {products.map((item, index) => (
+          <div className="w-full lg:w-1/2 flex flex-col pb-12" ref={scrollContainerRef}>
+            {displayedProducts.map((item, index) => (
               <div
                 key={item.id}
                 data-product-id={item.id}
                 onClick={() => setSelectedProduct(item)}
-                className={`product-card-scroll group sticky flex flex-col items-start cursor-pointer transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 rounded-[2rem] border p-7 mb-10 ${dark
-                    ? 'bg-slate-900/90 backdrop-blur-xl border-slate-800 hover:border-blue-500 shadow-xl'
-                    : 'bg-white/95 backdrop-blur-xl border-slate-100 hover:border-blue-300 shadow-2xl'
+                className={`product-card-scroll group sticky flex flex-col items-start cursor-pointer transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 rounded-2xl border p-4 mb-8 ${dark
+                  ? 'bg-slate-900/90 backdrop-blur-xl border-slate-800 hover:border-blue-500 shadow-xl'
+                  : 'bg-white/95 backdrop-blur-xl border-slate-100 hover:border-blue-300 shadow-2xl'
                   }`}
                 style={{
                   top: `calc(15vh + ${index * 12}px)`,
@@ -184,12 +116,12 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                   </div>
                 )}
 
-                <div className="w-full">
-                  <div className={`flex h-14 w-14 mb-6 items-center justify-center rounded-2xl bg-gradient-to-br ${item.accent ?? 'from-blue-600 to-cyan-500'} text-white shadow-lg group-hover:rotate-6 transition-transform duration-500`}>
+                <div className="w-full flex flex-col h-full">
+                  <div className={`flex h-12 w-12 mb-3 items-center justify-center rounded-xl bg-gradient-to-br ${item.accent || 'from-blue-600 to-cyan-500'} text-white shadow-lg group-hover:rotate-6 transition-transform duration-500`}>
                     {item.icon ? (
                       <img
                         src={item.icon}
-                        className="h-7 w-7 object-contain"
+                        className="h-6 w-6 object-contain"
                         alt=""
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
@@ -197,23 +129,23 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                         }}
                       />
                     ) : null}
-                    <Workflow className={`h-7 w-7 fallback-icon ${item.icon ? 'hidden' : ''}`} />
+                    <Workflow className={`h-6 w-6 fallback-icon ${item.icon ? 'hidden' : ''}`} />
                   </div>
-                  <h3 className={`text-2xl font-black mb-4 ${dark ? 'text-white' : 'text-slate-900'}`}>{item.title}</h3>
-                  <p className={`text-base leading-relaxed mb-6 ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <h3 className={`text-lg font-black mb-2 ${dark ? 'text-white' : 'text-slate-900'}`}>{item.title}</h3>
+                  <p className={`text-sm leading-relaxed mb-4 line-clamp-2 min-h-[40px] ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {item.description}
                   </p>
 
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex gap-2">
+                  <div className="flex items-center justify-between mt-auto text-xs">
+                    <div className="flex gap-1">
                       {item.bullets?.slice(0, 2).map((b, i) => (
-                        <span key={i} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${dark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                        <span key={i} className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${dark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
                           {b}
                         </span>
                       ))}
                     </div>
-                    <div className="font-black text-[10px] uppercase tracking-widest text-blue-600 group-hover:translate-x-2 transition-transform">
-                      Explore &rarr;
+                    <div className="font-black text-[8px] uppercase tracking-widest text-blue-600 group-hover:translate-x-1 transition-transform">
+                      View &rarr;
                     </div>
                   </div>
                 </div>
@@ -225,14 +157,25 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                 onClick={() => setIsAdding(true)}
                 className={`sticky flex flex-col items-center justify-center border-2 border-dashed rounded-[2rem] p-8 transition-all hover:bg-blue-500/10 hover:border-blue-500 min-h-[200px] ${dark ? 'bg-slate-900/60 backdrop-blur-md border-slate-800 text-slate-400' : 'bg-white/60 backdrop-blur-md border-slate-300 text-slate-500'}`}
                 style={{
-                  top: `calc(15vh + ${products.length * 12}px)`,
-                  zIndex: products.length + 10,
-                  marginTop: '-80px' // Consistently stack at the end
+                  top: `calc(15vh + ${displayedProducts.length * 12}px)`,
+                  zIndex: displayedProducts.length + 10,
+                  marginTop: '-80px'
                 }}
               >
                 <Plus className="h-8 w-8 mb-3 text-blue-500" />
                 <span className="font-black text-sm uppercase tracking-widest">Add New Product</span>
               </button>
+            )}
+
+            {isLoadingMore && (
+              <div className="flex justify-center py-8">
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${dark ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className={`text-sm font-semibold ml-2 ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Loading more...</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -244,7 +187,7 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                   <div key={activeProduct.id} className="animate-[slideInRight_0.6s_ease-out]">
                     <h2 className={`text-3xl xl:text-4xl font-black tracking-tighter leading-[0.95] ${dark ? 'text-white' : 'text-slate-900'}`}>
                       {activeProduct.title.split(' ').map((word, i, arr) => (
-                        <span key={i} className={`block ${i === arr.length - 1 ? 'text-transparent bg-clip-text bg-gradient-to-r ' + (activeProduct.accent ?? 'from-blue-600 to-cyan-500') : ''}`}>
+                        <span key={i} className={`block ${i === arr.length - 1 ? 'text-transparent bg-clip-text bg-gradient-to-r ' + (activeProduct.accent || 'from-blue-600 to-cyan-500') : ''}`}>
                           {word}
                         </span>
                       ))}
@@ -253,7 +196,7 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                     <div className="mt-8 space-y-3">
                       {activeProduct.bullets?.map((bullet, idx) => (
                         <div key={bullet} className={`flex items-center gap-3 text-base font-bold animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0`} style={{ animationDelay: `${0.3 + idx * 0.1}s` }}>
-                          <div className={`h-2 w-2 rounded-full bg-gradient-to-r ${activeProduct.accent ?? 'from-blue-600 to-cyan-500'}`} />
+                          <div className={`h-2 w-2 rounded-full bg-gradient-to-r ${activeProduct.accent || 'from-blue-600 to-cyan-500'}`} />
                           <span className={dark ? 'text-slate-400' : 'text-slate-500'}>{bullet}</span>
                         </div>
                       ))}
@@ -266,13 +209,22 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
         </div>
       </div>
 
-      {(editingProduct || isAdding) && (
+      {(editingProduct || isAdding) && !editingProduct?.details && (
         <ServiceModal
           product={editingProduct}
           dark={dark}
           onSave={(data: Service) => {
             if (editingProduct) {
-              onUpdateServiceAtomic(data.id, data);
+              const updates: Partial<Service> = {};
+              if (data.title !== editingProduct.title) updates.title = data.title;
+              if (data.description !== editingProduct.description) updates.description = data.description;
+              if (data.icon !== editingProduct.icon) updates.icon = data.icon;
+              if (data.image !== editingProduct.image) updates.image = data.image;
+              if (JSON.stringify(data.bullets) !== JSON.stringify(editingProduct.bullets)) updates.bullets = data.bullets;
+
+              if (Object.keys(updates).length > 0) {
+                onUpdateServiceAtomic(data.id, updates);
+              }
             } else {
               onAddService(data);
             }
@@ -290,7 +242,54 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
         <ProductDetailModal
           product={selectedProduct}
           dark={dark}
+          isEditMode={editMode}
           onClose={() => setSelectedProduct(null)}
+          onEditStart={() => setEditingProduct(selectedProduct)}
+          onSaveEdit={(updatedProduct: Service) => {
+            const updates: Partial<Service> = {};
+            if (updatedProduct.title !== selectedProduct.title) updates.title = updatedProduct.title;
+            if (updatedProduct.description !== selectedProduct.description) updates.description = updatedProduct.description;
+            if (updatedProduct.type !== selectedProduct.type) updates.type = updatedProduct.type;
+            if (updatedProduct.icon !== selectedProduct.icon) updates.icon = updatedProduct.icon;
+            if (updatedProduct.image !== selectedProduct.image) updates.image = updatedProduct.image;
+            if (updatedProduct.details !== selectedProduct.details) updates.details = updatedProduct.details;
+            if (updatedProduct.detailsImage !== selectedProduct.detailsImage) updates.detailsImage = updatedProduct.detailsImage;
+            if (JSON.stringify(updatedProduct.bullets) !== JSON.stringify(selectedProduct.bullets)) updates.bullets = updatedProduct.bullets;
+
+            if (Object.keys(updates).length > 0) {
+              onUpdateServiceAtomic(updatedProduct.id, updates);
+              setSelectedProduct(updatedProduct);
+            }
+          }}
+        />
+      )}
+
+      {editingProduct && editingProduct?.details && (
+        <ProductDetailModal
+          product={editingProduct}
+          dark={dark}
+          isEditing={true}
+          isEditMode={editMode}
+          onClose={() => setEditingProduct(null)}
+          onSaveEdit={(updatedProduct: Service) => {
+            const updates: Partial<Service> = {};
+            if (updatedProduct.title !== editingProduct.title) updates.title = updatedProduct.title;
+            if (updatedProduct.description !== editingProduct.description) updates.description = updatedProduct.description;
+            if (updatedProduct.type !== editingProduct.type) updates.type = updatedProduct.type;
+            if (updatedProduct.icon !== editingProduct.icon) updates.icon = updatedProduct.icon;
+            if (updatedProduct.image !== editingProduct.image) updates.image = updatedProduct.image;
+            if (updatedProduct.details !== editingProduct.details) updates.details = updatedProduct.details;
+            if (updatedProduct.detailsImage !== editingProduct.detailsImage) updates.detailsImage = updatedProduct.detailsImage;
+            if (JSON.stringify(updatedProduct.bullets) !== JSON.stringify(editingProduct.bullets)) updates.bullets = updatedProduct.bullets;
+
+            if (Object.keys(updates).length > 0) {
+              onUpdateServiceAtomic(updatedProduct.id, updates);
+              setEditingProduct(null);
+              if (selectedProduct?.id === editingProduct.id) {
+                setSelectedProduct(updatedProduct);
+              }
+            }
+          }}
         />
       )}
     </section>

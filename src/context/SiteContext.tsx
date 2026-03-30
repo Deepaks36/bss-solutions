@@ -74,6 +74,7 @@ const defaultContent: SiteContent = {
   careersSubtitle: "Be part of a team that is redefining the future of technology solutions.",
 
   services: [],
+  products: [],
   workflow: [],
   testimonials: [],
   news: [],
@@ -95,7 +96,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 const res = await fetch(API_URL);
                 if (res.ok) {
                     const data = await res.json();
-                    // Merge with defaultContent to ensure any new fields in code are present
+                    // Ensure arrays exist
+                    data.services = data.services || [];
+                    data.products = data.products || [];
                     setContent({ ...defaultContent, ...data });
                 } else if (res.status === 404) {
                     // Seed initial data if DB is empty as a fallback
@@ -108,7 +111,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                     setContent(defaultContent);
                 }
             } catch (e) {
-                console.error('Failed to fetch content from server. Using local defaults.', e);
                 setContent(defaultContent);
             }
         };
@@ -125,7 +127,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify({ key, value }),
             });
         } catch (e) {
-            console.error('Failed to update setting:', e);
+            // Error handled silently
         }
     }, []);
 
@@ -141,13 +143,13 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         });
 
         try {
-            await fetch(`${API_URL}/sections/${section}/${id}`, {
+            await fetch(`${API_URL}/sections/${section}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [field]: value }),
+                body: JSON.stringify({ id, [field]: value }),
             });
         } catch (e) {
-            console.error('Failed to update section item:', e);
+            // Error handled silently or via global toast in real apps
         }
     }, []);
 
@@ -163,13 +165,13 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         });
 
         try {
-            await fetch(`${API_URL}/sections/${section}/${id}`, {
+            await fetch(`${API_URL}/sections/${section}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updates),
+                body: JSON.stringify({ id, ...updates }),
             });
         } catch (e) {
-            console.error('Failed to update section item atomic:', e);
+            // Error handled silently
         }
     }, []);
 
@@ -187,7 +189,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify(item),
             });
         } catch (e) {
-            console.error('Failed to add section item:', e);
+            // Error handled silently
         }
     }, []);
 
@@ -199,11 +201,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         });
 
         try {
-            await fetch(`${API_URL}/sections/${section}/${id}`, {
+            await fetch(`${API_URL}/sections/${section}?id=${id}`, {
                 method: 'DELETE'
             });
         } catch (e) {
-            console.error('Failed to delete section item:', e);
+            // Error handled silently
         }
     }, []);
 

@@ -187,11 +187,14 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
 
   const handleSave = (data: WorkflowStep) => {
     if (editingStep) {
-      onUpdateWorkflowStepAtomic(data.id, {
-        title: data.title,
-        description: data.description,
-        icon: data.icon
-      });
+      const updates: Partial<WorkflowStep> = {};
+      if (data.title !== editingStep.title) updates.title = data.title;
+      if (data.description !== editingStep.description) updates.description = data.description;
+      if (data.icon !== editingStep.icon) updates.icon = data.icon;
+      
+      if (Object.keys(updates).length > 0) {
+        onUpdateWorkflowStepAtomic(data.id, updates);
+      }
     } else {
       onAddWorkflowStep(data);
     }

@@ -101,9 +101,9 @@ export default function App() {
             <Products
               content={content}
               dark={dark}
-              onUpdateServiceAtomic={(id, updates) => updateSectionItemAtomic('services', id, updates)}
-              onAddService={(service) => addItemToSection('services', service)}
-              onDeleteService={(id) => deleteItemFromSection('services', id)}
+              onUpdateServiceAtomic={(id, updates) => updateSectionItemAtomic('products', id, updates)}
+              onAddService={(service) => addItemToSection('products', service)}
+              onDeleteService={(id) => deleteItemFromSection('products', id)}
             />
             <About
               content={content}
