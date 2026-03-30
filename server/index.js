@@ -32,7 +32,13 @@ const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  if (req.method !== 'GET') {
+    console.log(`Payload size: ${JSON.stringify(req.body).length} characters`);
+  }
+  next();
+});
 
 console.log(`\n--- BSS Solutions Server starting on port ${PORT} ---`);
 
@@ -68,12 +74,131 @@ function serializeMessage(row) {
   };
 }
 
+// Helper to get structured content
+function getSiteContent() {
+  const content = {};
+
+  // 1. Get settings (top-level strings)
+  const settings = db.prepare('SELECT * FROM site_settings').all();
+  settings.forEach(s => {
+    content[s.key] = s.value;
+  });
+
+  // 2. Arrays of simple objects (Hero highlights, stats, proof items)
+  content.heroHighlights = db.prepare('SELECT * FROM hero_highlights').all();
+  content.heroStats = db.prepare('SELECT * FROM hero_stats').all();
+  content.heroProofItems = db.prepare('SELECT * FROM hero_proof_items').all();
+
+  // 3. Main sections
+  const services = db.prepare('SELECT * FROM services').all();
+  content.services = services.map(s => ({
+    ...s,
+    bullets: s.bullets ? JSON.parse(s.bullets) : []
+  }));
+
+  content.workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
+  content.testimonials = db.prepare('SELECT * FROM testimonials').all();
+  content.news = db.prepare('SELECT * FROM news').all();
+  content.clients = db.prepare('SELECT * FROM clients').all();
+  content.whyItems = db.prepare('SELECT * FROM why_items').all();
+  content.positions = db.prepare('SELECT * FROM positions').all();
+  content.technologies = db.prepare('SELECT * FROM technologies').all();
+
+  return content;
+}
+
+// Helper to save structured content
+function saveSiteContent(content) {
+  const transaction = db.transaction((data) => {
+    // 1. Settings
+    const setSetting = db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
+    const simpleKeys = [
+      'heroTitle', 'heroSubtitle', 'heroCta', 'heroStat', 'heroCenterBadgeLabel', 'heroImage',
+      'heroTopLeftImage', 'heroTopLeftBadgeTop', 'heroTopLeftBadgeBottom', 'heroBottomRightImage',
+      'heroBottomRightBadgeTop', 'heroBottomRightBadgeBottom', 'aboutTitle', 'aboutBody',
+      'aboutImage', 'servicesTagline', 'servicesTitle', 'servicesSubtitle', 'workflowTagline',
+      'workflowTitle', 'whyTitle', 'testimonialsTagline', 'testimonialsTitle', 'ctaBannerText',
+      'newsTitle', 'newsTagline', 'contactTitle', 'contactTagline', 'contactAddress',
+      'contactEmail', 'contactPhone', 'careersTagline', 'careersTitle', 'careersSubtitle'
+    ];
+
+    simpleKeys.forEach(key => {
+      if (data[key] !== undefined) setSetting.run(key, String(data[key]));
+    });
+
+    // 2. Sections (Clear and refilled for simplicity in this full-sync POST)
+    // In a real app, you might want more granular updates, but this matches the current frontend behavior
+    
+    // Highlights
+    db.prepare('DELETE FROM hero_highlights').run();
+    const insHighlight = db.prepare('INSERT INTO hero_highlights (id, label) VALUES (?, ?)');
+    (data.heroHighlights || []).forEach(h => insHighlight.run(h.id, h.label));
+
+    // Stats
+    db.prepare('DELETE FROM hero_stats').run();
+    const insStat = db.prepare('INSERT INTO hero_stats (id, value, label) VALUES (?, ?, ?)');
+    (data.heroStats || []).forEach(s => insStat.run(s.id, s.value, s.label));
+
+    // Proof Items
+    db.prepare('DELETE FROM hero_proof_items').run();
+    const insProof = db.prepare('INSERT INTO hero_proof_items (id, label) VALUES (?, ?)');
+    (data.heroProofItems || []).forEach(p => insProof.run(p.id, p.label));
+
+    // Services
+    db.prepare('DELETE FROM services').run();
+    const insService = db.prepare('INSERT INTO services (id, title, description, icon, image, accent, bullets) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    (data.services || []).forEach(s => insService.run(s.id, s.title, s.description, s.icon, s.image || '', s.accent || '', JSON.stringify(s.bullets || [])));
+
+    // Workflow
+    db.prepare('DELETE FROM workflow').run();
+    const insWorkflow = db.prepare('INSERT INTO workflow (id, title, description, icon, order_index) VALUES (?, ?, ?, ?, ?)');
+    (data.workflow || []).forEach((w, i) => insWorkflow.run(w.id, w.title, w.description, w.icon, i));
+
+    // Testimonials
+    db.prepare('DELETE FROM testimonials').run();
+    const insTestimonial = db.prepare('INSERT INTO testimonials (id, quote, name, role) VALUES (?, ?, ?, ?)');
+    (data.testimonials || []).forEach(t => insTestimonial.run(t.id, t.quote, t.name, t.role));
+
+    // News
+    db.prepare('DELETE FROM news').run();
+    const insNews = db.prepare('INSERT INTO news (id, title, excerpt, image, date) VALUES (?, ?, ?, ?, ?)');
+    (data.news || []).forEach(n => insNews.run(n.id, n.title, n.excerpt, n.image, n.date));
+
+    // Clients
+    db.prepare('DELETE FROM clients').run();
+    const insClient = db.prepare('INSERT INTO clients (id, name, image) VALUES (?, ?, ?)');
+    (data.clients || []).forEach(c => insClient.run(c.id, c.name, c.image));
+
+    // Why Items
+    db.prepare('DELETE FROM why_items').run();
+    const insWhy = db.prepare('INSERT INTO why_items (id, title, description, image) VALUES (?, ?, ?, ?)');
+    (data.whyItems || []).forEach(w => insWhy.run(w.id, w.title, w.description, w.image));
+
+    // Positions
+    db.prepare('DELETE FROM positions').run();
+    const insPosition = db.prepare('INSERT INTO positions (id, title, department, location, type, description) VALUES (?, ?, ?, ?, ?, ?)');
+    (data.positions || []).forEach(p => insPosition.run(p.id, p.title, p.department, p.location, p.type, p.description));
+
+    // Technologies
+    db.prepare('DELETE FROM technologies').run();
+    const insTech = db.prepare('INSERT INTO technologies (id, name, image) VALUES (?, ?, ?)');
+    (data.technologies || []).forEach(t => insTech.run(t.id, t.name, t.image));
+
+    // Also update the legacy site_content blob (for backward compatibility or as a backup)
+    db.prepare('INSERT OR REPLACE INTO site_content (id, data) VALUES (1, ?)').run(JSON.stringify(data));
+  });
+
+  transaction(content);
+}
+
 // Get all content
 app.get('/api/content', (req, res) => {
   try {
-    const row = db.prepare('SELECT data FROM site_content WHERE id = 1').get();
-    if (row) {
-      res.json(JSON.parse(row.data));
+    const content = getSiteContent();
+    // If settings are empty, consider it 404 so frontend can seed
+    const settingsCount = db.prepare('SELECT COUNT(*) as count FROM site_settings').get().count;
+    if (settingsCount > 0) {
+      res.json(content);
     } else {
       res.status(404).json({ error: 'Content not found' });
     }
@@ -82,14 +207,125 @@ app.get('/api/content', (req, res) => {
   }
 });
 
-// Update content
+// Update content (Full Sync - remains for convenience)
 app.post('/api/content', (req, res) => {
   try {
-    const data = JSON.stringify(req.body);
-    const stmt = db.prepare('INSERT OR REPLACE INTO site_content (id, data) VALUES (1, ?)');
-    stmt.run(data);
+    saveSiteContent(req.body);
     res.json({ success: true });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update specific setting (Granular)
+app.patch('/api/content/settings', (req, res) => {
+  const { key, value } = req.body;
+  if (!key) return res.status(400).json({ error: 'Key is required' });
+
+  console.log(`PATCH /api/content/settings - Updating ${key}`);
+  try {
+    const stmt = db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
+    stmt.run(key, String(value));
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`Error updating setting ${key}:`, error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Section whitelist to prevent arbitrary table access
+const SECTION_TABLE_MAP = {
+  services: 'services',
+  workflow: 'workflow',
+  testimonials: 'testimonials',
+  news: 'news',
+  clients: 'clients',
+  whyItems: 'why_items',
+  positions: 'positions',
+  technologies: 'technologies',
+  heroHighlights: 'hero_highlights',
+  heroStats: 'hero_stats',
+  heroProofItems: 'hero_proof_items'
+};
+
+// Add item to section
+app.post('/api/content/sections/:section', (req, res) => {
+  const { section } = req.params;
+  const table = SECTION_TABLE_MAP[section];
+  if (!table) return res.status(400).json({ error: 'Invalid section' });
+
+  console.log(`POST /api/content/sections/${section} - Adding new item`);
+  try {
+    const item = req.body;
+    const columns = Object.keys(item);
+    const placeholders = columns.map(() => '?').join(', ');
+    const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
+    
+    // Convert arrays/objects to JSON strings
+    const values = columns.map(col => {
+      const val = item[col];
+      return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+    });
+
+    const stmt = db.prepare(sql);
+    stmt.run(...values);
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`Error adding to ${section}:`, error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update item in section
+app.put('/api/content/sections/:section/:id', (req, res) => {
+  const { section, id } = req.params;
+  const table = SECTION_TABLE_MAP[section];
+  if (!table) return res.status(400).json({ error: 'Invalid section' });
+
+  console.log(`PUT /api/content/sections/${section}/${id} - Updating item`);
+  try {
+    const updates = req.body;
+    const columns = Object.keys(updates);
+    const setClause = columns.map(col => `${col} = ?`).join(', ');
+    const sql = `UPDATE ${table} SET ${setClause} WHERE id = ?`;
+
+    const values = columns.map(col => {
+      const val = updates[col];
+      return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+    });
+
+    const stmt = db.prepare(sql);
+    const result = stmt.run(...values, id);
+    
+    if (result.changes === 0) {
+      console.warn(`Item ${id} not found in ${table}`);
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`Error updating ${section}/${id}:`, error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete item from section
+app.delete('/api/content/sections/:section/:id', (req, res) => {
+  const { section, id } = req.params;
+  const table = SECTION_TABLE_MAP[section];
+  if (!table) return res.status(400).json({ error: 'Invalid section' });
+
+  console.log(`DELETE /api/content/sections/${section}/${id} - Deleting item`);
+  try {
+    const stmt = db.prepare(`DELETE FROM ${table} WHERE id = ?`);
+    const result = stmt.run(id);
+    
+    if (result.changes === 0) {
+      console.warn(`Item ${id} not found in ${table}`);
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`Error deleting from ${section}/${id}:`, error.message);
     res.status(500).json({ error: error.message });
   }
 });
