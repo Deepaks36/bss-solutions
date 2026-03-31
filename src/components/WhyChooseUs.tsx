@@ -135,7 +135,7 @@ function WhyCard({
   return (
     <div
       ref={ref}
-      className={`group relative rounded-[2rem] overflow-hidden border transition-all duration-700 hover:shadow-2xl sticky flex flex-col
+      className={`group relative rounded-[2rem] overflow-hidden border transition-all duration-700 hover:shadow-2xl lg:sticky flex flex-col
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} 
         ${dark
           ? 'bg-gray-800/95 backdrop-blur-xl border-gray-700 hover:border-blue-500/50 shadow-black/50'
@@ -228,7 +228,7 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, on
             </p>
           </div>
 
-          <div className="lg:w-2/3 flex flex-col gap-12 pb-[20vh]">
+          <div className="lg:w-2/3 flex flex-col gap-12 lg:pb-[20vh]">
             {content.whyItems.map((item, i) => (
               <WhyCard
                 key={item.id}

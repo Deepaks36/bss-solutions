@@ -133,16 +133,16 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
       className={`py-24 ${dark ? 'bg-gray-900' : 'bg-white'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
+        <div className="grid lg:grid-cols-2 gap-10 items-center mb-12">
           {/* Text */}
           <div
             ref={textRef}
-            className={`transition-all duration-700 ${textVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}
+            className={`transition-all duration-700 ${textVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
-            <span className={`inline-block text-sm font-bold uppercase tracking-widest mb-3 ${dark ? 'text-blue-400' : 'text-blue-600'}`}>
+            <span className={`inline-block text-[10px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-blue-400' : 'text-blue-600'}`}>
               World&apos;s exceptional IT-based corporation!
             </span>
-            <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-6 ${dark ? 'text-white' : 'text-gray-900'}`}>
+            <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
               <EditableText
                 value={content.aboutTitle}
                 onSave={(v) => onUpdate('aboutTitle', v)}
@@ -150,7 +150,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                 dark={dark}
               />
             </h2>
-            <div className={`text-lg leading-relaxed mb-8 ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
+            <div className={`text-lg leading-relaxed mb-4 ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
               <EditableText
                 value={content.aboutBody}
                 onSave={(v) => onUpdate('aboutBody', v)}
@@ -162,7 +162,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
             <a
               href="#contact"
               onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-sm transition-all duration-200 shadow-xl shadow-blue-600/30"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-[10px] transition-all duration-200 shadow-lg shadow-blue-600/30"
             >
               Get Started
             </a>
@@ -171,15 +171,15 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
           {/* Image */}
           <div
             ref={imgRef}
-            className={`transition-all duration-700 delay-200 ${imgVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
+            className={`transition-all duration-700 delay-200 ${imgVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-600/20 to-purple-600/10 blur-xl" />
+            <div className="relative max-w-sm mx-auto">
+              <div className="absolute -inset-3 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/10 blur-lg" />
               <EditableImage
                 src={content.aboutImage}
                 alt="About BSS"
                 onSave={(v) => onUpdate('aboutImage', v)}
-                className="relative rounded-2xl w-full"
+                className="relative rounded-xl w-full"
               />
             </div>
           </div>
@@ -190,14 +190,14 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
           ref={techRef}
           className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
-          <p className={`text-center text-sm font-bold uppercase tracking-widest mb-8 ${dark ? 'text-gray-400' : 'text-gray-400'}`}>
+          <p className={`text-center text-[10px] font-bold uppercase tracking-widest mb-6 ${dark ? 'text-gray-400' : 'text-gray-400'}`}>
             Our Products & Services
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-5 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 max-w-3xl mx-auto">
             {content.technologies.map((tech, i) => (
               <div
                 key={tech.id}
-                className={`group relative flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default text-center ${
+                className={`group relative flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default text-center ${
                   dark ? 'bg-gray-800/60 border-gray-700 hover:border-blue-500' : 'bg-gray-50 border-gray-100 hover:border-blue-200'
                 }`}
                 style={{ transitionDelay: `${i * 40}ms` }}
@@ -218,8 +218,8 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                     </button>
                   </div>
                 )}
-                <img src={tech.image} alt={tech.name} className="w-10 h-10 object-contain mb-1" />
-                <span className={`text-xs font-bold text-center leading-snug ${dark ? 'text-gray-300' : 'text-gray-700'}`}>{tech.name}</span>
+                <img src={tech.image} alt={tech.name} className="w-7 h-7 object-contain" />
+                <span className={`text-[10px] font-bold text-center leading-snug ${dark ? 'text-gray-300' : 'text-gray-700'}`}>{tech.name}</span>
               </div>
             ))}
 

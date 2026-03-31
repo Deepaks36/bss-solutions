@@ -87,7 +87,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Info */}
           <div
-            className={`space-y-8 transition-all duration-700 delay-100 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
+            className={`space-y-8 transition-all duration-700 delay-100 ${visible ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
             <div>
               <h3 className={`text-2xl font-bold mb-2 ${dark ? 'text-white' : 'text-gray-900'}`}>Sales and Support Office</h3>
@@ -130,7 +130,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
 
           {/* Form */}
           <div
-            className={`transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
+            className={`transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
             <form
               onSubmit={handleSubmit}

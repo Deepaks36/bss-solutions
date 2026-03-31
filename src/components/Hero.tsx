@@ -335,7 +335,7 @@ export function Hero({ content, dark, onUpdate }: Props) {
           {/* Content Column */}
           <div
             ref={ref}
-            className={`transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
+            className={`transition-all duration-700 ${visible || true ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
               <Sparkles className="h-4 w-4" />
@@ -383,7 +383,7 @@ export function Hero({ content, dark, onUpdate }: Props) {
           </div>
 
           {/* Visual Column */}
-          <div className={`relative h-[550px] sm:h-[600px] lg:h-[650px] w-full transition-all duration-1000 delay-200 ${visible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`}>
+          <div className={`relative h-[550px] sm:h-[600px] lg:h-[650px] w-full transition-all duration-1000 delay-200 translate-x-0 opacity-100`}>
             <style>{`
               @keyframes floatY {
                 0%, 100% { transform: translateY(0); }
