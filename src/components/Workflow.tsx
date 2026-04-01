@@ -135,7 +135,7 @@ function StepCard({
   return (
     <div
       ref={ref}
-      className={`group relative rounded-3xl border p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      className={`group relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         } ${dark
           ? 'bg-gray-900 border-gray-800 hover:border-blue-500/50 hover:shadow-blue-900/20'
           : 'bg-white border-gray-100 hover:border-blue-200 hover:shadow-blue-100/50'
@@ -143,38 +143,38 @@ function StepCard({
       style={{ transitionDelay: `${index * 80}ms` }}
     >
       {editMode && (
-        <div className="absolute top-6 right-6 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={onEdit}
-            className="p-2 rounded-xl bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all hover:scale-110"
+            className="p-1.5 rounded-lg bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all hover:scale-110"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onDelete}
-            className="p-2 rounded-xl bg-red-600 text-white shadow-lg hover:bg-red-700 transition-all hover:scale-110"
+            className="p-1.5 rounded-lg bg-red-600 text-white shadow-lg hover:bg-red-700 transition-all hover:scale-110"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
 
-      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${dark ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600'
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${dark ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600'
         }`}>
-        <img src={step.icon} alt={step.title} className="w-9 h-9 object-contain" />
+        <img src={step.icon} alt={step.title} className="w-7 h-7 object-contain" />
       </div>
 
-      <div className="mb-4">
-        <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${dark ? 'bg-blue-900/60 text-blue-400' : 'bg-blue-50 text-blue-600'
+      <div className="mb-3">
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${dark ? 'bg-blue-900/60 text-blue-400' : 'bg-blue-50 text-blue-600'
           }`}>
           Phase {index + 1}
         </span>
       </div>
 
-      <h3 className={`font-extrabold text-xl mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>{step.title}</h3>
+      <h3 className={`font-extrabold text-base mb-2 ${dark ? 'text-white' : 'text-gray-900'}`}>{step.title}</h3>
       <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{step.description}</p>
 
-      <div className={`absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500 rounded-b-3xl ${visible ? 'w-full' : 'w-0'}`} />
+      <div className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500 rounded-b-2xl ${visible ? 'w-full' : 'w-0'}`} />
     </div>
   );
 }
@@ -207,7 +207,7 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
       id="workflow"
       className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-950' : 'bg-gray-50'}`}
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           ref={ref}
           className={`text-center mb-16 transition-all duration-700 ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
@@ -231,7 +231,7 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-8 relative">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
           {content.workflow.map((step, i) => (
             <StepCard
               key={step.id}

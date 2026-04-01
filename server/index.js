@@ -204,6 +204,31 @@ function saveSiteContent(content) {
   transaction(content);
 }
 
+// ── Footer CRUD ──────────────────────────────────────────────
+app.get('/api/footer', (req, res) => {
+  try {
+    const row = db.prepare('SELECT * FROM footer WHERE id = 1').get();
+    if (!row) return res.status(404).json({ error: 'Footer not found' });
+    res.json(row);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/footer', (req, res) => {
+  const { company_name, tagline, phone, whatsapp, email, address, facebook, twitter, linkedin, instagram, copyright } = req.body;
+  try {
+    db.prepare(`
+      INSERT INTO footer (id, company_name, tagline, phone, whatsapp, email, address, facebook, twitter, linkedin, instagram, copyright)
+      VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        company_name=excluded.company_name, tagline=excluded.tagline, phone=excluded.phone,
+        whatsapp=excluded.whatsapp, email=excluded.email, address=excluded.address,
+        facebook=excluded.facebook, twitter=excluded.twitter, linkedin=excluded.linkedin,
+        instagram=excluded.instagram, copyright=excluded.copyright
+    `).run(company_name, tagline, phone, whatsapp, email, address, facebook, twitter, linkedin, instagram, copyright);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Get all content
 app.get('/api/content', (req, res) => {
   try {
