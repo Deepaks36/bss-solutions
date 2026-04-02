@@ -89,51 +89,132 @@ export interface Technology {
   image: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  website?: string;
+  mapUrl?: string;
+  description: string;
+  images: string[];
+  details: string;
+}
+
+export interface TimelineItem {
+  id: string;
+  year: string;
+  clients: number;
+  growth: string;
+  description: string;
+  order_index?: number;
+}
+
+export interface TeamCelebration {
+  id: string;
+  year: number;
+  title: string;
+  description: string;
+  images: string[];
+  order_index?: number;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  order_index?: number;
+}
+
 export interface SiteContent {
+  // Hero Section
   heroTitle: string;
   heroSubtitle: string;
   heroCta: string;
   heroStat: string;
-  heroCenterBadgeLabel?: string;
+  heroCenterBadgeLabel: string;
   heroImage: string;
-  heroTopLeftImage?: string;
-  heroTopLeftBadgeTop?: string;
-  heroTopLeftBadgeBottom?: string;
-  heroBottomRightImage?: string;
-  heroBottomRightBadgeTop?: string;
-  heroBottomRightBadgeBottom?: string;
-  heroHighlights: HomeHighlight[];
-  heroStats: HomeStat[];
-  heroProofItems: HomeProofItem[];
+  heroHighlights: { id: string; label: string }[];
+  heroStats: { id: string; value: string; label: string }[];
+  heroProofItems: { id: string; label: string }[];
+  heroTopLeftImage: string;
+  heroTopLeftBadgeTop: string;
+  heroTopLeftBadgeBottom: string;
+  heroBottomRightImage: string;
+  heroBottomRightBadgeTop: string;
+  heroBottomRightBadgeBottom: string;
+
+  // About Section
   aboutTitle: string;
   aboutBody: string;
   aboutImage: string;
+
+  // Services Section
   servicesTagline: string;
   servicesTitle: string;
   servicesSubtitle: string;
+  services: Service[];
+
+  // Products Section
+  products: Service[];
+
+  // Workflow Section
   workflowTagline: string;
   workflowTitle: string;
+  workflow: WorkflowStep[];
+
+  // Why Choose Us Section
   whyTitle: string;
+  whyItems: WhyItem[];
+
+  // Testimonials Section
   testimonialsTagline: string;
   testimonialsTitle: string;
+  testimonials: Testimonial[];
+
+  // CTA Section
   ctaBannerText: string;
+
+  // News Section
   newsTitle: string;
   newsTagline: string;
+  news: NewsItem[];
+
+  // Contact Section
   contactTitle: string;
   contactTagline: string;
   contactAddress: string;
   contactEmail: string;
   contactPhone: string;
+
+  // Careers Section
   careersTagline: string;
   careersTitle: string;
   careersSubtitle: string;
-  services: Service[];
-  products: Service[];
-  workflow: WorkflowStep[];
-  testimonials: Testimonial[];
-  news: NewsItem[];
-  clients: Client[];
-  whyItems: WhyItem[];
   positions: JobPosition[];
+
+  // Clients Section
+  clients: Client[];
+
+  // Tech Stack Section
   technologies: Technology[];
+
+  // Company Section
+  companies: Company[];
+
+  // Timeline Section
+  timelineItems: TimelineItem[];
+
+  // Team Section
+  ceoName?: string;
+  ceoRole?: string;
+  ceoMessage?: string;
+  ceoImage?: string;
+  teamTagline?: string;
+  teamTitle?: string;
+  teamCelebrations: TeamCelebration[];
+  teamMembers: TeamMember[];
 }

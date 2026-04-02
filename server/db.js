@@ -209,6 +209,54 @@ function initDb() {
   `);
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS companies (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      address TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      website TEXT,
+      mapUrl TEXT,
+      description TEXT,
+      images TEXT, -- Store as JSON array of strings
+      details TEXT  -- Store as JSON or Text
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS timeline_items (
+      id TEXT PRIMARY KEY,
+      year TEXT NOT NULL,
+      clients INTEGER NOT NULL,
+      growth TEXT NOT NULL,
+      description TEXT NOT NULL,
+      order_index INTEGER DEFAULT 0
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS team_celebrations (
+      id TEXT PRIMARY KEY,
+      year INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      images TEXT NOT NULL, -- Store as JSON array of string Data URIs/URLs
+      order_index INTEGER DEFAULT 0
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS team_members (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      role TEXT NOT NULL,
+      bio TEXT NOT NULL DEFAULT '',
+      image TEXT NOT NULL DEFAULT '',
+      order_index INTEGER DEFAULT 0
+    )
+  `);
+
+  db.exec(`
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -283,7 +331,13 @@ function seedInitialData() {
     { key: 'contactPhone', value: '(0452) 238 738 80' },
     { key: 'careersTagline', value: 'Join Our Team' },
     { key: 'careersTitle', value: 'Latest Job Openings' },
-    { key: 'careersSubtitle', value: 'Be part of a team that is redefining the future of technology solutions.' }
+    { key: 'careersSubtitle', value: 'Be part of a team that is redefining the future of technology solutions.' },
+    { key: 'ceoName', value: 'John Brilliant' },
+    { key: 'ceoRole', value: 'Founder & CEO' },
+    { key: 'ceoMessage', value: 'At BSS Solutions, we believe that our greatest asset is our people. Our culture is built on innovation, collaboration, and a relentless pursuit of excellence.' },
+    { key: 'ceoImage', value: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800' },
+    { key: 'teamTagline', value: 'Our Culture' },
+    { key: 'teamTitle', value: 'Meet the Team Behind Our Success' }
   ];
 
   const insSetting = db.prepare('INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)');
@@ -558,6 +612,96 @@ function seedInitialData() {
   ];
   const insTech = db.prepare('INSERT OR IGNORE INTO technologies (id, name, image) VALUES (?, ?, ?)');
   techs.forEach(t => insTech.run(t.id, t.name, t.image));
+
+  // 12. Companies
+  const companies = [
+    {
+      id: 'comp1',
+      name: 'Brilliant Systems Solutions (India)',
+      address: '90/2 Arun Nagar, Ponmeni, Madakulam Main Road, Madurai, India',
+      email: 'info@bsyssolutions.com',
+      phone: '+91-452 238 7388',
+      website: 'https://bsyssolutions.com',
+      mapUrl: '',
+      description: 'Our Indian headquarters focusing on core R&D and enterprise solutions.',
+      images: JSON.stringify(['/src/assets/images/hero/hero-main.jpg', '/src/assets/images/hero/hero-top-left.jpg']),
+      details: 'Leading development center for BSOL ERP and HRMetrics platforms.'
+    },
+    {
+      id: 'comp2',
+      name: 'Brilliant Systems Solutions (Maldives)',
+      address: "M. Alia Building, 7th Floor, Gandhakoalhi Magu, Male', Maldives",
+      email: 'sales@bsyssolutions.com',
+      phone: '+91- 452 238 7388',
+      website: 'https://bsyssolutions.com',
+      description: 'Our main headquarters and development hub in India.',
+      details: 'Brilliant Systems Solutions Private Limited in India is the central heart of our operations, where we develop cutting-edge solutions in ERP, AI, and Custom App Development. Our Madurai office houses our core engineering and support teams dedicated to global client success.',
+      images: JSON.stringify([
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200',
+        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1200'
+      ])
+    },
+    {
+      id: 'comp-maldives',
+      name: 'Systems Solutions Private Limited (Maldives)',
+      address: 'M. Alia Building, 7th Floor, Gandhakoalhi Magu, Male’, Maldives',
+      email: 'info@solutions.com.mv',
+      phone: '(960) 301 13 55',
+      website: 'https://solutions.com.mv',
+      description: 'Our primary presence in the Maldives for localized support.',
+      details: 'In the Maldives, Systems Solutions Private Limited provides specialized technology consulting and localized support for our growing client base in the region. We focus on delivering tailored ERP solutions that cater to the unique needs of Maldivian businesses.',
+      images: JSON.stringify([
+        'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=1200',
+        'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&q=80&w=1200'
+      ])
+    },
+    {
+      id: 'comp-bhutan',
+      name: 'Yang Khor Private Limited (Bhutan)',
+      address: '2nd Floor, KMT Building Changangkha Thimphu, Bhutan',
+      email: 'info@yangkhor.com',
+      phone: '(975) 8939688814',
+      website: 'https://yangkhor.com',
+      description: 'Empowering businesses in Bhutan with innovative tech.',
+      details: 'Yang Khor Private Limited represents our commitment to the Bhutanese market, providing modern technology solutions and consulting services to help local enterprises thrive in the digital age.',
+      images: JSON.stringify([
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200',
+        'https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&q=80&w=1200'
+      ])
+    }
+  ];
+
+  const insCompany = db.prepare('INSERT OR IGNORE INTO companies (id, name, address, email, phone, website, description, details, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+companies.forEach(c => insCompany.run(c.id, c.name, c.address, c.email, c.phone, c.website, c.description, c.details, c.images));
+
+  // 13. Timeline Items
+  const timeline = [
+    { id: 'time1', year: '2020', clients: 50, growth: 'Starting', description: 'Established our foundation and launched BSOL ERP v1.', order_index: 0 },
+    { id: 'time2', year: '2022', clients: 150, growth: '3x', description: 'Expanded to international markets and released HRMetrics.', order_index: 1 },
+    { id: 'time3', year: '2024', clients: 300, growth: '2x', description: 'Reached 300+ successful projects milestone.', order_index: 2 },
+    { id: 'time4', year: '2026', clients: 500, growth: '1.6x', description: 'Leading the digital transformation with AI-driven solutions.', order_index: 3 }
+  ];
+  const insTimeline = db.prepare('INSERT OR IGNORE INTO timeline_items (id, year, clients, growth, description, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+  timeline.forEach(t => insTimeline.run(t.id, t.year, t.clients, t.growth, t.description, t.order_index));
+
+  // 14. Team Members
+  const members = [
+    { id: 'member1', name: 'Alice Johnson', role: 'Lead Engineer', bio: 'Passionate about building scalable systems and mentoring junior developers.', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400', order_index: 0 },
+    { id: 'member2', name: 'Raj Patel', role: 'Product Manager', bio: 'Bridging the gap between business goals and technical execution.', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400', order_index: 1 },
+    { id: 'member3', name: 'Sara Kim', role: 'UI/UX Designer', bio: 'Crafting intuitive and beautiful user experiences across all platforms.', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400', order_index: 2 }
+  ];
+  const insMember = db.prepare('INSERT OR IGNORE INTO team_members (id, name, role, bio, image, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+  members.forEach(m => insMember.run(m.id, m.name, m.role, m.bio, m.image, m.order_index));
+
+  // 15. Team Celebrations
+  const celebrations = [
+    { id: 'celeb1', year: 2022, title: 'Annual Team Retreat', description: 'Our 2022 retreat in the hills of Himachal was a time of bonding and strategic planning. We shared visions for the future and competed in friendly outdoor challenges.', images: JSON.stringify(['https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=1200', 'https://images.unsplash.com/photo-1549413204-61b477b94e02?auto=format&fit=crop&q=80&w=600']), order_index: 0 },
+    { id: 'celeb2', year: 2022, title: 'Project Success Party', description: 'Celebrating the successful launch of BSOL ERP v2 with the entire engineering team. A night of music, dinner, and well-deserved recognition.', images: JSON.stringify(['https://images.unsplash.com/photo-1519671482749-fd09be45bc76?auto=format&fit=crop&q=80&w=1200', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600']), order_index: 1 },
+    { id: 'celeb3', year: 2023, title: 'International Office Expansion', description: 'Marking our expansion into new territories. This celebration brought together team members from across our global offices.', images: JSON.stringify(['https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=600']), order_index: 2 },
+    { id: 'celeb4', year: 2024, title: 'New Year Kickoff 2024', description: 'Starting the year with high energy and new ambitions. Our kickoff event featured inspirational talks and team-building workshops.', images: JSON.stringify(['https://images.unsplash.com/photo-1543157145-f78c636d023d?auto=format&fit=crop&q=80&w=1200', 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=600']), order_index: 3 }
+  ];
+  const insCeleb = db.prepare('INSERT OR IGNORE INTO team_celebrations (id, year, title, description, images, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+  celebrations.forEach(c => insCeleb.run(c.id, c.year, c.title, c.description, c.images, c.order_index));
 }
 
 initDb();

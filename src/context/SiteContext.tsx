@@ -82,6 +82,17 @@ const defaultContent: SiteContent = {
   whyItems: [],
   positions: [],
   technologies: [],
+  companies: [],
+  timelineItems: [],
+  ceoName: 'John Brilliant',
+  ceoRole: 'Founder & CEO',
+  ceoMessage: 'At BSS Solutions, we believe that our greatest asset is our people. Our culture is built on innovation, collaboration, and a relentless pursuit of excellence.',
+  ceoImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
+  teamTagline: 'Our Culture',
+  teamTitle: 'Meet the Team Behind Our Success',
+  teamCelebrations: [],
+  teamMembers: [],
+  heroCenterBadgeLabel: 'Trusted Leaders'
 };
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {

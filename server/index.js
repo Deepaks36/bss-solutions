@@ -111,6 +111,20 @@ function getSiteContent() {
   content.whyItems = db.prepare('SELECT * FROM why_items').all();
   content.positions = db.prepare('SELECT * FROM positions').all();
   content.technologies = db.prepare('SELECT * FROM technologies').all();
+  content.teamCelebrations = db.prepare('SELECT * FROM team_celebrations ORDER BY year DESC, order_index ASC').all().map(c => ({
+    ...c,
+    images: JSON.parse(c.images || '[]')
+  }));
+
+  content.teamMembers = db.prepare('SELECT * FROM team_members ORDER BY order_index ASC').all();
+
+  const companies = db.prepare('SELECT * FROM companies').all();
+  content.companies = companies.map(c => ({
+    ...c,
+    images: c.images ? JSON.parse(c.images) : []
+  }));
+
+  content.timelineItems = db.prepare('SELECT * FROM timeline_items ORDER BY order_index').all();
 
   return content;
 }
@@ -197,6 +211,26 @@ function saveSiteContent(content) {
     const insTech = db.prepare('INSERT INTO technologies (id, name, image) VALUES (?, ?, ?)');
     (data.technologies || []).forEach(t => insTech.run(t.id, t.name, t.image));
 
+    // Team Celebrations
+    db.prepare('DELETE FROM team_celebrations').run();
+    const insCeleb = db.prepare('INSERT INTO team_celebrations (id, year, title, description, images, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+    (data.teamCelebrations || []).forEach((c, i) => insCeleb.run(c.id, c.year, c.title, c.description, JSON.stringify(c.images || []), c.order_index || i));
+
+    // Team Members
+    db.prepare('DELETE FROM team_members').run();
+    const insMember = db.prepare('INSERT INTO team_members (id, name, role, bio, image, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+    (data.teamMembers || []).forEach((m, i) => insMember.run(m.id, m.name, m.role, m.bio || '', m.image || '', m.order_index ?? i));
+
+    // Companies
+    db.prepare('DELETE FROM companies').run();
+    const insCompany = db.prepare('INSERT INTO companies (id, name, address, email, phone, website, mapUrl, description, images, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    (data.companies || []).forEach(c => insCompany.run(c.id, c.name, c.address, c.email, c.phone, c.website || '', c.mapUrl || '', c.description || '', JSON.stringify(c.images || []), c.details || ''));
+
+    // Timeline Items
+    db.prepare('DELETE FROM timeline_items').run();
+    const insTimeline = db.prepare('INSERT INTO timeline_items (id, year, clients, growth, description, order_index) VALUES (?, ?, ?, ?, ?, ?)');
+    (data.timelineItems || []).forEach((t, i) => insTimeline.run(t.id, t.year, t.clients || 0, t.growth || '', t.description || '', i));
+
     // Also update the legacy site_content blob (for backward compatibility or as a backup)
     db.prepare('INSERT OR REPLACE INTO site_content (id, data) VALUES (1, ?)').run(JSON.stringify(data));
   });
@@ -282,7 +316,11 @@ const SECTION_TABLE_MAP = {
   technologies: 'technologies',
   heroHighlights: 'hero_highlights',
   heroStats: 'hero_stats',
-  heroProofItems: 'hero_proof_items'
+  heroProofItems: 'hero_proof_items',
+  companies: 'companies',
+  timelineItems: 'timeline_items',
+  teamCelebrations: 'team_celebrations',
+  teamMembers: 'team_members'
 };
 
 // Add item to section
@@ -300,7 +338,7 @@ app.post('/api/content/sections/:section', (req, res) => {
     const values = columns.map(col => {
       const val = item[col];
       if (typeof val === 'boolean') return val ? 1 : 0;
-      return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+      return (Array.isArray(val) || (typeof val === 'object' && val !== null)) ? JSON.stringify(val) : val;
     });
 
     const stmt = db.prepare(sql);
@@ -328,7 +366,7 @@ app.put('/api/content/sections/:section', (req, res) => {
     const values = columns.map(col => {
       const val = updates[col];
       if (typeof val === 'boolean') return val ? 1 : 0;
-      return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+      return (Array.isArray(val) || (typeof val === 'object' && val !== null)) ? JSON.stringify(val) : val;
     });
 
     const stmt = db.prepare(sql);

@@ -117,6 +117,35 @@ function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps
   );
 }
 
+function ImageWithFallback({ src, alt, className }: { src: string, alt: string, className?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <div className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg ${!loaded && !error ? 'animate-pulse bg-gray-100 dark:bg-slate-800' : ''}`}>
+      {!error ? (
+        <img
+          src={src}
+          alt={alt}
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+          className={`${className} transition-all duration-700 ${loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+          loading="lazy"
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-1 opacity-40">
+           <span className="text-[10px] font-bold uppercase tracking-tighter">No Logo</span>
+        </div>
+      )}
+      {!loaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center">
+           <div className="w-8 h-8 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Clients({ content, dark, onAddClient, onUpdateClientAtomic, onDeleteClient }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.05);
   const { editMode } = useSite();
@@ -134,7 +163,7 @@ export function Clients({ content, dark, onAddClient, onUpdateClientAtomic, onDe
             Trusted by leading brands and enterprise teams.
           </h2>
           <p className={`mt-3 text-lg ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
-            A clean proof section keeps the home page professional while showing who the company works with.
+            Our established partnerships with global enterprises drive innovation and collective success.
           </p>
         </div>
 
@@ -168,18 +197,11 @@ export function Clients({ content, dark, onAddClient, onUpdateClientAtomic, onDe
               )}
 
               <div className="flex h-20 w-full items-center justify-center">
-                {client.image ? (
-                  <img
-                    src={client.image}
-                    alt={client.name}
-                    className={`max-h-16 max-w-full object-contain transition-all ${editMode ? 'opacity-100 scale-105' : 'opacity-75 group-hover:scale-105 group-hover:opacity-100'}`}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className={`flex h-16 w-full items-center justify-center rounded-lg ${dark ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                    <span className="text-xs text-slate-400">No image</span>
-                  </div>
-                )}
+                <ImageWithFallback 
+                  src={client.image} 
+                  alt={client.name} 
+                  className={`max-h-16 max-w-full object-contain ${editMode ? 'scale-105' : 'group-hover:scale-105'}`}
+                />
               </div>
               <span className={`mt-4 text-center text-xs font-semibold leading-tight transition-colors ${dark ? 'text-slate-400 group-hover:text-blue-400' : 'text-slate-600 group-hover:text-blue-600'}`}>
                 {client.name}

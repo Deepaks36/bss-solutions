@@ -6,6 +6,7 @@ import { About } from './components/About';
 import { Services } from './components/Services';
 import { Workflow } from './components/Workflow';
 import { WhyChooseUs } from './components/WhyChooseUs';
+import { Team } from './components/Team';
 import { Clients } from './components/Clients';
 import { Testimonials } from './components/Testimonials';
 import { NewsRoom } from './components/NewsRoom';
@@ -144,6 +145,12 @@ export default function App() {
               onAddTestimonial={(testimonial) => addItemToSection('testimonials', testimonial)}
               onDeleteTestimonial={(id) => deleteItemFromSection('testimonials', id)}
             />
+
+            <Team
+              content={content}
+              dark={dark}
+            />
+
             <Clients
               content={content}
               dark={dark}

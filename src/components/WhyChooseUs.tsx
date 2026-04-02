@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, ImagePlus, TrendingUp, Users } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
-import { SiteContent, WhyItem } from '../types';
+import { SiteContent, WhyItem, TimelineItem } from '../types';
 
 interface WhyItemEditModalProps {
   item: WhyItem | null;
@@ -114,6 +114,157 @@ interface Props {
   onUpdateWhyItemAtomic: (id: string, updates: Partial<WhyItem>) => void;
   onAddWhyItem: (item: WhyItem) => void;
   onDeleteWhyItem: (id: string) => void;
+  onUpdateTimelineItemAtomic?: (id: string, updates: Partial<TimelineItem>) => void;
+  onAddTimelineItem?: (item: TimelineItem) => void;
+  onDeleteTimelineItem?: (id: string) => void;
+}
+
+function TimelineItemCard({ 
+  item, 
+  dark, 
+  editMode, 
+  onEdit, 
+  onDelete 
+}: { 
+  item: TimelineItem, 
+  dark: boolean, 
+  editMode: boolean, 
+  onEdit: () => void, 
+  onDelete: () => void 
+}) {
+  const { ref, visible } = useAnimateOnScroll(0.1);
+  
+  return (
+    <div 
+      ref={ref}
+      className={`relative pl-8 pb-12 last:pb-0 transition-all duration-700 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}
+    >
+      {/* Line */}
+      <div className={`absolute left-[11px] top-2 bottom-0 w-0.5 ${dark ? 'bg-gray-800' : 'bg-gray-100'} group-last:hidden`} />
+      
+      {/* Dot */}
+      <div className={`absolute left-0 top-1.5 w-6 h-6 rounded-full border-4 flex items-center justify-center transition-transform hover:scale-125 z-10 ${dark ? 'bg-gray-950 border-blue-600' : 'bg-white border-blue-600'}`}>
+        <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+      </div>
+      
+      <div className={`p-6 rounded-2xl border transition-all hover:shadow-xl ${dark ? 'bg-gray-900/50 border-gray-800 hover:border-blue-500/30' : 'bg-white border-gray-100 hover:border-blue-200 shadow-sm'}`}>
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-4">
+             <span className="text-3xl font-black text-blue-600 tracking-tighter">{item.year}</span>
+             <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${dark ? 'bg-blue-600/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+               Growth: {item.growth}
+             </div>
+          </div>
+          {editMode && (
+            <div className="flex gap-2">
+              <button onClick={onEdit} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+              <button onClick={onDelete} className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+            </div>
+          )}
+        </div>
+        
+        <p className={`mb-6 text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-600'}`}>{item.description}</p>
+        
+        <div className="flex flex-wrap gap-4">
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${dark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
+            <Users className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-bold whitespace-nowrap">
+              <span className={dark ? 'text-white' : 'text-gray-900'}>{item.clients}+</span>
+              <span className={`ml-1 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>Clients</span>
+            </span>
+          </div>
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${dark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
+            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs font-bold whitespace-nowrap">
+              <span className={dark ? 'text-white' : 'text-gray-900'}>{item.growth}</span>
+              <span className={`ml-1 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>Expansion</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TimelineItemEditModal({ 
+  item, 
+  dark, 
+  onSave, 
+  onClose 
+}: { 
+  item: TimelineItem | null, 
+  dark: boolean, 
+  onSave: (data: TimelineItem) => void, 
+  onClose: () => void 
+}) {
+  const [year, setYear] = useState(item?.year ?? '');
+  const [clients, setClients] = useState(item?.clients ?? 0);
+  const [growth, setGrowth] = useState(item?.growth ?? '');
+  const [description, setDescription] = useState(item?.description ?? '');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className={`mx-4 w-full max-w-md rounded-2xl border p-6 shadow-2xl ${dark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'}`}>
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className={`text-lg font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>
+            {item ? 'Edit Progress' : 'Add Milestone'}
+          </h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-50">Year</label>
+              <input 
+                value={year} 
+                onChange={e => setYear(e.target.value)}
+                placeholder="e.g. 2024"
+                className={`w-full p-2.5 rounded-xl border text-sm ${dark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50'}`}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-50">Clients Acquired</label>
+              <input 
+                type="number"
+                value={clients} 
+                onChange={e => setClients(parseInt(e.target.value) || 0)}
+                className={`w-full p-2.5 rounded-xl border text-sm ${dark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50'}`}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-50">Growth Rate / Milestone</label>
+            <input 
+              value={growth} 
+              onChange={e => setGrowth(e.target.value)}
+              placeholder="e.g. 2x Growth"
+              className={`w-full p-2.5 rounded-xl border text-sm ${dark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50'}`}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-50">Brief Description</label>
+            <textarea 
+              value={description} 
+              onChange={e => setDescription(e.target.value)}
+              rows={3}
+              className={`w-full p-2.5 rounded-xl border text-sm ${dark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50'}`}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-500">Cancel</button>
+          <button 
+            onClick={() => onSave({ id: item?.id ?? Date.now().toString(), year, clients, growth, description })}
+            className="px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-lg shadow-blue-600/20"
+          >
+            {item ? 'Update' : 'Add Milestone'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function WhyCard({
@@ -180,11 +331,24 @@ function WhyCard({
   );
 }
 
-export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, onAddWhyItem, onDeleteWhyItem }: Props) {
+export function WhyChooseUs({ 
+  content, 
+  dark, 
+  onUpdate, 
+  onUpdateWhyItemAtomic, 
+  onAddWhyItem, 
+  onDeleteWhyItem,
+  onUpdateTimelineItemAtomic,
+  onAddTimelineItem,
+  onDeleteTimelineItem
+}: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode } = useSite();
+  const { editMode, updateSectionItemAtomic, addItemToSection, deleteItemFromSection } = useSite();
   const [editingItem, setEditingItem] = useState<WhyItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  
+  const [editingTimeline, setEditingTimeline] = useState<TimelineItem | null>(null);
+  const [isAddingTimeline, setIsAddingTimeline] = useState(false);
 
   const handleSave = (data: WhyItem) => {
     if (editingItem) {
@@ -254,6 +418,44 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, on
             )}
           </div>
         </div>
+
+        {/* Timeline Section */}
+        <div className="mt-32 pt-24 border-t border-gray-800/10">
+          <div className="text-center mb-16">
+            <h3 className={`text-3xl sm:text-4xl font-black mb-4 ${dark ? 'text-white' : 'text-gray-900'}`}>Our Growth Journey</h3>
+            <p className={`text-lg max-w-2xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+              From humble beginnings to a global technology partner, our journey is defined by innovation and client success.
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <div className="relative">
+              {content.timelineItems?.map((item) => (
+                <TimelineItemCard
+                  key={item.id}
+                  item={item}
+                  dark={dark}
+                  editMode={editMode}
+                  onEdit={() => setEditingTimeline(item)}
+                  onDelete={() => {
+                    if (onDeleteTimelineItem) onDeleteTimelineItem(item.id);
+                    else deleteItemFromSection('timelineItems', item.id);
+                  }}
+                />
+              ))}
+
+              {editMode && (
+                <button
+                  onClick={() => setIsAddingTimeline(true)}
+                  className={`mt-8 flex items-center justify-center gap-3 w-full p-8 rounded-2xl border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group ${dark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}
+                >
+                  <Plus className="w-6 h-6 text-blue-600" />
+                  <span className={`font-bold ${dark ? 'text-gray-300' : 'text-gray-800'}`}>Add Growth Milestone</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {(editingItem || isAdding) && (
@@ -264,6 +466,28 @@ export function WhyChooseUs({ content, dark, onUpdate, onUpdateWhyItemAtomic, on
           onClose={() => {
             setEditingItem(null);
             setIsAdding(false);
+          }}
+        />
+      )}
+
+      {(editingTimeline || isAddingTimeline) && (
+        <TimelineItemEditModal
+          item={editingTimeline}
+          dark={dark}
+          onSave={(data) => {
+            if (editingTimeline) {
+              if (onUpdateTimelineItemAtomic) onUpdateTimelineItemAtomic(editingTimeline.id, data);
+              else updateSectionItemAtomic('timelineItems', editingTimeline.id, data);
+            } else {
+              if (onAddTimelineItem) onAddTimelineItem(data);
+              else addItemToSection('timelineItems', data);
+            }
+            setEditingTimeline(null);
+            setIsAddingTimeline(false);
+          }}
+          onClose={() => {
+            setEditingTimeline(null);
+            setIsAddingTimeline(false);
           }}
         />
       )}
