@@ -108,7 +108,7 @@ interface Props {
 export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAddTechnology, onDeleteTechnology }: Props) {
   const { ref: textRef, visible: textVisible } = useAnimateOnScroll(0.1);
   const { ref: imgRef, visible: imgVisible } = useAnimateOnScroll(0.1);
-  const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
+  // const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
 
   const { editMode } = useSite();
   const [editingTech, setEditingTech] = useState<Technology | null>(null);
@@ -186,7 +186,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
         </div>
 
         {/* Tech Stack */}
-        <div
+        {/* <div
           ref={techRef}
           className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
@@ -233,7 +233,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
               </button>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {(editingTech || isAdding) && (

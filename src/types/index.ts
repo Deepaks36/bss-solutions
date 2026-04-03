@@ -21,6 +21,7 @@ export interface Service {
   description: string;
   icon: string;
   image?: string;
+  images?: string[];
   accent?: string;
   bullets?: string[];
   is_product?: boolean;
@@ -129,6 +130,21 @@ export interface TeamMember {
   order_index?: number;
 }
 
+export interface CareerMilestone {
+  id: string;
+  title: string;
+  body: string;
+}
+
+export interface Leader {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  timeline: CareerMilestone[];
+}
+
 export interface SiteContent {
   // Hero Section
   heroTitle: string;
@@ -209,12 +225,9 @@ export interface SiteContent {
   timelineItems: TimelineItem[];
 
   // Team Section
-  ceoName?: string;
-  ceoRole?: string;
-  ceoMessage?: string;
-  ceoImage?: string;
   teamTagline?: string;
   teamTitle?: string;
+  leaders: Leader[];
   teamCelebrations: TeamCelebration[];
   teamMembers: TeamMember[];
 }

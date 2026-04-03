@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { SiteContent } from '../types';
 
 interface SiteContextType {
@@ -19,62 +19,92 @@ const SiteContext = createContext<SiteContextType | undefined>(undefined);
 
 const API_URL = '/api/content';
 
+// Empty shape; real content is loaded from the database via `/api/content`.
 const defaultContent: SiteContent = {
-  heroTitle: "Significant IT Software Technologies Development Kingdom Ends Here!",
-  heroSubtitle:
-    "Brilliant Systems Solutions will transverse your business across the world by outsourcing your requirements to a leading IT software development company around the globe. We help clients launch next-generation products with robust, Advanced features, User-Friendly applications.",
-  heroCta: "Let's Live Your Project Today!",
-  heroStat: "Successfully Completed & Delivered 300+ Projects!",
-  heroImage: "/src/assets/images/hero/hero-main.jpg",
-  heroTopLeftImage: "/src/assets/images/hero/hero-top-left.jpg",
-  heroTopLeftBadgeTop: "Growth rate",
-  heroTopLeftBadgeBottom: "+340% Velocity",
-  heroBottomRightImage: "/src/assets/images/hero/hero-bottom-right.jpg",
-  heroBottomRightBadgeTop: "System Status",
-  heroBottomRightBadgeBottom: "100% Uptime Guaranteed",
-  heroHighlights: [
-    { id: "hh1", label: "Enterprise HR platforms" },
-    { id: "hh2", label: "Cloud-native product engineering" },
-    { id: "hh3", label: "AI-driven workflow automation" },
-  ],
-  heroStats: [
-    { id: "hs1", value: "4.9/5", label: "Client rating" },
-    { id: "hs2", value: "60+", label: "Team members" },
-    { id: "hs3", value: "200+", label: "Projects done" },
-  ],
-  heroProofItems: [
-    { id: "hp1", label: "HR Metrics" },
-    { id: "hp2", label: "BSOL ERP Suite" },
-    { id: "hp3", label: "AI Chatbot" },
-    { id: "hp4", label: "Knowledgebase AI" },
-  ],
-  aboutTitle: "About Us",
-  aboutBody:
-    "Brilliant Systems Solution Pvt. Ltd is a tech-leading IT consulting and software development company in the Digital Era! We have provisioned our esteemed clients with the Best-Suite Software Solutions. We mainly focus on ERP Development, Implementation, and integration. Our journey began out of the passion for a unique monarch in the industry.",
-  aboutImage: "/src/assets/images/about/about-main.png",
-  servicesTagline: "We Are Best",
-  servicesTitle: "Our Services & Solution For Your Innovative Ideas!",
-  servicesSubtitle:
-    "Team up with the perfect digital partner for all your technical needs to achieve your business goals, reduce costs and accelerate your business growth.",
-  workflowTagline: "Being a reputed service provider, we are offering streamlined workflow to clients!",
-  workflowTitle: "Our Seamless Workflow",
-  whyTitle: "Why Choose Us",
-  testimonialsTagline: "Testimonials",
-  testimonialsTitle: "The Leading Brands & Enterprises",
-  ctaBannerText: "Grow Your Business and Build Your Website or Software With Us.",
-  newsTitle: "News Room",
-  newsTagline: "Latest events and activities from our team",
-  contactTitle: "Reach Out",
-  contactTagline: "Let us help you build your next project",
-  contactAddress: "M. Alia Building, 7th Floor, Gandhakoalhi Magu, Male', Maldives.",
-  contactEmail: "info@bsyssolutions.com",
-  contactPhone: "(0452) 238 738 80",
-  careersTagline: "Join Our Team",
-  careersTitle: "Latest Job Openings",
-  careersSubtitle: "Be part of a team that is redefining the future of technology solutions.",
-
+  heroTitle: '',
+  heroSubtitle: '',
+  heroCta: '',
+  heroStat: '',
+  heroCenterBadgeLabel: '',
+  heroImage: '',
+  heroTopLeftImage: '',
+  heroTopLeftBadgeTop: '',
+  heroTopLeftBadgeBottom: '',
+  heroBottomRightImage: '',
+  heroBottomRightBadgeTop: '',
+  heroBottomRightBadgeBottom: '',
+  heroHighlights: [],
+  heroStats: [],
+  heroProofItems: [],
+  aboutTitle: '',
+  aboutBody: '',
+  aboutImage: '',
+  servicesTagline: '',
+  servicesTitle: '',
+  servicesSubtitle: '',
+  workflowTagline: '',
+  workflowTitle: '',
+  whyTitle: '',
+  testimonialsTagline: '',
+  testimonialsTitle: '',
+  ctaBannerText: '',
+  newsTitle: '',
+  newsTagline: '',
+  contactTitle: '',
+  contactTagline: '',
+  contactAddress: '',
+  contactEmail: '',
+  contactPhone: '',
+  careersTagline: '',
+  careersTitle: '',
+  careersSubtitle: '',
   services: [],
-  products: [],
+  products: [
+    {
+      id: 'prod-1',
+      title: 'Enterprise Core ERP',
+      description: 'A comprehensive ERP solution designed to streamline core business processes from finance to supply chain.',
+      accent: 'from-blue-600 to-indigo-600',
+      type: 'ERP System',
+      icon: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=100',
+      image: '/assets/products/erp_preview.jpg',
+      detailsImage: '/assets/products/erp_details.jpg',
+      bullets: ['Real-time Analytics', 'Multi-currency Support', 'Automated Workflows']
+    },
+    {
+      id: 'prod-2',
+      title: 'Cloud Payroll Pro',
+      description: 'The ultimate payroll management system for modern enterprises, ensuring compliance and precision.',
+      accent: 'from-cyan-500 to-blue-500',
+      type: 'HR Tech',
+      icon: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=100',
+      image: '/assets/products/payroll_preview.jpg',
+      detailsImage: '/assets/products/payroll_details.jpg',
+      bullets: ['Tax Automation', 'Self-service Portal', 'Direct Batch Transfers']
+    },
+    {
+      id: 'prod-3',
+      title: 'ReserveEase Booking',
+      description: 'Seamless appointment and resource booking platform that scales with your growth.',
+      accent: 'from-purple-600 to-pink-500',
+      type: 'Booking Solution',
+      icon: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&q=80&w=100',
+      image: '/assets/products/booking_preview.jpg',
+      detailsImage: '/assets/products/booking_details.jpg',
+      bullets: ['Calendar Sync', 'Payment Integration', 'Automated Reminders']
+    },
+    {
+      id: 'prod-4',
+      title: 'GrandStay Hotel Suite',
+      description: 'A dedicated property management system for the hospitality industry, from small boutiques to large resorts.',
+      accent: 'from-amber-500 to-orange-600',
+      type: 'Hospitality',
+      icon: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=100',
+      image: '/assets/products/hotel_preview.jpg',
+      detailsImage: '/assets/products/hotel_details.jpg',
+      bullets: ['Channel Management', 'Front Desk Dashboard', 'Guest Experience Portal']
+    }
+  ],
   workflow: [],
   testimonials: [],
   news: [],
@@ -83,16 +113,44 @@ const defaultContent: SiteContent = {
   positions: [],
   technologies: [],
   companies: [],
-  timelineItems: [],
-  ceoName: 'John Brilliant',
-  ceoRole: 'Founder & CEO',
-  ceoMessage: 'At BSS Solutions, we believe that our greatest asset is our people. Our culture is built on innovation, collaboration, and a relentless pursuit of excellence.',
-  ceoImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
-  teamTagline: 'Our Culture',
-  teamTitle: 'Meet the Team Behind Our Success',
-  teamCelebrations: [],
-  teamMembers: [],
-  heroCenterBadgeLabel: 'Trusted Leaders'
+  timelineItems: [
+    { id: 'tm-1', year: '2020', clients: 12, growth: 'Foundation', description: 'BSS-Solutions was founded with a vision to provide cutting-edge ERP systems for local businesses.' },
+    { id: 'tm-2', year: '2022', clients: 50, growth: 'Regional Leader', description: 'Successfully expanded operations to the UAE and achieved a 50+ client milestone with our cloud payroll module.' },
+    { id: 'tm-3', year: '2024', clients: 150, growth: 'AI Innovation', description: 'Launched our AI-driven analytics suite and established a global presence with partners in 10+ countries.' }
+  ],
+  leaders: [
+    {
+      id: 'leader-1',
+      name: 'John Brilliant',
+      role: 'Founder & CEO',
+      bio: 'Visionary leader with 15+ years of experience in ERP automation and digital transformation.',
+      image: '/src/assets/ceo.jpg',
+      timeline: [
+        { id: 'ceo-1', title: 'The Vision (2018)', body: 'Founded BSS-Solutions with a team of 4, driven by the goal of automating regional enterprises using custom-built ERP frameworks.' },
+        { id: 'ceo-2', title: 'The Acceleration (2020)', body: 'Spearheaded our first major cloud payroll implementation, successfully serving 100+ clients across the Middle East.' },
+        { id: 'ceo-3', title: 'The Innovation (2022)', body: 'Won the Digital Strategy Excellence Award for our AI-driven workforce management analytics platform.' },
+        { id: 'ceo-4', title: 'The Global Horizon (2024)', body: 'Initiated our global expansion strategy, establishing key partnerships in APAC and Europe to scale our tech stack.' }
+      ]
+    },
+    {
+      id: 'leader-2',
+      name: 'Sarah Chen',
+      role: 'Co-Founder & CTO',
+      bio: 'Tech architect specializing in scalable cloud infrastructures and enterprise-grade security.',
+      image: '/src/assets/cto.jpg',
+      timeline: [
+        { id: 'cto-1', title: 'Core Architecture (2018)', body: 'Designed the underlying microservices architecture that powers BSS-Solutions platform.' },
+        { id: 'cto-2', title: 'Security First (2021)', body: 'Achieved ISO 27001 certification for our cloud ecosystem.' }
+      ]
+    }
+  ],
+  teamCelebrations: [
+    { id: 'celeb-1', year: 2021, title: 'Inception Anniversary', description: 'Celebrating our first full year of operations with a team retreat and the launch of our initial ERP product.', images: ['https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200'], order_index: 0 },
+    { id: 'celeb-2', year: 2022, title: 'Regional Expansion', description: 'Marking our successful entry into the UAE market with a new regional headquarters and 50+ new team members.', images: ['https://images.unsplash.com/photo-1540317580114-ed684c15ff73?auto=format&fit=crop&q=80&w=1200'], order_index: 0 },
+    { id: 'celeb-3', year: 2023, title: 'Excellence Awards', description: 'An evening celebrating the hard work and dedication of our team with the first annual BSS Excellence Awards.', images: ['https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1200'], order_index: 0 },
+    { id: 'celeb-4', year: 2024, title: 'Tech Innovation Summit', description: 'Gathering world-class engineers to discuss the future of AI and the global scaling of our tech stack.', images: ['https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1200'], order_index: 0 }
+  ],
+  teamMembers: []
 };
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {
@@ -107,18 +165,41 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                 const res = await fetch(API_URL);
                 if (res.ok) {
                     const data = await res.json();
-                    // Ensure arrays exist
-                    data.services = data.services || [];
-                    data.products = data.products || [];
-                    setContent({ ...defaultContent, ...data });
-                } else if (res.status === 404) {
-                    // Seed initial data if DB is empty as a fallback
-                    // Note: Since we're removing siteData.ts, we use the local defaultContent
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(defaultContent),
+                    // Smart merge: Only override defaults if API response is not empty for arrays
+                    const mergedData = { ...defaultContent };
+                    Object.keys(data).forEach(key => {
+                        const val = data[key as keyof SiteContent];
+                        if (Array.isArray(val)) {
+                            if (val.length > 0) {
+                                // Universal & Relevant migration for products: Map images based on category
+                                if (key === 'products') {
+                                    (mergedData as any)[key] = (val as any[]).map((item) => {
+                                        const text = `${item.title} ${item.type} ${item.description}`.toLowerCase();
+                                        let cat = 'erp';
+                                        if (text.includes('payroll') || text.includes('hr') || text.includes('salary')) cat = 'payroll';
+                                        else if (text.includes('hotel') || text.includes('hospitality') || text.includes('stay') || text.includes('premise')) cat = 'hotel';
+                                        else if (text.includes('booking') || text.includes('boat') || text.includes('reservation') || text.includes('reserve')) cat = 'booking';
+                                        
+                                        const preview = `/assets/products/${cat}_preview.jpg`;
+                                        const details = `/assets/products/${cat}_details.jpg`;
+
+                                        // Update if missing or using old paths
+                                        if (!item.image || item.image.includes('/src/assets/') || item.image.includes('erp_preview.jpg')) {
+                                          return { ...item, image: preview, detailsImage: details };
+                                        }
+                                        return item;
+                                    });
+                                } else {
+                                    (mergedData as any)[key] = val;
+                                }
+                            }
+                        } else if (val !== undefined && val !== null && val !== '') {
+                            (mergedData as any)[key] = val;
+                        }
                     });
+
+                    setContent(mergedData);
+                } else {
                     setContent(defaultContent);
                 }
             } catch (e) {
@@ -130,7 +211,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
     const updateContent = useCallback(async (key: keyof SiteContent, value: any) => {
         setContent((prev) => ({ ...prev, [key]: value }));
-        
+
         try {
             await fetch(`${API_URL}/settings`, {
                 method: 'PATCH',
@@ -224,22 +305,32 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         setContent(defaultContent);
     }, []);
 
+    const value = useMemo(() => ({
+        content,
+        updateContent,
+        updateSectionItem,
+        updateSectionItemAtomic,
+        addItemToSection,
+        deleteItemFromSection,
+        isAdmin,
+        setIsAdmin,
+        editMode,
+        setEditMode,
+        resetContent,
+    }), [
+        content,
+        updateContent,
+        updateSectionItem,
+        updateSectionItemAtomic,
+        addItemToSection,
+        deleteItemFromSection,
+        isAdmin,
+        editMode,
+        resetContent,
+    ]);
+
     return (
-        <SiteContext.Provider
-            value={{
-                content,
-                updateContent,
-                updateSectionItem,
-                updateSectionItemAtomic,
-                addItemToSection,
-                deleteItemFromSection,
-                isAdmin,
-                setIsAdmin,
-                editMode,
-                setEditMode,
-                resetContent,
-            }}
-        >
+        <SiteContext.Provider value={value}>
             {children}
         </SiteContext.Provider>
     );

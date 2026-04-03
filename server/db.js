@@ -70,6 +70,11 @@ function ensureProductsColumns() {
       db.exec('ALTER TABLE products ADD COLUMN detailsImage TEXT');
       console.log('Added "detailsImage" column to products table');
     }
+
+    if (!columns.includes('images')) {
+      db.exec('ALTER TABLE products ADD COLUMN images TEXT');
+      console.log('Added "images" column to products table');
+    }
   } catch (error) {
     console.error('Error ensuring products columns:', error.message);
     // Table might not exist yet - CREATE will handle it
@@ -135,6 +140,7 @@ function initDb() {
       description TEXT NOT NULL,
       icon TEXT NOT NULL,
       image TEXT,
+      images TEXT,
       accent TEXT,
       bullets TEXT, -- Store as JSON string
       details TEXT, -- Extended product details (JSON)
@@ -335,6 +341,9 @@ function seedInitialData() {
     { key: 'ceoName', value: 'John Brilliant' },
     { key: 'ceoRole', value: 'Founder & CEO' },
     { key: 'ceoMessage', value: 'At BSS Solutions, we believe that our greatest asset is our people. Our culture is built on innovation, collaboration, and a relentless pursuit of excellence.' },
+    { key: 'ceoCareerLeftTitle', value: 'Early Career' },
+    { key: 'ceoCareerRightTitle', value: 'First Breakthrough' },
+    { key: 'ceoCareerRightBody', value: 'He started by taking ownership of real client problems, building practical systems, and quickly learning what works at scale.' },
     { key: 'ceoImage', value: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800' },
     { key: 'teamTagline', value: 'Our Culture' },
     { key: 'teamTitle', value: 'Meet the Team Behind Our Success' }
@@ -440,6 +449,7 @@ function seedInitialData() {
       image: '',
       accent: 'from-blue-600 to-cyan-500',
       bullets: JSON.stringify(['Financial Management', 'Inventory Control', 'Human Resources', 'Supply Chain Management']),
+      images: JSON.stringify([]),
       type: 'ERP System',
       details: JSON.stringify({
         fullName: 'Billing System Shop Billing System (BSOL)',
@@ -467,6 +477,7 @@ function seedInitialData() {
       image: '',
       accent: 'from-purple-600 to-fuchsia-500',
       bullets: JSON.stringify(['Payroll Processing', 'Attendance Tracking', 'Salary Management', 'Employee Reports']),
+      images: JSON.stringify([]),
       type: 'Payroll System',
       details: JSON.stringify({
         fullName: 'HRMetrics Payroll & Attendance System',
@@ -496,6 +507,7 @@ function seedInitialData() {
       image: '',
       accent: 'from-cyan-600 to-blue-500',
       bullets: JSON.stringify(['Booking Management', 'Fleet Management', 'Real-time Availability', 'Payment Integration']),
+      images: JSON.stringify([]),
       type: 'Booking Platform',
       details: JSON.stringify({
         fullName: 'GoBoat - Boat Booking Platform',
@@ -525,6 +537,7 @@ function seedInitialData() {
       image: '',
       accent: 'from-amber-500 to-orange-500',
       bullets: JSON.stringify(['Room Management', 'Reservation System', 'Guest Services', 'Billing & Reports']),
+      images: JSON.stringify([]),
       type: 'Hotel Management System',
       details: JSON.stringify({
         fullName: 'Premise Pro - Hotel Management System',
@@ -549,9 +562,8 @@ function seedInitialData() {
       detailsImage: ''
     }
   ];
-
-  const insProduct = db.prepare('INSERT OR IGNORE INTO products (id, title, description, icon, image, accent, bullets, type, details, detailsImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  products.forEach(p => insProduct.run(p.id, p.title, p.description, p.icon, p.image, p.accent, p.bullets, p.type, p.details, p.detailsImage));
+  const insProduct = db.prepare('INSERT OR IGNORE INTO products (id, title, description, icon, image, images, accent, bullets, type, details, detailsImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  products.forEach(p => insProduct.run(p.id, p.title, p.description, p.icon, p.image, p.images, p.accent, p.bullets, p.type, p.details, p.detailsImage));
 
   // 5. Workflow
   const workflows = [

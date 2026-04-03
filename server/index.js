@@ -90,7 +90,12 @@ function getSiteContent() {
     }
   });
 
-  // 2. Main sections (Skip individual hero tables as they are now in site_settings)
+  // 2. Hero ribbon data (stored in dedicated tables)
+  content.heroHighlights = db.prepare('SELECT * FROM hero_highlights').all();
+  content.heroStats = db.prepare('SELECT * FROM hero_stats').all();
+  content.heroProofItems = db.prepare('SELECT * FROM hero_proof_items').all();
+
+  // 3. Main sections
   const services = db.prepare('SELECT * FROM services').all();
   content.services = services.map(s => ({
     ...s,
@@ -101,7 +106,8 @@ function getSiteContent() {
   content.products = products.map(p => ({
     ...p,
     bullets: p.bullets ? JSON.parse(p.bullets) : [],
-    details: p.details ? p.details : undefined
+    details: p.details ? p.details : undefined,
+    images: p.images ? JSON.parse(p.images) : []
   }));
 
   content.workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
@@ -173,8 +179,23 @@ function saveSiteContent(content) {
 
     // Products
     db.prepare('DELETE FROM products').run();
-    const insProduct = db.prepare('INSERT INTO products (id, title, description, icon, image, accent, bullets, type, details, detailsImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    (data.products || []).forEach(p => insProduct.run(p.id, p.title, p.description, p.icon, p.image || '', p.accent || '', JSON.stringify(p.bullets || []), p.type || '', p.details || '', p.detailsImage || ''));
+    const insProduct = db.prepare('INSERT INTO products (id, title, description, icon, image, images, accent, bullets, type, details, detailsImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    (data.products || []).forEach(p => {
+      const images = Array.isArray(p.images) ? JSON.stringify(p.images) : (p.images || '');
+      insProduct.run(
+        p.id,
+        p.title,
+        p.description,
+        p.icon,
+        p.image || '',
+        images,
+        p.accent || '',
+        JSON.stringify(p.bullets || []),
+        p.type || '',
+        p.details || '',
+        p.detailsImage || ''
+      );
+    });
 
     // Workflow
     db.prepare('DELETE FROM workflow').run();
@@ -295,6 +316,26 @@ app.patch('/api/content/settings', (req, res) => {
   if (!key) return res.status(400).json({ error: 'Key is required' });
 
   try {
+    // Hero ribbon arrays are stored in dedicated tables (not site_settings).
+    if (['heroHighlights', 'heroStats', 'heroProofItems'].includes(key)) {
+      const parsed = Array.isArray(value) ? value : (typeof value === 'string' ? JSON.parse(value) : []);
+
+      if (key === 'heroHighlights') {
+        db.prepare('DELETE FROM hero_highlights').run();
+        const ins = db.prepare('INSERT INTO hero_highlights (id, label) VALUES (?, ?)');
+        (parsed || []).forEach((h) => ins.run(h.id, h.label));
+      } else if (key === 'heroStats') {
+        db.prepare('DELETE FROM hero_stats').run();
+        const ins = db.prepare('INSERT INTO hero_stats (id, value, label) VALUES (?, ?, ?)');
+        (parsed || []).forEach((s) => ins.run(s.id, s.value, s.label));
+      } else if (key === 'heroProofItems') {
+        db.prepare('DELETE FROM hero_proof_items').run();
+        const ins = db.prepare('INSERT INTO hero_proof_items (id, label) VALUES (?, ?)');
+        (parsed || []).forEach((p) => ins.run(p.id, p.label));
+      }
+      return res.json({ success: true });
+    }
+
     const stmt = db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
     stmt.run(key, (typeof value === 'object' && value !== null) ? JSON.stringify(value) : String(value));
     res.json({ success: true });

@@ -227,18 +227,33 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
             )}
           </div>
 
-          {/* RIGHT: Sticky product name only */}
-          <div className="hidden lg:block lg:w-1/3 lg:sticky lg:top-32">
+          {/* RIGHT: Sticky product image & name */}
+          <div className="hidden lg:block lg:w-1/3 lg:sticky lg:top-32 h-fit">
             {activeProduct && (
-              <div key={activeProduct.id} className="animate-[fadeInUp_0.5s_ease-out]">
-                <h2 className={`text-4xl xl:text-5xl font-extrabold tracking-tight leading-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
-                  {activeProduct.title.split(' ').map((word, i, arr) => (
-                    <span key={i} className={`block ${i === arr.length - 1 ? `text-transparent bg-clip-text bg-gradient-to-r ${activeProduct.accent || 'from-blue-600 to-cyan-500'}` : ''}`}>
-                      {word}
-                    </span>
-                  ))}
-                </h2>
-                <div className={`w-20 h-2 rounded-full mt-8 bg-gradient-to-r ${activeProduct.accent || 'from-blue-600 to-cyan-500'}`} />
+              <div key={activeProduct.id} className="space-y-8 animate-[fadeInUp_0.5s_ease-out]">
+                {/* Active Image Preview */}
+                <div className="relative group">
+                  <div className={`absolute -inset-2 rounded-[2.5rem] bg-gradient-to-br ${activeProduct.accent || 'from-blue-600 to-cyan-500'} opacity-20 blur-2xl group-hover:opacity-30 transition-opacity`} />
+                  <div className={`relative aspect-[4/3] rounded-[2rem] overflow-hidden border shadow-2xl ${dark ? 'border-white/10 bg-slate-900' : 'border-slate-100 bg-white'}`}>
+                    <img
+                      src={activeProduct.image}
+                      alt={activeProduct.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 animate-in fade-in zoom-in-95 duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h2 className={`text-4xl xl:text-5xl font-extrabold tracking-tight leading-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
+                    {activeProduct.title.split(' ').map((word, i, arr) => (
+                      <span key={i} className={`block ${i === arr.length - 1 ? `text-transparent bg-clip-text bg-gradient-to-r ${activeProduct.accent || 'from-blue-600 to-cyan-500'}` : ''}`}>
+                        {word}
+                      </span>
+                    ))}
+                  </h2>
+                  <div className={`w-20 h-2 rounded-full bg-gradient-to-r ${activeProduct.accent || 'from-blue-600 to-cyan-500'}`} />
+                </div>
               </div>
             )}
           </div>

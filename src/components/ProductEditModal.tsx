@@ -37,6 +37,7 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
     description: product?.description ?? '',
     icon: product?.icon ?? '',
     image: product?.image ?? '',
+    images: product?.images ?? [],
     accent: product?.accent ?? 'from-blue-600 to-cyan-500',
     bullets: product?.bullets ?? [],
     type: product?.type ?? '',
@@ -45,15 +46,39 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
   });
 
   const [bulletsText, setBulletsText] = useState((product?.bullets ?? []).join(', '));
+  const [galleryImages, setGalleryImages] = useState<string[]>(product?.images ?? []);
   const [details, setDetails] = useState(initDetails);
 
   const updateDetail = (key: string, value: any) => setDetails((d: any) => ({ ...d, [key]: value }));
+
+  const handleGalleryFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    let loaded = 0;
+    const results: string[] = [];
+    files.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        results[idx] = reader.result as string;
+        loaded++;
+        if (loaded === files.length) {
+          setGalleryImages(prev => [...prev, ...results]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeGalleryImage = (idx: number) => {
+    setGalleryImages(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSave = () => {
     if (!main.title.trim()) return;
     const bullets = bulletsText.split(',').map(b => b.trim()).filter(Boolean);
     onSave({
       ...main,
+      images: galleryImages,
       bullets,
       details: JSON.stringify(details),
     });
@@ -171,6 +196,40 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
                 </button>
                 <input type="file" id="edit-img" className="hidden" accept="image/*" onChange={e => handleFileRead(e, v => setMain(m => ({ ...m, image: v })))} />
               </div>
+            </div>
+
+            <div>
+              <label className={labelCls}>Gallery Images</label>
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {galleryImages.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('edit-gallery-imgs')?.click()}
+                  className={`aspect-square rounded-xl border-2 border-dashed flex items-center justify-center text-[10px] font-bold gap-1 ${dark ? 'border-white/10 text-slate-500 hover:border-blue-500 hover:text-blue-400' : 'border-slate-200 text-slate-400 hover:border-blue-500 hover:text-blue-600'}`}
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Add
+                </button>
+              </div>
+              <input
+                type="file"
+                id="edit-gallery-imgs"
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryFiles}
+              />
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { X, Workflow, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Service } from '../types';
 
@@ -8,9 +9,17 @@ interface Props {
 }
 
 export function ProductDetailModal({ product, dark, onClose }: Props) {
-  const details = product.details
-    ? (typeof product.details === 'string' ? JSON.parse(product.details) : product.details)
-    : null;
+  const details = useMemo(() => {
+    if (!product.details) return null;
+    try {
+      return typeof product.details === 'string' ? JSON.parse(product.details) : product.details;
+    } catch {
+      return null;
+    }
+  }, [product.details]);
+
+  const galleryImages = (product.images || []).filter(Boolean);
+  const heroImage = product.detailsImage || product.image || galleryImages[0] || '';
 
   return (
     <div
@@ -42,9 +51,9 @@ export function ProductDetailModal({ product, dark, onClose }: Props) {
             </div>
 
             {/* Hero image */}
-            {product.image ? (
-              <div className="w-full rounded-2xl overflow-hidden shadow-xl">
-                <img src={product.image} alt={product.title} className="w-full aspect-[4/3] object-cover" />
+            {heroImage ? (
+              <div className="w-full rounded-2xl overflow-hidden shadow-xl relative">
+                <img src={heroImage} alt={product.title} className="w-full aspect-[4/3] object-cover" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${dark ? 'from-slate-900/40' : 'from-white/20'} to-transparent pointer-events-none`} />
               </div>
             ) : (
@@ -53,11 +62,27 @@ export function ProductDetailModal({ product, dark, onClose }: Props) {
               </div>
             )}
 
-            {/* Details image */}
-            {product.detailsImage && (
-              <div className="w-full">
-                <p className={`text-[9px] font-black uppercase tracking-widest mb-2 text-center ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Inside the Solution</p>
-                <img src={product.detailsImage} className="w-full h-24 object-cover rounded-xl border border-white/10 shadow" alt="Details" />
+            {/* Details / Gallery images */}
+            {(product.detailsImage || galleryImages.length > 1) && (
+              <div className="w-full space-y-3">
+                <p className={`text-[9px] font-black uppercase tracking-widest mb-1 text-center ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Inside the Solution</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {product.detailsImage && (
+                    <img
+                      src={product.detailsImage}
+                      className="w-full h-20 object-cover rounded-xl border border-white/10 shadow"
+                      alt="Details"
+                    />
+                  )}
+                  {galleryImages.slice(1, 5).map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img}
+                      className="w-full h-20 object-cover rounded-xl border border-white/10 shadow"
+                      alt=""
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -66,6 +91,19 @@ export function ProductDetailModal({ product, dark, onClose }: Props) {
         {/* Right: Content */}
         <div className={`w-full md:w-[62%] flex flex-col p-7 md:p-10 overflow-y-auto ${dark ? 'text-slate-300' : 'text-slate-600'}`}>
           <div className="space-y-7 animate-[fadeInUp_0.4s_ease-out]">
+            
+            {/* Header Image (Visible everywhere inside modal) */}
+            {heroImage && (
+              <div className="w-full mb-8 rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 ring-1 ring-white/10 group">
+                 <img 
+                    src={heroImage} 
+                    alt={product.title} 
+                    className="w-full aspect-video object-cover transition-transform duration-1000 group-hover:scale-105" 
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60 pointer-events-none" />
+              </div>
+            )}
+
             {/* Header */}
             <div>
               <div className="flex items-center gap-2 mb-3">
