@@ -73,6 +73,9 @@ export interface Testimonial {
   quote: string;
   name: string;
   role: string;
+  videoUrl?: string;
+  videoMime?: string;
+  audioOnly?: boolean;
 }
 
 export interface JobPosition {

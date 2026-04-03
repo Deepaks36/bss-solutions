@@ -37,7 +37,6 @@ export default function App() {
     editMode,
     setEditMode,
     updateContent,
-    updateSectionItem,
     updateSectionItemAtomic,
     addItemToSection,
     deleteItemFromSection
@@ -141,7 +140,7 @@ export default function App() {
               content={content}
               dark={dark}
               onUpdate={updateContent}
-              onUpdateTestimonial={(id, field, value) => updateSectionItem('testimonials', id, field, value)}
+              onUpdateTestimonialAtomic={(id, updates) => updateSectionItemAtomic('testimonials', id, updates)}
               onAddTestimonial={(testimonial) => addItemToSection('testimonials', testimonial)}
               onDeleteTestimonial={(id) => deleteItemFromSection('testimonials', id)}
             />

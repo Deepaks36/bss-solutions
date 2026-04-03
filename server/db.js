@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.resolve(__dirname, '../data.db');
+const dbPath = path.resolve(process.cwd(), 'data.db');
 const db = new Database(dbPath);
 
 function ensureMessageColumns() {
@@ -96,6 +96,22 @@ function ensureDocumentsTable() {
   db.exec('CREATE INDEX IF NOT EXISTS idx_documents_reference ON documents(referenceType, referenceId)');
 }
 
+function ensureTestimonialColumns() {
+  const columns = db.prepare('PRAGMA table_info(testimonials)').all().map((column) => column.name);
+
+  if (!columns.includes('videoUrl')) {
+    db.exec('ALTER TABLE testimonials ADD COLUMN videoUrl TEXT');
+  }
+
+  if (!columns.includes('audioOnly')) {
+    db.exec('ALTER TABLE testimonials ADD COLUMN audioOnly INTEGER NOT NULL DEFAULT 0');
+  }
+
+  if (!columns.includes('videoMime')) {
+    db.exec('ALTER TABLE testimonials ADD COLUMN videoMime TEXT');
+  }
+}
+
 // Initialize database
 function initDb() {
   // Original site_content for backup/migration if needed
@@ -179,7 +195,10 @@ function initDb() {
       id TEXT PRIMARY KEY,
       quote TEXT NOT NULL,
       name TEXT NOT NULL,
-      role TEXT NOT NULL
+      role TEXT NOT NULL,
+      videoUrl TEXT,
+      audioOnly INTEGER NOT NULL DEFAULT 0,
+      videoMime TEXT
     )
   `);
 
@@ -314,6 +333,7 @@ function initDb() {
   ensureServiceColumns();
   ensureProductsColumns();
   ensureDocumentsTable();
+  ensureTestimonialColumns();
   seedInitialData();
 }
 
@@ -593,11 +613,11 @@ function seedInitialData() {
 
   // 6. Testimonials
   const testimonials = [
-    { id: 't1', quote: "BSS transformed our legacy systems into a modern, efficient platform. Their expertise is unmatched.", name: 'Sarah Johnson', role: 'CTO, TechCorp' },
-    { id: 't2', quote: "The best partner for enterprise software development. Professional, responsive, and innovative.", name: 'Michael Chen', role: 'CEO, InnovateX' }
+    { id: 't1', quote: "BSS transformed our legacy systems into a modern, efficient platform. Their expertise is unmatched.", name: 'Sarah Johnson', role: 'CTO, TechCorp', videoUrl: '', audioOnly: 0, videoMime: '' },
+    { id: 't2', quote: "The best partner for enterprise software development. Professional, responsive, and innovative.", name: 'Michael Chen', role: 'CEO, InnovateX', videoUrl: '', audioOnly: 0, videoMime: '' }
   ];
-  const insTestimonial = db.prepare('INSERT OR IGNORE INTO testimonials (id, quote, name, role) VALUES (?, ?, ?, ?)');
-  testimonials.forEach(t => insTestimonial.run(t.id, t.quote, t.name, t.role));
+  const insTestimonial = db.prepare('INSERT OR IGNORE INTO testimonials (id, quote, name, role, videoUrl, audioOnly, videoMime) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  testimonials.forEach(t => insTestimonial.run(t.id, t.quote, t.name, t.role, t.videoUrl, t.audioOnly, t.videoMime));
 
   // 7. News
   const news = [

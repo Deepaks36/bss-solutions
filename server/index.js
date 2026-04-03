@@ -10,7 +10,7 @@ import multer from 'multer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const appSettingsPath = path.resolve(__dirname, '../appsettings.json');
+const appSettingsPath = path.resolve(process.cwd(), 'appsettings.json');
 let appSettings = { BackendPort: 3001, Smtp: {} };
 if (fs.existsSync(appSettingsPath)) {
   try {
@@ -33,8 +33,19 @@ const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const uploadsDir = path.resolve(__dirname, '../public/assets/uploads');
-fs.mkdirSync(uploadsDir, { recursive: true });
+const uploadsDir = path.resolve(process.cwd(), 'public/assets/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Serve uploaded files statically
+app.use('/assets/uploads', (req, res, next) => {
+  // Add broad CORS and correct MIME types for video/audio
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  next();
+}, express.static(uploadsDir));
+
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -321,7 +332,12 @@ function getSiteContent() {
 
   const workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
   content.workflow = applyDocumentImages('workflow', workflow);
-  content.testimonials = db.prepare('SELECT * FROM testimonials').all();
+  content.testimonials = db.prepare('SELECT * FROM testimonials').all().map((t) => ({
+    ...t,
+    audioOnly: Boolean(t.audioOnly),
+    videoUrl: t.videoUrl || '',
+    videoMime: t.videoMime || ''
+  }));
   const news = db.prepare('SELECT * FROM news').all();
   content.news = applyDocumentImages('news', news);
   const clients = db.prepare('SELECT * FROM clients').all();
@@ -432,8 +448,16 @@ function saveSiteContent(content) {
 
     // Testimonials
     db.prepare('DELETE FROM testimonials').run();
-    const insTestimonial = db.prepare('INSERT INTO testimonials (id, quote, name, role) VALUES (?, ?, ?, ?)');
-    (data.testimonials || []).forEach(t => insTestimonial.run(t.id, t.quote, t.name, t.role));
+    const insTestimonial = db.prepare('INSERT INTO testimonials (id, quote, name, role, videoUrl, audioOnly, videoMime) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    (data.testimonials || []).forEach(t => insTestimonial.run(
+      t.id,
+      t.quote,
+      t.name,
+      t.role,
+      t.videoUrl || '',
+      t.audioOnly ? 1 : 0,
+      t.videoMime || ''
+    ));
 
     // News
     db.prepare('DELETE FROM news').run();

@@ -82,7 +82,7 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
     : 'text-gray-600 hover:text-gray-900 after:w-0 hover:after:w-full';
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${bg}`}>
+    <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${bg}`}>
       <div className="max-w-full px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

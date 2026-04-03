@@ -1,4 +1,4 @@
-export async function uploadImageFile(file: File): Promise<string> {
+export async function uploadMediaFile(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -8,7 +8,7 @@ export async function uploadImageFile(file: File): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to upload image');
+    throw new Error('Failed to upload media');
   }
 
   const data = await response.json();
@@ -17,4 +17,8 @@ export async function uploadImageFile(file: File): Promise<string> {
   }
 
   return data.path as string;
+}
+
+export async function uploadImageFile(file: File): Promise<string> {
+  return uploadMediaFile(file);
 }
