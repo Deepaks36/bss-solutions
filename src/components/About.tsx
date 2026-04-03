@@ -5,6 +5,7 @@ import { EditableText } from './EditableText';
 import { EditableImage } from './EditableImage';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, Technology } from '../types';
+import { uploadImageFile } from '../utils/upload';
 
 interface TechnologyEditModalProps {
   tech: Technology | null;
@@ -18,12 +19,15 @@ function TechnologyEditModal({ tech, onSave, onClose, dark }: TechnologyEditModa
   const [image, setImage] = useState(tech?.image ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setImage(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadImageFile(file);
+      setImage(path);
+    } catch (_e) {
+      // Ignore upload failures.
+    }
   };
 
   return (

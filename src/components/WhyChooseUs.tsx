@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WhyItem, TimelineItem } from '../types';
+import { uploadImageFile } from '../utils/upload';
 
 interface WhyItemEditModalProps {
   item: WhyItem | null;
@@ -18,12 +19,15 @@ function WhyItemEditModal({ item, onSave, onClose, dark }: WhyItemEditModalProps
   const [image, setImage] = useState(item?.image ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setImage(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadImageFile(file);
+      setImage(path);
+    } catch (_e) {
+      // Ignore and keep existing image.
+    }
   };
 
   return (

@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, NewsItem } from '../types';
+import { uploadImageFile } from '../utils/upload';
 
 interface NewsItemEditModalProps {
   item: NewsItem | null;
@@ -16,14 +17,18 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
   const [title, setTitle] = useState(item?.title ?? '');
   const [excerpt, setExcerpt] = useState(item?.excerpt ?? '');
   const [image, setImage] = useState(item?.image ?? '');
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setImage(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadImageFile(file);
+      setImage(path);
+    } catch (_e) {
+      // Ignore upload failure and keep previous image.
+    }
   };
 
   return (
@@ -90,8 +95,9 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
             Cancel
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               if (title.trim()) {
+                setSaving(true);
                 onSave({
                   id: item?.id ?? Date.now().toString(),
                   title: title.trim(),
@@ -99,13 +105,14 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
                   image,
                   date: item?.date ?? new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
                 });
+                setSaving(false);
               }
             }}
-            disabled={!title.trim()}
+            disabled={!title.trim() || saving}
             className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-50"
           >
             <Check className="h-4 w-4" />
-            {item ? 'Update' : 'Add'}
+            {saving ? 'Saving...' : item ? 'Update' : 'Add'}
           </button>
         </div>
       </div>

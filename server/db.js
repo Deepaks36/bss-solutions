@@ -81,6 +81,21 @@ function ensureProductsColumns() {
   }
 }
 
+function ensureDocumentsTable() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS documents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      path TEXT NOT NULL,
+      referenceType TEXT NOT NULL,
+      referenceId TEXT NOT NULL,
+      fieldName TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_documents_reference ON documents(referenceType, referenceId)');
+}
+
 // Initialize database
 function initDb() {
   // Original site_content for backup/migration if needed
@@ -298,6 +313,7 @@ function initDb() {
   ensureMessageColumns();
   ensureServiceColumns();
   ensureProductsColumns();
+  ensureDocumentsTable();
   seedInitialData();
 }
 

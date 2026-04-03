@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import { ImagePlus } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
+import { uploadImageFile } from '../utils/upload';
 
 interface EditableImageProps {
     src: string;
     alt: string;
-    onSave: (dataUrl: string) => void;
+    onSave: (path: string) => void;
     className?: string;
     width?: number;
     height?: number;
@@ -28,12 +29,11 @@ export function EditableImage({
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const dataUrl = ev.target?.result as string;
-            onSave(dataUrl);
-        };
-        reader.readAsDataURL(file);
+        uploadImageFile(file)
+            .then((path) => onSave(path))
+            .catch(() => {
+                // Keep current image unchanged if upload fails.
+            });
     };
 
     return (

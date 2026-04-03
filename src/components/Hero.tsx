@@ -3,6 +3,7 @@ import { ArrowRight, Check, CheckCircle2, ImagePlus, Pencil, Plus, Sparkles, Tra
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { HomeHighlight, HomeProofItem, HomeStat, SiteContent } from '../types';
 import { useSite } from '../context/SiteContext';
+import { uploadImageFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -83,13 +84,14 @@ function HomeEditModal({
   const topLeftImageRef = useRef<HTMLInputElement>(null);
   const bottomRightImageRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File | undefined, setter: (val: string) => void) => {
+  const handleFile = async (file: File | undefined, setter: (val: string) => void) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setter(ev.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadImageFile(file);
+      setter(path);
+    } catch (_e) {
+      // Keep previous image if upload fails.
+    }
   };
 
   const updateHighlight = (id: string, label: string) => {

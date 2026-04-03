@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WorkflowStep } from '../types';
+import { uploadImageFile } from '../utils/upload';
 
 interface WorkflowEditModalProps {
   step: WorkflowStep | null;
@@ -18,12 +19,15 @@ function WorkflowEditModal({ step, onSave, onClose, dark }: WorkflowEditModalPro
   const [icon, setIcon] = useState(step?.icon ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setIcon(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadImageFile(file);
+      setIcon(path);
+    } catch (_e) {
+      // Ignore upload failures.
+    }
   };
 
   return (

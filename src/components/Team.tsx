@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { SiteContent, TeamCelebration, CareerMilestone, Leader } from '../types';
 import { useSite } from '../context/SiteContext';
+import { uploadImageFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -24,22 +25,19 @@ function CelebrationEditModal({ item, year, orderIndex, dark, onSave, onClose }:
   const [title, setTitle] = useState(item?.title ?? '');
   const [description, setDescription] = useState(item?.description ?? '');
   const [images, setImages] = useState<string[]>(item?.images ?? []);
+  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    let loaded = 0;
-    const results: string[] = [];
-    files.forEach((file, idx) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        results[idx] = reader.result as string;
-        loaded++;
-        if (loaded === files.length) setImages(prev => [...prev, ...results]);
-      };
-      reader.readAsDataURL(file);
-    });
+    setUploading(true);
+    try {
+      const uploaded = await Promise.all(files.map((file) => uploadImageFile(file)));
+      setImages((prev) => [...prev, ...uploaded]);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeImage = (idx: number) => setImages(prev => prev.filter((_, i) => i !== idx));
@@ -122,11 +120,11 @@ function CelebrationEditModal({ item, year, orderIndex, dark, onSave, onClose }:
           </button>
           <button
             onClick={handleSave}
-            disabled={!title.trim()}
+            disabled={!title.trim() || uploading}
             className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-all"
           >
             <Check className="w-4 h-4" />
-            {item ? 'Update' : 'Add Event'}
+            {uploading ? 'Uploading...' : item ? 'Update' : 'Add Event'}
           </button>
         </div>
       </div>
@@ -150,12 +148,15 @@ function MemberEditModal({ item, type, dark, onSave, onClose }: MemberEditModalP
   const [timeline, setTimeline] = useState<CareerMilestone[]>(item?.timeline ?? []);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImage(reader.result as string);
-      reader.readAsDataURL(file);
+      try {
+        const path = await uploadImageFile(file);
+        setImage(path);
+      } catch (_e) {
+        // Ignore upload errors.
+      }
     }
   };
 

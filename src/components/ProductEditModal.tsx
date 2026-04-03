@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Check, ImagePlus, Workflow, ArrowRight, Plus } from 'lucide-react';
 import { Service } from '../types';
+import { uploadImageFile } from '../utils/upload';
 
 interface Props {
   product: Service | null;
@@ -18,12 +19,13 @@ const ACCENTS = [
   { name: 'Purple', value: 'from-purple-600 to-fuchsia-500' },
 ];
 
-function handleFileRead(e: React.ChangeEvent<HTMLInputElement>, cb: (v: string) => void) {
+function handleFileRead(
+  e: React.ChangeEvent<HTMLInputElement>,
+  cb: (previewUrl: string, file: File) => void
+) {
   const file = e.target.files?.[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => cb(ev.target?.result as string);
-  reader.readAsDataURL(file);
+  cb(URL.createObjectURL(file), file);
 }
 
 export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
@@ -47,6 +49,13 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
 
   const [bulletsText, setBulletsText] = useState((product?.bullets ?? []).join(', '));
   const [galleryImages, setGalleryImages] = useState<string[]>(product?.images ?? []);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [detailsImageFile, setDetailsImageFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<(File | null)[]>(
+    (product?.images ?? []).map(() => null)
+  );
+  const [saving, setSaving] = useState(false);
   const [details, setDetails] = useState(initDetails);
 
   const updateDetail = (key: string, value: any) => setDetails((d: any) => ({ ...d, [key]: value }));
@@ -57,31 +66,55 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
     let loaded = 0;
     const results: string[] = [];
     files.forEach((file, idx) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        results[idx] = reader.result as string;
-        loaded++;
-        if (loaded === files.length) {
-          setGalleryImages(prev => [...prev, ...results]);
-        }
-      };
-      reader.readAsDataURL(file);
+      results[idx] = URL.createObjectURL(file);
+      loaded++;
+      if (loaded === files.length) {
+        setGalleryImages(prev => [...prev, ...results]);
+      }
     });
+    setGalleryFiles(prev => [...prev, ...files]);
   };
 
   const removeGalleryImage = (idx: number) => {
     setGalleryImages(prev => prev.filter((_, i) => i !== idx));
+    setGalleryFiles(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!main.title.trim()) return;
+    setSaving(true);
+    let iconPath = main.icon;
+    let imagePath = main.image;
+    let detailsImagePath = main.detailsImage || '';
+    let galleryPaths = [...galleryImages];
+
+    try {
+      if (iconFile) iconPath = await uploadImageFile(iconFile);
+      if (imageFile) imagePath = await uploadImageFile(imageFile);
+      if (detailsImageFile) detailsImagePath = await uploadImageFile(detailsImageFile);
+
+      if (galleryFiles.length > 0) {
+        galleryPaths = await Promise.all(
+          galleryFiles.map((file, index) => {
+            if (file) return uploadImageFile(file);
+            return Promise.resolve(galleryImages[index]);
+          })
+        );
+      }
+
     const bullets = bulletsText.split(',').map(b => b.trim()).filter(Boolean);
     onSave({
       ...main,
-      images: galleryImages,
+      icon: iconPath,
+      image: imagePath,
+      detailsImage: detailsImagePath,
+      images: galleryPaths,
       bullets,
       details: JSON.stringify(details),
     });
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Mini card preview
@@ -183,7 +216,7 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
                   {main.icon ? <img src={main.icon} className="h-5 w-5 object-contain" alt="" /> : <ImagePlus className="h-4 w-4 text-blue-400" />}
                   {main.icon ? 'Change' : 'Upload Icon'}
                 </button>
-                <input type="file" id="edit-icon" className="hidden" accept="image/*" onChange={e => handleFileRead(e, v => setMain(m => ({ ...m, icon: v })))} />
+                <input type="file" id="edit-icon" className="hidden" accept="image/*" onChange={e => handleFileRead(e, (v, file) => { setIconFile(file); setMain(m => ({ ...m, icon: v })); })} />
               </div>
               <div>
                 <label className={labelCls}>Hero Image</label>
@@ -194,7 +227,7 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
                   {main.image ? <img src={main.image} className="h-5 w-5 object-cover rounded" alt="" /> : <ImagePlus className="h-4 w-4 text-cyan-400" />}
                   {main.image ? 'Change' : 'Upload Image'}
                 </button>
-                <input type="file" id="edit-img" className="hidden" accept="image/*" onChange={e => handleFileRead(e, v => setMain(m => ({ ...m, image: v })))} />
+                <input type="file" id="edit-img" className="hidden" accept="image/*" onChange={e => handleFileRead(e, (v, file) => { setImageFile(file); setMain(m => ({ ...m, image: v })); })} />
               </div>
             </div>
 
@@ -328,7 +361,7 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
                 {main.detailsImage ? <img src={main.detailsImage} className="h-5 w-5 object-cover rounded" alt="" /> : <ImagePlus className="h-4 w-4 text-indigo-400" />}
                 {main.detailsImage ? 'Change Details Image' : 'Upload Details Image'}
               </button>
-              <input type="file" id="edit-details-img" className="hidden" accept="image/*" onChange={e => handleFileRead(e, v => setMain(m => ({ ...m, detailsImage: v })))} />
+              <input type="file" id="edit-details-img" className="hidden" accept="image/*" onChange={e => handleFileRead(e, (v, file) => { setDetailsImageFile(file); setMain(m => ({ ...m, detailsImage: v })); })} />
             </div>
           </div>
 
@@ -342,11 +375,11 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
             </button>
             <button
               onClick={handleSave}
-              disabled={!main.title.trim()}
+              disabled={!main.title.trim() || saving}
               className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-black text-white shadow-lg transition-all hover:bg-blue-700 hover:scale-[1.02] disabled:opacity-50"
             >
               <Check className="h-4 w-4" />
-              {product ? 'Save Changes' : 'Create Product'}
+              {saving ? 'Saving...' : product ? 'Save Changes' : 'Create Product'}
             </button>
           </div>
         </div>

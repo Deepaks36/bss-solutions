@@ -171,27 +171,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
                         const val = data[key as keyof SiteContent];
                         if (Array.isArray(val)) {
                             if (val.length > 0) {
-                                // Universal & Relevant migration for products: Map images based on category
-                                if (key === 'products') {
-                                    (mergedData as any)[key] = (val as any[]).map((item) => {
-                                        const text = `${item.title} ${item.type} ${item.description}`.toLowerCase();
-                                        let cat = 'erp';
-                                        if (text.includes('payroll') || text.includes('hr') || text.includes('salary')) cat = 'payroll';
-                                        else if (text.includes('hotel') || text.includes('hospitality') || text.includes('stay') || text.includes('premise')) cat = 'hotel';
-                                        else if (text.includes('booking') || text.includes('boat') || text.includes('reservation') || text.includes('reserve')) cat = 'booking';
-                                        
-                                        const preview = `/assets/products/${cat}_preview.jpg`;
-                                        const details = `/assets/products/${cat}_details.jpg`;
-
-                                        // Update if missing or using old paths
-                                        if (!item.image || item.image.includes('/src/assets/') || item.image.includes('erp_preview.jpg')) {
-                                          return { ...item, image: preview, detailsImage: details };
-                                        }
-                                        return item;
-                                    });
-                                } else {
-                                    (mergedData as any)[key] = val;
-                                }
+                                (mergedData as any)[key] = val;
                             }
                         } else if (val !== undefined && val !== null && val !== '') {
                             (mergedData as any)[key] = val;

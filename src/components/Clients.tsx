@@ -3,6 +3,7 @@ import { Pencil, Plus, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { SiteContent, Client } from '../types';
 import { useSite } from '../context/SiteContext';
+import { uploadImageFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -23,37 +24,49 @@ interface ClientEditModalProps {
 function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps) {
   const [name, setName] = useState(client?.name ?? '');
   const [image, setImage] = useState(client?.image ?? '');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const imageRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setImage(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    setSelectedFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setImage(previewUrl);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return;
-    
-    // For existing clients, only send what changed
-    if (client) {
-      const updates: Partial<Client> = {};
-      if (name.trim() !== client.name) updates.name = name.trim();
-      if (image !== client.image) updates.image = image;
-      
-      if (Object.keys(updates).length > 0) {
-        onSave({ ...client, ...updates });
-      } else {
-        onClose();
+    setSaving(true);
+    let imagePath = image;
+
+    try {
+      if (selectedFile) {
+        imagePath = await uploadImageFile(selectedFile);
       }
-    } else {
-      // New client - send full object
-      onSave({
-        id: `client-${Date.now()}`,
-        name: name.trim(),
-        image,
-      });
+    
+      // For existing clients, only send what changed
+      if (client) {
+        const updates: Partial<Client> = {};
+        if (name.trim() !== client.name) updates.name = name.trim();
+        if (imagePath !== client.image) updates.image = imagePath;
+        
+        if (Object.keys(updates).length > 0) {
+          onSave({ ...client, ...updates });
+        } else {
+          onClose();
+        }
+      } else {
+        // New client - send full object
+        onSave({
+          id: `client-${Date.now()}`,
+          name: name.trim(),
+          image: imagePath,
+        });
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -105,11 +118,11 @@ function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps
           </button>
           <button
             onClick={handleSave}
-            disabled={!name.trim()}
+            disabled={!name.trim() || saving}
             className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-black text-white transition-all hover:bg-blue-700 disabled:opacity-50"
           >
             <Check className="h-4 w-4" />
-            {client ? 'Save Changes' : 'Add Client'}
+            {saving ? 'Saving...' : client ? 'Save Changes' : 'Add Client'}
           </button>
         </div>
       </div>

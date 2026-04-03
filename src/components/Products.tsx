@@ -235,11 +235,17 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                 <div className="relative group">
                   <div className={`absolute -inset-2 rounded-[2.5rem] bg-gradient-to-br ${activeProduct.accent || 'from-blue-600 to-cyan-500'} opacity-20 blur-2xl group-hover:opacity-30 transition-opacity`} />
                   <div className={`relative aspect-[4/3] rounded-[2rem] overflow-hidden border shadow-2xl ${dark ? 'border-white/10 bg-slate-900' : 'border-slate-100 bg-white'}`}>
-                    <img
-                      src={activeProduct.image}
-                      alt={activeProduct.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 animate-in fade-in zoom-in-95 duration-500"
-                    />
+                    {activeProduct.image ? (
+                      <img
+                        src={activeProduct.image}
+                        alt={activeProduct.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 animate-in fade-in zoom-in-95 duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                        No image
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
                   </div>
                 </div>

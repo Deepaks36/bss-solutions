@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,21 @@ const CONTACT_TO_EMAIL = appSettings.Smtp?.ContactToEmail || process.env.CONTACT
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+
+const uploadsDir = path.resolve(__dirname, '../public/assets/uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadsDir),
+  filename: (_req, file, cb) => {
+    const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const ext = path.extname(safeOriginalName);
+    const base = path.basename(safeOriginalName, ext);
+    cb(null, `${Date.now()}-${base}${ext}`);
+  },
+});
+
+const upload = multer({ storage });
 
 console.log(`\n--- BSS Solutions Server starting on port ${PORT} ---`);
 
@@ -66,6 +82,196 @@ function serializeMessage(row) {
   };
 }
 
+function ensureDocumentsTableExists() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS documents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      path TEXT NOT NULL,
+      referenceType TEXT NOT NULL,
+      referenceId TEXT NOT NULL,
+      fieldName TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_documents_reference ON documents(referenceType, referenceId)');
+}
+
+ensureDocumentsTableExists();
+
+const SECTION_REFERENCE_TYPE_MAP = {
+  workflow: 'Workflow',
+  products: 'Product',
+  clients: 'Client',
+  services: 'Service',
+  news: 'News',
+  whyItems: 'WhyItem',
+  technologies: 'Technology',
+  teamMembers: 'TeamMember',
+  companies: 'Company',
+  teamCelebrations: 'TeamCelebration',
+};
+
+const SETTINGS_IMAGE_KEYS = new Set([
+  'heroImage',
+  'heroTopLeftImage',
+  'heroBottomRightImage',
+  'aboutImage',
+]);
+
+function syncSettingDocument(key, value) {
+  ensureDocumentsTableExists();
+  if (!SETTINGS_IMAGE_KEYS.has(key)) return;
+
+  db.prepare('DELETE FROM documents WHERE referenceType = ? AND referenceId = ?').run('Setting', key);
+  if (typeof value === 'string' && value.trim()) {
+    db.prepare('INSERT INTO documents (path, referenceType, referenceId, fieldName) VALUES (?, ?, ?, ?)').run(value, 'Setting', key, key);
+  }
+}
+
+function applySettingDocuments(content) {
+  ensureDocumentsTableExists();
+  const docs = db
+    .prepare('SELECT path, referenceId FROM documents WHERE referenceType = ?')
+    .all('Setting');
+
+  docs.forEach((doc) => {
+    if (doc.referenceId) {
+      content[doc.referenceId] = doc.path;
+    }
+  });
+}
+
+function getDefaultProductImages(product) {
+  const text = `${product.id} ${product.title} ${product.type || ''} ${product.description || ''}`.toLowerCase();
+  if (text.includes('p2') || text.includes('payroll') || text.includes('hr') || text.includes('salary')) {
+    return { image: '/assets/products/payroll_preview.jpg', detailsImage: '/assets/products/payroll_details.jpg' };
+  }
+  if (text.includes('p3') || text.includes('booking') || text.includes('boat') || text.includes('reserve')) {
+    return { image: '/assets/products/booking_preview.jpg', detailsImage: '/assets/products/booking_details.jpg' };
+  }
+  if (text.includes('p4') || text.includes('hotel') || text.includes('premise') || text.includes('hospitality')) {
+    return { image: '/assets/products/hotel_preview.jpg', detailsImage: '/assets/products/hotel_details.jpg' };
+  }
+  return { image: '/assets/products/erp_preview.jpg', detailsImage: '/assets/products/erp_details.jpg' };
+}
+
+function syncDocumentsForItem(section, item) {
+  ensureDocumentsTableExists();
+  const referenceType = SECTION_REFERENCE_TYPE_MAP[section];
+  if (!referenceType || !item?.id) return;
+
+  const deleteStmt = db.prepare('DELETE FROM documents WHERE referenceType = ? AND referenceId = ?');
+  const insertStmt = db.prepare('INSERT INTO documents (path, referenceType, referenceId, fieldName) VALUES (?, ?, ?, ?)');
+
+  const imageFields = [
+    { key: 'image', multiple: false },
+    { key: 'icon', multiple: false },
+    { key: 'detailsImage', multiple: false },
+    { key: 'images', multiple: true },
+  ];
+
+  deleteStmt.run(referenceType, item.id);
+
+  imageFields.forEach(({ key, multiple }) => {
+    const value = item[key];
+    if (!value) return;
+
+    if (multiple && Array.isArray(value)) {
+      value
+        .filter((v) => typeof v === 'string' && v.trim().length > 0)
+        .forEach((imgPath) => insertStmt.run(imgPath, referenceType, item.id, key));
+      return;
+    }
+
+    if (!multiple && typeof value === 'string' && value.trim().length > 0) {
+      insertStmt.run(value, referenceType, item.id, key);
+    }
+  });
+}
+
+function applyDocumentImages(section, items) {
+  ensureDocumentsTableExists();
+  const referenceType = SECTION_REFERENCE_TYPE_MAP[section];
+  if (!referenceType || !Array.isArray(items) || items.length === 0) return items;
+
+  const docs = db
+    .prepare('SELECT path, referenceId, fieldName FROM documents WHERE referenceType = ?')
+    .all(referenceType);
+
+  const docsByReference = docs.reduce((acc, doc) => {
+    if (!acc[doc.referenceId]) acc[doc.referenceId] = [];
+    acc[doc.referenceId].push(doc);
+    return acc;
+  }, {});
+
+  return items.map((item) => {
+    const itemDocs = docsByReference[item.id] || [];
+    if (!itemDocs.length) return item;
+
+    const next = { ...item };
+    itemDocs.forEach((doc) => {
+      if (doc.fieldName === 'images') {
+        if (!Array.isArray(next.images)) next.images = [];
+        next.images.push(doc.path);
+      } else if (doc.fieldName) {
+        next[doc.fieldName] = doc.path;
+      } else if (!next.image) {
+        next.image = doc.path;
+      }
+    });
+    return next;
+  });
+}
+
+function backfillDocuments() {
+  ensureDocumentsTableExists();
+  const sectionsToBackfill = [
+    { section: 'services', table: 'services' },
+    { section: 'workflow', table: 'workflow' },
+    { section: 'news', table: 'news' },
+    { section: 'whyItems', table: 'why_items' },
+    { section: 'technologies', table: 'technologies' },
+    { section: 'products', table: 'products' },
+    { section: 'clients', table: 'clients' },
+    { section: 'teamMembers', table: 'team_members' },
+    { section: 'companies', table: 'companies' },
+    { section: 'teamCelebrations', table: 'team_celebrations' },
+  ];
+
+  sectionsToBackfill.forEach(({ section, table }) => {
+    const rows = db.prepare(`SELECT * FROM ${table}`).all();
+    rows.forEach((row) => {
+      const normalized = { ...row };
+      if (typeof normalized.images === 'string') {
+        try {
+          normalized.images = JSON.parse(normalized.images);
+        } catch (_e) {
+          normalized.images = [];
+        }
+      }
+
+      if (section === 'products') {
+        const defaults = getDefaultProductImages(normalized);
+        normalized.image = normalized.image?.trim() ? normalized.image : defaults.image;
+        normalized.detailsImage = normalized.detailsImage?.trim() ? normalized.detailsImage : defaults.detailsImage;
+
+        db.prepare('UPDATE products SET image = ?, detailsImage = ? WHERE id = ?').run(
+          normalized.image,
+          normalized.detailsImage,
+          normalized.id
+        );
+      }
+
+      syncDocumentsForItem(section, normalized);
+    });
+  });
+
+  const settingRows = db.prepare('SELECT key, value FROM site_settings').all();
+  settingRows.forEach((row) => syncSettingDocument(row.key, row.value));
+}
+
+backfillDocuments();
+
 // Helper to get structured content
 function getSiteContent() {
   const content = {};
@@ -89,6 +295,7 @@ function getSiteContent() {
       content[s.key] = s.value;
     }
   });
+  applySettingDocuments(content);
 
   // 2. Hero ribbon data (stored in dedicated tables)
   content.heroHighlights = db.prepare('SELECT * FROM hero_highlights').all();
@@ -97,38 +304,48 @@ function getSiteContent() {
 
   // 3. Main sections
   const services = db.prepare('SELECT * FROM services').all();
-  content.services = services.map(s => ({
+  const parsedServices = services.map(s => ({
     ...s,
     bullets: s.bullets ? JSON.parse(s.bullets) : []
   }));
+  content.services = applyDocumentImages('services', parsedServices);
 
   const products = db.prepare('SELECT * FROM products').all();
-  content.products = products.map(p => ({
+  const parsedProducts = products.map(p => ({
     ...p,
     bullets: p.bullets ? JSON.parse(p.bullets) : [],
     details: p.details ? p.details : undefined,
     images: p.images ? JSON.parse(p.images) : []
   }));
+  content.products = applyDocumentImages('products', parsedProducts);
 
-  content.workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
+  const workflow = db.prepare('SELECT * FROM workflow ORDER BY order_index').all();
+  content.workflow = applyDocumentImages('workflow', workflow);
   content.testimonials = db.prepare('SELECT * FROM testimonials').all();
-  content.news = db.prepare('SELECT * FROM news').all();
-  content.clients = db.prepare('SELECT * FROM clients').all();
-  content.whyItems = db.prepare('SELECT * FROM why_items').all();
+  const news = db.prepare('SELECT * FROM news').all();
+  content.news = applyDocumentImages('news', news);
+  const clients = db.prepare('SELECT * FROM clients').all();
+  content.clients = applyDocumentImages('clients', clients);
+  const whyItems = db.prepare('SELECT * FROM why_items').all();
+  content.whyItems = applyDocumentImages('whyItems', whyItems);
   content.positions = db.prepare('SELECT * FROM positions').all();
-  content.technologies = db.prepare('SELECT * FROM technologies').all();
-  content.teamCelebrations = db.prepare('SELECT * FROM team_celebrations ORDER BY year DESC, order_index ASC').all().map(c => ({
+  const technologies = db.prepare('SELECT * FROM technologies').all();
+  content.technologies = applyDocumentImages('technologies', technologies);
+  const teamCelebrations = db.prepare('SELECT * FROM team_celebrations ORDER BY year DESC, order_index ASC').all().map(c => ({
     ...c,
     images: JSON.parse(c.images || '[]')
   }));
+  content.teamCelebrations = applyDocumentImages('teamCelebrations', teamCelebrations);
 
-  content.teamMembers = db.prepare('SELECT * FROM team_members ORDER BY order_index ASC').all();
+  const teamMembers = db.prepare('SELECT * FROM team_members ORDER BY order_index ASC').all();
+  content.teamMembers = applyDocumentImages('teamMembers', teamMembers);
 
   const companies = db.prepare('SELECT * FROM companies').all();
-  content.companies = companies.map(c => ({
+  const parsedCompanies = companies.map(c => ({
     ...c,
     images: c.images ? JSON.parse(c.images) : []
   }));
+  content.companies = applyDocumentImages('companies', parsedCompanies);
 
   content.timelineItems = db.prepare('SELECT * FROM timeline_items ORDER BY order_index').all();
 
@@ -151,7 +368,11 @@ function saveSiteContent(content) {
     ];
 
     simpleKeys.forEach(key => {
-      if (data[key] !== undefined) setSetting.run(key, String(data[key]));
+      if (data[key] !== undefined) {
+        const value = String(data[key]);
+        setSetting.run(key, value);
+        syncSettingDocument(key, value);
+      }
     });
 
     // 2. Sections (Clear and refilled for simplicity in this full-sync POST)
@@ -175,7 +396,10 @@ function saveSiteContent(content) {
     // Services
     db.prepare('DELETE FROM services').run();
     const insService = db.prepare('INSERT INTO services (id, title, description, icon, image, accent, bullets) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    (data.services || []).forEach(s => insService.run(s.id, s.title, s.description, s.icon, s.image || '', s.accent || '', JSON.stringify(s.bullets || [])));
+    (data.services || []).forEach(s => {
+      insService.run(s.id, s.title, s.description, s.icon, s.image || '', s.accent || '', JSON.stringify(s.bullets || []));
+      syncDocumentsForItem('services', s);
+    });
 
     // Products
     db.prepare('DELETE FROM products').run();
@@ -195,12 +419,16 @@ function saveSiteContent(content) {
         p.details || '',
         p.detailsImage || ''
       );
+      syncDocumentsForItem('products', p);
     });
 
     // Workflow
     db.prepare('DELETE FROM workflow').run();
     const insWorkflow = db.prepare('INSERT INTO workflow (id, title, description, icon, order_index) VALUES (?, ?, ?, ?, ?)');
-    (data.workflow || []).forEach((w, i) => insWorkflow.run(w.id, w.title, w.description, w.icon, i));
+    (data.workflow || []).forEach((w, i) => {
+      insWorkflow.run(w.id, w.title, w.description, w.icon, i);
+      syncDocumentsForItem('workflow', w);
+    });
 
     // Testimonials
     db.prepare('DELETE FROM testimonials').run();
@@ -210,17 +438,26 @@ function saveSiteContent(content) {
     // News
     db.prepare('DELETE FROM news').run();
     const insNews = db.prepare('INSERT INTO news (id, title, excerpt, image, date) VALUES (?, ?, ?, ?, ?)');
-    (data.news || []).forEach(n => insNews.run(n.id, n.title, n.excerpt, n.image, n.date));
+    (data.news || []).forEach(n => {
+      insNews.run(n.id, n.title, n.excerpt, n.image, n.date);
+      syncDocumentsForItem('news', n);
+    });
 
     // Clients
     db.prepare('DELETE FROM clients').run();
     const insClient = db.prepare('INSERT INTO clients (id, name, image) VALUES (?, ?, ?)');
-    (data.clients || []).forEach(c => insClient.run(c.id, c.name, c.image));
+    (data.clients || []).forEach(c => {
+      insClient.run(c.id, c.name, c.image);
+      syncDocumentsForItem('clients', c);
+    });
 
     // Why Items
     db.prepare('DELETE FROM why_items').run();
     const insWhy = db.prepare('INSERT INTO why_items (id, title, description, image) VALUES (?, ?, ?, ?)');
-    (data.whyItems || []).forEach(w => insWhy.run(w.id, w.title, w.description, w.image));
+    (data.whyItems || []).forEach(w => {
+      insWhy.run(w.id, w.title, w.description, w.image);
+      syncDocumentsForItem('whyItems', w);
+    });
 
     // Positions
     db.prepare('DELETE FROM positions').run();
@@ -230,22 +467,34 @@ function saveSiteContent(content) {
     // Technologies
     db.prepare('DELETE FROM technologies').run();
     const insTech = db.prepare('INSERT INTO technologies (id, name, image) VALUES (?, ?, ?)');
-    (data.technologies || []).forEach(t => insTech.run(t.id, t.name, t.image));
+    (data.technologies || []).forEach(t => {
+      insTech.run(t.id, t.name, t.image);
+      syncDocumentsForItem('technologies', t);
+    });
 
     // Team Celebrations
     db.prepare('DELETE FROM team_celebrations').run();
     const insCeleb = db.prepare('INSERT INTO team_celebrations (id, year, title, description, images, order_index) VALUES (?, ?, ?, ?, ?, ?)');
-    (data.teamCelebrations || []).forEach((c, i) => insCeleb.run(c.id, c.year, c.title, c.description, JSON.stringify(c.images || []), c.order_index || i));
+    (data.teamCelebrations || []).forEach((c, i) => {
+      insCeleb.run(c.id, c.year, c.title, c.description, JSON.stringify(c.images || []), c.order_index || i);
+      syncDocumentsForItem('teamCelebrations', c);
+    });
 
     // Team Members
     db.prepare('DELETE FROM team_members').run();
     const insMember = db.prepare('INSERT INTO team_members (id, name, role, bio, image, order_index) VALUES (?, ?, ?, ?, ?, ?)');
-    (data.teamMembers || []).forEach((m, i) => insMember.run(m.id, m.name, m.role, m.bio || '', m.image || '', m.order_index ?? i));
+    (data.teamMembers || []).forEach((m, i) => {
+      insMember.run(m.id, m.name, m.role, m.bio || '', m.image || '', m.order_index ?? i);
+      syncDocumentsForItem('teamMembers', m);
+    });
 
     // Companies
     db.prepare('DELETE FROM companies').run();
     const insCompany = db.prepare('INSERT INTO companies (id, name, address, email, phone, website, mapUrl, description, images, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    (data.companies || []).forEach(c => insCompany.run(c.id, c.name, c.address, c.email, c.phone, c.website || '', c.mapUrl || '', c.description || '', JSON.stringify(c.images || []), c.details || ''));
+    (data.companies || []).forEach(c => {
+      insCompany.run(c.id, c.name, c.address, c.email, c.phone, c.website || '', c.mapUrl || '', c.description || '', JSON.stringify(c.images || []), c.details || '');
+      syncDocumentsForItem('companies', c);
+    });
 
     // Timeline Items
     db.prepare('DELETE FROM timeline_items').run();
@@ -337,7 +586,9 @@ app.patch('/api/content/settings', (req, res) => {
     }
 
     const stmt = db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
-    stmt.run(key, (typeof value === 'object' && value !== null) ? JSON.stringify(value) : String(value));
+    const serializedValue = (typeof value === 'object' && value !== null) ? JSON.stringify(value) : String(value);
+    stmt.run(key, serializedValue);
+    syncSettingDocument(key, serializedValue);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -384,6 +635,7 @@ app.post('/api/content/sections/:section', (req, res) => {
 
     const stmt = db.prepare(sql);
     stmt.run(...values);
+    syncDocumentsForItem(section, item);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -414,6 +666,18 @@ app.put('/api/content/sections/:section', (req, res) => {
     const result = stmt.run(...values, id);
     
     if (result.changes === 0) return res.status(404).json({ error: 'Item not found' });
+    const row = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
+    if (row) {
+      const normalized = { ...row };
+      if (normalized.images && typeof normalized.images === 'string') {
+        try {
+          normalized.images = JSON.parse(normalized.images);
+        } catch (_e) {
+          normalized.images = [];
+        }
+      }
+      syncDocumentsForItem(section, normalized);
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -433,10 +697,23 @@ app.delete('/api/content/sections/:section', (req, res) => {
     const result = stmt.run(id);
     
     if (result.changes === 0) return res.status(404).json({ error: 'Item not found' });
+    const referenceType = SECTION_REFERENCE_TYPE_MAP[section];
+    if (referenceType) {
+      db.prepare('DELETE FROM documents WHERE referenceType = ? AND referenceId = ?').run(referenceType, id);
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+app.post('/api/uploads', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'File is required' });
+  }
+
+  const webPath = `/assets/uploads/${req.file.filename}`;
+  return res.json({ success: true, path: webPath });
 });
 
 // Admin login

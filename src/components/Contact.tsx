@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { SiteContent, Company } from '../types';
 import { useSite } from '../context/SiteContext';
+import { uploadImageFile } from '../utils/upload';
 
 
 interface Props {
@@ -469,20 +470,19 @@ function CompanyEditModal({ company, dark, onSave, onClose }: { company: Company
   });
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setFormData((prev: Partial<Company>) => ({
-          ...prev,
-          images: [...(prev.images || []), ev.target?.result as string]
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+
+    try {
+      const uploaded = await Promise.all(Array.from(files).map((file) => uploadImageFile(file)));
+      setFormData((prev: Partial<Company>) => ({
+        ...prev,
+        images: [...(prev.images || []), ...uploaded]
+      }));
+    } catch (_e) {
+      // Ignore upload failures and keep existing images.
+    }
   };
 
   return (
