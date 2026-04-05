@@ -323,10 +323,12 @@ export function Hero({ content, dark, onUpdate }: Props) {
   return (
     <section
       id="home"
-      className={`relative pt-32 pb-16 lg:pt-40 lg:pb-24 transition-colors duration-300 ${dark ? 'bg-[#0A0F1C] text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`relative pt-32 pb-16 lg:pt-40 lg:pb-24 transition-colors duration-300 isolate ${dark ? 'bg-[#0A0F1C] text-white' : 'bg-slate-50 text-slate-900'}`}
     >
+      <CircuitBackground dark={dark} />
+
       {/* Background subtleties */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 z-[-1]">
         <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-[100px]" />
         <div className="absolute top-40 -left-40 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[80px]" />
       </div>
@@ -385,11 +387,11 @@ export function Hero({ content, dark, onUpdate }: Props) {
           </div>
 
           {/* Visual Column */}
-          <div className={`relative h-[550px] sm:h-[600px] lg:h-[650px] w-full transition-all duration-1000 delay-200 translate-x-0 opacity-100`}>
+          <div className="relative h-[550px] sm:h-[600px] lg:h-[650px] w-full transition-all duration-1000 delay-200">
             <style>{`
               @keyframes floatY {
                 0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-15px); }
+                50% { transform: translateY(-20px); }
               }
               .animate-float-1 { animation: floatY 6s ease-in-out infinite; }
               .animate-float-2 { animation: floatY 7s ease-in-out infinite 1.5s; }
@@ -397,73 +399,72 @@ export function Hero({ content, dark, onUpdate }: Props) {
             `}</style>
 
             {/* Top Left Card */}
-            <div className="absolute top-4 left-0 w-[40%] md:w-[38%] z-10 hidden lg:block">
-              <div className={`animate-float-1 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
-                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+            <div className="absolute top-0 left-0 w-[42%] md:w-[40%] z-10 hidden lg:block">
+              <div className={`animate-float-1 relative rounded-[1.5rem] border p-2 shadow-2xl ${dark ? 'border-slate-700/50 bg-slate-900/40' : 'border-white/60 bg-white/40 shadow-blue-200/50'} backdrop-blur-xl transition-all hover:scale-105`}>
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[1rem]">
                   <img
                     src={content.heroTopLeftImage || "/src/assets/images/hero/hero-top-left.jpg"}
                     alt="Teamwork"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-4 left-3 right-3 text-white">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-emerald-400 font-bold mb-0.5">{content.heroTopLeftBadgeTop || 'Growth rate'}</p>
-                    <p className="text-[13px] sm:text-sm font-black leading-tight">{content.heroTopLeftBadgeBottom || '+340% Velocity'}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-black mb-0.5">{content.heroTopLeftBadgeTop || 'Growth rate'}</p>
+                    <p className="text-[11px] font-black leading-tight">{content.heroTopLeftBadgeBottom || '+340% Velocity'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bottom Right Card */}
-            <div className="absolute bottom-4 right-0 w-[40%] md:w-[38%] z-10 hidden lg:block">
-              <div className={`animate-float-3 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/30' : 'border-white/80 bg-white/80 shadow-slate-200/60 backdrop-blur-sm'}`}>
-                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+            <div className="absolute bottom-0 right-0 w-[42%] md:w-[40%] z-10 hidden lg:block">
+              <div className={`animate-float-3 relative rounded-[1.5rem] border p-2 shadow-2xl ${dark ? 'border-slate-700/50 bg-slate-900/40' : 'border-white/60 bg-white/40 shadow-blue-200/50'} backdrop-blur-xl transition-all hover:scale-105`}>
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[1rem]">
                   <img
                     src={content.heroBottomRightImage || "/src/assets/images/hero/hero-bottom-right.jpg"}
                     alt="Technology"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-4 left-3 right-3 text-white">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-blue-300 font-bold">{content.heroBottomRightBadgeTop || 'System Status'}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <div className="flex items-center gap-1.2 mb-0.5">
+                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-[9px] uppercase tracking-widest text-emerald-300 font-black">{content.heroBottomRightBadgeTop || 'System Status'}</p>
                     </div>
-                    <p className="text-[13px] sm:text-sm font-black leading-tight">{content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed'}</p>
+                    <p className="text-[11px] font-black leading-tight">{content.heroBottomRightBadgeBottom || '100% Uptime Guaranteed'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Center Main Card (using heroImage) */}
-            <div className="absolute top-1/2 left-1/2 w-[70%] sm:w-[50%] lg:w-[42%] -translate-x-1/2 -translate-y-1/2 z-20">
-              <div className={`animate-float-2 relative rounded-[2rem] border-8 p-1 sm:p-2 shadow-2xl ${dark ? 'border-slate-800/80 bg-slate-900/80 shadow-blue-900/40' : 'border-white/80 bg-white/80 shadow-xl shadow-slate-200/80 backdrop-blur-md'}`}>
-                <div className="relative aspect-[4/5] sm:aspect-[4/4] w-full overflow-hidden rounded-[1.25rem]">
+            <div className="absolute top-1/2 left-1/2 w-[75%] sm:w-[55%] lg:w-[48%] -translate-x-1/2 -translate-y-1/2 z-20">
+              <div className={`animate-float-2 relative rounded-[2rem] border p-3 shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${dark ? 'border-slate-600/50 bg-slate-900/60' : 'border-white/80 bg-white/60 shadow-blue-500/10'} backdrop-blur-2xl transition-all hover:scale-105`}>
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[1.5rem]">
                   <img
                     src={heroImage}
-                    alt="Corporate Technology"
+                    alt="Global Connectivity"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                  {/* Perfectly Integrated Trust Badge */}
-                  <div className="absolute bottom-4 left-3 right-3 text-white">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
+                  {/* Badge */}
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
                         <Check className="h-3 w-3" />
                       </div>
-                      <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-blue-300 font-black leading-tight">
+                      <p className="text-[10px] uppercase tracking-widest text-blue-300 font-black">
                         {content.heroCenterBadgeLabel || 'Trusted Leaders'}
                       </p>
                     </div>
-                    <p className="text-xs sm:text-[15px] font-black leading-snug sm:leading-tight line-clamp-2">
-                      {content.heroStat}
+                    <p className="text-xs sm:text-base font-black leading-tight">
+                      {content.heroStat || 'Successfully Completed & Delivered 300+ Projects'}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -506,5 +507,44 @@ export function Hero({ content, dark, onUpdate }: Props) {
         <HomeEditModal content={content} dark={dark} onClose={() => setIsEditing(false)} onSave={saveHeroContent} />
       )}
     </section>
+  );
+}
+
+function CircuitBackground({ dark }: { dark: boolean }) {
+  return (
+    <div className="absolute inset-0 z-[-1] overflow-hidden pointer-events-none transition-all duration-1000">
+      <svg className="h-full w-full opacity-[0.4] dark:opacity-[0.2]" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="circuit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={dark ? '#22d3ee' : '#3b82f6'} stopOpacity="0" />
+            <stop offset="50%" stopColor={dark ? '#22d3ee' : '#3b82f6'} stopOpacity="1" />
+            <stop offset="100%" stopColor={dark ? '#22d3ee' : '#3b82f6'} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        
+        {/* Paths inspired by the reference image's zigzag/angled technical lines */}
+        <g stroke="url(#circuit-grad)" fill="none" strokeWidth="1.5">
+          <path d="M 0 100 L 200 100 L 250 150 L 500 150 L 550 100 L 1000 100" className="animate-circuit" />
+          <path d="M 0 400 L 100 400 L 150 450 L 300 450 L 350 400 L 600 400 L 650 350 L 1000 350" className="animate-circuit" style={{ animationDelay: '-5s' }} />
+          <path d="M 200 0 L 200 200 L 250 250 L 250 500 L 300 550 L 300 1000" className="animate-circuit" style={{ animationDelay: '-10s' }} />
+          <path d="M 800 0 L 800 300 L 750 350 L 750 600 L 700 650 L 700 1000" className="animate-circuit" style={{ animationDelay: '-15s' }} />
+          
+          <path d="M 900 0 L 900 100 L 850 150 L 850 400 L 900 450 L 900 1000" className="animate-circuit" style={{ animationDelay: '-7s' }} />
+          <path d="M 0 700 L 300 700 L 350 750 L 1000 750" className="animate-circuit" style={{ animationDelay: '-12s' }} />
+          <path d="M 500 0 L 500 300 L 550 350 L 800 350 L 850 400 L 1000 400" className="animate-circuit" style={{ animationDelay: '-3s' }} />
+        </g>
+
+        {/* Connection Nodes */}
+        <g fill={dark ? '#22d3ee' : '#3b82f6'}>
+          <circle cx="250" cy="150" r="3" className="animate-node-glow" />
+          <circle cx="500" cy="150" r="3" className="animate-node-glow" style={{ animationDelay: '1s' }} />
+          <circle cx="150" cy="450" r="3" className="animate-node-glow" style={{ animationDelay: '2s' }} />
+          <circle cx="650" cy="350" r="3" className="animate-node-glow" style={{ animationDelay: '0.5s' }} />
+          <circle cx="250" cy="250" r="3" className="animate-node-glow" style={{ animationDelay: '1.5s' }} />
+          <circle cx="750" cy="350" r="3" className="animate-node-glow" style={{ animationDelay: '2.5s' }} />
+          <circle cx="350" cy="750" r="3" className="animate-node-glow" style={{ animationDelay: '3s' }} />
+        </g>
+      </svg>
+    </div>
   );
 }

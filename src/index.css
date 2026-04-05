@@ -231,3 +231,33 @@ h5 {
     opacity: 1;
   }
 }
+
+/* Circuit background animations */
+@keyframes circuitFlow {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-circuit {
+  stroke-dasharray: 100 200;
+  animation: circuitFlow 30s linear infinite;
+}
+
+@keyframes nodeGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+.animate-node-glow {
+  animation: nodeGlow 4s ease-in-out infinite;
+}

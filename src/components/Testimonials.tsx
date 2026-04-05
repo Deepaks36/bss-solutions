@@ -287,7 +287,7 @@ function TestimonialCard({
       className={`w-full md:w-[48%] max-w-2xl ${alignClass} ${overlapClass} transition-all duration-700 ${visible || editMode ? 'opacity-100 translate-y-0 translate-x-0' : `opacity-0 translate-y-10 ${sideRevealClass}`}`}
       style={{ zIndex: 10 - index }}
     >
-      <div className={`relative p-8 rounded-[2.5rem] border overflow-hidden transition-all duration-500 hover:shadow-2xl h-full flex flex-col group/card ${dark ? 'bg-[#081028] border-white/10' : 'bg-white border-slate-100 shadow-xl'}`}>
+      <div className={`relative p-6 rounded-[2rem] border overflow-hidden transition-all duration-500 hover:shadow-2xl h-full flex flex-col group/card ${dark ? 'bg-[#081028] border-white/10' : 'bg-white border-slate-100 shadow-xl'}`}>
         
         {editMode && (
           <div className="absolute top-6 right-6 flex items-center gap-2 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity">
@@ -308,16 +308,16 @@ function TestimonialCard({
           </div>
         )}
 
-        <Quote className={`absolute top-8 left-8 w-12 h-12 opacity-5 ${dark ? 'text-white' : 'text-blue-900'}`} />
+        <Quote className={`absolute top-6 left-6 w-8 h-8 opacity-5 ${dark ? 'text-white' : 'text-blue-900'}`} />
         
-        <div className="mb-8 mt-4 relative z-10">
-          <blockquote className={`text-xl italic font-medium leading-relaxed ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
+        <div className="mb-6 mt-4 relative z-10">
+          <blockquote className={`text-base sm:text-lg italic font-medium leading-relaxed ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
             "{item.quote}"
           </blockquote>
         </div>
 
         {(item.videoUrl || item.imageUrl) && (
-          <div className="mb-8 rounded-3xl overflow-hidden border border-white/5 bg-black shadow-2xl group/media relative aspect-video">
+          <div className="mb-6 rounded-2xl overflow-hidden border border-white/5 bg-black shadow-2xl group/media relative aspect-video">
             {item.videoUrl ? (
               !speakerMode ? (
                 <video
@@ -350,13 +350,13 @@ function TestimonialCard({
         )}
 
         <div className="flex items-center justify-between gap-4 mt-auto">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg`}>
               {item.name.charAt(0)}
             </div>
             <div>
-              <h4 className={`font-black text-lg tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>{item.name}</h4>
-              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? 'text-blue-400' : 'text-blue-600'}`}>{item.role}</p>
+              <h4 className={`font-black text-base tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>{item.name}</h4>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${dark ? 'text-blue-400' : 'text-blue-600'}`}>{item.role}</p>
             </div>
           </div>
 
@@ -436,10 +436,10 @@ export function Testimonials({ content, dark, onUpdate, onUpdateTestimonialAtomi
               onSave={(v) => onUpdate('testimonialsTitle', v)}
               as="h2"
               dark={dark}
-              className={`text-5xl sm:text-7xl font-black tracking-tighter mb-8 leading-[0.9] ${dark ? 'text-white' : 'text-slate-950'}`}
+              className={`text-4xl sm:text-6xl font-black tracking-tighter mb-8 leading-[0.9] ${dark ? 'text-white' : 'text-slate-950'}`}
             />
           </div>
-          <p className={`text-lg sm:text-xl font-medium max-w-2xl mx-auto ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+          <p className={`text-base sm:text-lg font-medium max-w-2xl mx-auto ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
             Over 25 years working in IT services developing software applications and mobile apps for clients over the world.
           </p>
         </div>
