@@ -22,3 +22,15 @@ export async function uploadMediaFile(file: File): Promise<string> {
 export async function uploadImageFile(file: File): Promise<string> {
   return uploadMediaFile(file);
 }
+
+export async function deleteMediaFile(path: string): Promise<void> {
+  if (!path || !path.startsWith('/assets/uploads/')) return;
+  
+  try {
+    await fetch(`/api/uploads?path=${encodeURIComponent(path)}`, {
+      method: 'DELETE',
+    });
+  } catch (e) {
+    console.error('Failed to delete media file:', e);
+  }
+}

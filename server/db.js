@@ -110,6 +110,10 @@ function ensureTestimonialColumns() {
   if (!columns.includes('videoMime')) {
     db.exec('ALTER TABLE testimonials ADD COLUMN videoMime TEXT');
   }
+
+  if (!columns.includes('imageUrl')) {
+    db.exec('ALTER TABLE testimonials ADD COLUMN imageUrl TEXT');
+  }
 }
 
 // Initialize database
@@ -198,7 +202,8 @@ function initDb() {
       role TEXT NOT NULL,
       videoUrl TEXT,
       audioOnly INTEGER NOT NULL DEFAULT 0,
-      videoMime TEXT
+      videoMime TEXT,
+      imageUrl TEXT
     )
   `);
 

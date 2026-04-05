@@ -75,6 +75,7 @@ export interface Testimonial {
   role: string;
   videoUrl?: string;
   videoMime?: string;
+  imageUrl?: string;
   audioOnly?: boolean;
 }
 

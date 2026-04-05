@@ -336,7 +336,8 @@ function getSiteContent() {
     ...t,
     audioOnly: Boolean(t.audioOnly),
     videoUrl: t.videoUrl || '',
-    videoMime: t.videoMime || ''
+    videoMime: t.videoMime || '',
+    imageUrl: t.imageUrl || ''
   }));
   const news = db.prepare('SELECT * FROM news').all();
   content.news = applyDocumentImages('news', news);
@@ -448,7 +449,7 @@ function saveSiteContent(content) {
 
     // Testimonials
     db.prepare('DELETE FROM testimonials').run();
-    const insTestimonial = db.prepare('INSERT INTO testimonials (id, quote, name, role, videoUrl, audioOnly, videoMime) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const insTestimonial = db.prepare('INSERT INTO testimonials (id, quote, name, role, videoUrl, audioOnly, videoMime, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     (data.testimonials || []).forEach(t => insTestimonial.run(
       t.id,
       t.quote,
@@ -456,7 +457,8 @@ function saveSiteContent(content) {
       t.role,
       t.videoUrl || '',
       t.audioOnly ? 1 : 0,
-      t.videoMime || ''
+      t.videoMime || '',
+      t.imageUrl || ''
     ));
 
     // News
@@ -738,6 +740,30 @@ app.post('/api/uploads', upload.single('file'), (req, res) => {
 
   const webPath = `/assets/uploads/${req.file.filename}`;
   return res.json({ success: true, path: webPath });
+});
+
+app.delete('/api/uploads', (req, res) => {
+  const { path: webPath } = req.query;
+  if (!webPath) return res.status(400).json({ error: 'Path is required' });
+
+  try {
+    // Basic security check: ensure it starts with /assets/uploads/
+    if (!webPath.startsWith('/assets/uploads/')) {
+      return res.status(403).json({ error: 'Unauthorized path' });
+    }
+
+    const filename = path.basename(webPath);
+    const filePath = path.join(uploadsDir, filename);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: 'File not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Admin login
