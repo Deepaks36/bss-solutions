@@ -3,7 +3,7 @@ import { Pencil, Plus, Trash2, X, Check, ImagePlus } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { SiteContent, Client } from '../types';
 import { useSite } from '../context/SiteContext';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -44,6 +44,11 @@ function ClientEditModal({ client, onSave, onClose, dark }: ClientEditModalProps
     try {
       if (selectedFile) {
         imagePath = await uploadImageFile(selectedFile);
+        
+        // Delete old image if it's an upload
+        if (client?.image && client.image.startsWith('/assets/uploads/')) {
+          deleteMediaFile(client.image);
+        }
       }
     
       // For existing clients, only send what changed
@@ -200,7 +205,14 @@ export function Clients({ content, dark, onAddClient, onUpdateClientAtomic, onDe
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    onClick={() => onDeleteClient(client.id)}
+                    onClick={() => {
+                      if (confirm(`Remove ${client.name}?`)) {
+                        if (client.image && client.image.startsWith('/assets/uploads/')) {
+                          deleteMediaFile(client.image);
+                        }
+                        onDeleteClient(client.id);
+                      }
+                    }}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-transform hover:scale-110"
                     title="Delete client"
                   >

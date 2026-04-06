@@ -4,7 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, NewsItem } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface NewsItemEditModalProps {
   item: NewsItem | null;
@@ -25,6 +25,12 @@ function NewsItemEditModal({ item, onSave, onClose, dark }: NewsItemEditModalPro
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old image if it's an upload
+      if (image && image.startsWith('/assets/uploads/')) {
+        deleteMediaFile(image);
+      }
+      
       setImage(path);
     } catch (_e) {
       // Ignore upload failure and keep previous image.
@@ -250,7 +256,14 @@ export function NewsRoom({ content, dark, onUpdate, onUpdateNewsItemAtomic, onAd
               index={i}
               dark={dark}
               onEdit={() => setEditingItem(item)}
-              onDelete={() => onDeleteNewsItem(item.id)}
+              onDelete={() => {
+                if (confirm('Delete this news item?')) {
+                  if (item.image && item.image.startsWith('/assets/uploads/')) {
+                    deleteMediaFile(item.image);
+                  }
+                  onDeleteNewsItem(item.id);
+                }
+              }}
             />
           ))}
 

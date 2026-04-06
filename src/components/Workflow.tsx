@@ -4,7 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WorkflowStep } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface WorkflowEditModalProps {
   step: WorkflowStep | null;
@@ -24,6 +24,12 @@ function WorkflowEditModal({ step, onSave, onClose, dark }: WorkflowEditModalPro
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old icon if it's an upload
+      if (icon && icon.startsWith('/assets/uploads/')) {
+        deleteMediaFile(icon);
+      }
+      
       setIcon(path);
     } catch (_e) {
       // Ignore upload failures.
@@ -243,7 +249,14 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
               index={i}
               dark={dark}
               onEdit={() => setEditingStep(step)}
-              onDelete={() => onDeleteWorkflowStep(step.id)}
+              onDelete={() => {
+                if (confirm(`Delete Phase ${i + 1}: ${step.title}?`)) {
+                  if (step.icon && step.icon.startsWith('/assets/uploads/')) {
+                    deleteMediaFile(step.icon);
+                  }
+                  onDeleteWorkflowStep(step.id);
+                }
+              }}
             />
           ))}
 

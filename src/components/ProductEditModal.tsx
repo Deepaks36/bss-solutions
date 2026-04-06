@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Check, ImagePlus, Workflow, ArrowRight, Plus } from 'lucide-react';
 import { Service } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface Props {
   product: Service | null;
@@ -89,17 +89,44 @@ export function ProductEditModal({ product, dark, onSave, onClose }: Props) {
     let galleryPaths = [...galleryImages];
 
     try {
-      if (iconFile) iconPath = await uploadImageFile(iconFile);
-      if (imageFile) imagePath = await uploadImageFile(imageFile);
-      if (detailsImageFile) detailsImagePath = await uploadImageFile(detailsImageFile);
+      if (iconFile) {
+        if (product?.icon && product.icon.startsWith('/assets/uploads/')) {
+          deleteMediaFile(product.icon);
+        }
+        iconPath = await uploadImageFile(iconFile);
+      }
+      
+      if (imageFile) {
+        if (product?.image && product.image.startsWith('/assets/uploads/')) {
+          deleteMediaFile(product.image);
+        }
+        imagePath = await uploadImageFile(imageFile);
+      }
+      
+      if (detailsImageFile) {
+        if (product?.detailsImage && product.detailsImage.startsWith('/assets/uploads/')) {
+          deleteMediaFile(product.detailsImage);
+        }
+        detailsImagePath = await uploadImageFile(detailsImageFile);
+      }
 
-      if (galleryFiles.length > 0) {
+      if (galleryFiles.length > 0 || galleryImages.length !== (product?.images?.length || 0)) {
+        // Find which initial gallery images are being removed
+        const initialGallery = product?.images ?? [];
+        
         galleryPaths = await Promise.all(
           galleryFiles.map((file, index) => {
             if (file) return uploadImageFile(file);
             return Promise.resolve(galleryImages[index]);
           })
         );
+        
+        // Delete any initial gallery images that are no longer in the final list
+        initialGallery.forEach(oldImg => {
+          if (oldImg.startsWith('/assets/uploads/') && !galleryPaths.includes(oldImg)) {
+            deleteMediaFile(oldImg);
+          }
+        });
       }
 
     const bullets = bulletsText.split(',').map(b => b.trim()).filter(Boolean);

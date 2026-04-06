@@ -4,7 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { SiteContent, Company } from '../types';
 import { useSite } from '../context/SiteContext';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 
 interface Props {
@@ -86,7 +86,16 @@ export function Contact({ content, dark, onUpdate }: Props) {
                 editMode={editMode}
                 onView={() => setSelectedCompany(company)}
                 onEdit={() => setEditingCompany(company)}
-                onDelete={() => deleteItemFromSection('companies', company.id)}
+                onDelete={() => {
+                  if (confirm(`Delete ${company.name}? This will also remove its gallery images.`)) {
+                    company.images.forEach(img => {
+                      if (img.startsWith('/assets/uploads/')) {
+                        deleteMediaFile(img);
+                      }
+                    });
+                    deleteItemFromSection('companies', company.id);
+                  }
+                }}
               />
             ))}
 
@@ -580,7 +589,17 @@ function CompanyEditModal({ company, dark, onSave, onClose }: { company: Company
         <div className="mt-8 flex justify-end gap-4">
           <button onClick={onClose} className="px-6 py-3 font-bold text-gray-400 hover:text-gray-900 transition-colors">Cancel</button>
           <button 
-            onClick={() => onSave(formData)}
+            onClick={() => {
+              // Cleanup removed images from server if they were uploads
+              const initialImages = company?.images || [];
+              const finalImages = formData.images || [];
+              initialImages.forEach(img => {
+                if (img.startsWith('/assets/uploads/') && !finalImages.includes(img)) {
+                  deleteMediaFile(img);
+                }
+              });
+              onSave(formData);
+            }}
             className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
           >
             {company ? 'Update Location' : 'Save Location'}

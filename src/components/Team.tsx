@@ -2,9 +2,9 @@ import { useState, useRef, useMemo } from 'react';
 import { Plus, Trash2, X, Check, ImagePlus, Calendar, Pencil, TrendingUp } from 'lucide-react';
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
-import { SiteContent, TeamCelebration, CareerMilestone, Leader } from '../types';
+import { SiteContent, TeamCelebration, CareerMilestone } from '../types';
 import { useSite } from '../context/SiteContext';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -40,7 +40,13 @@ function CelebrationEditModal({ item, year, orderIndex, dark, onSave, onClose }:
     }
   };
 
-  const removeImage = (idx: number) => setImages(prev => prev.filter((_, i) => i !== idx));
+  const removeImage = (idx: number) => {
+    const imgToDelete = images[idx];
+    if (imgToDelete && imgToDelete.startsWith('/assets/uploads/')) {
+      deleteMediaFile(imgToDelete);
+    }
+    setImages(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSave = () => {
     if (!title.trim()) return;
@@ -153,6 +159,12 @@ function MemberEditModal({ item, type, dark, onSave, onClose }: MemberEditModalP
     if (file) {
       try {
         const path = await uploadImageFile(file);
+        
+        // Remove old image from server if it exists.
+        if (image && image.startsWith('/assets/uploads/')) {
+          deleteMediaFile(image);
+        }
+        
         setImage(path);
       } catch (_e) {
         // Ignore upload errors.
@@ -399,7 +411,14 @@ function CelebrationPopup({
                             <button onClick={() => setEditingItem(celeb)} className="p-3 bg-blue-600 text-white rounded-2xl shadow-xl hover:scale-110 transition-all">
                               <Pencil className="w-4 h-4" />
                             </button>
-                            <button onClick={() => { if (confirm('Delete?')) onDelete(celeb.id); }} className="p-3 bg-red-600 text-white rounded-2xl shadow-xl hover:scale-110 transition-all">
+                            <button onClick={() => { 
+                              if (confirm('Delete this event?')) {
+                                celeb.images.forEach(img => {
+                                  if (img.startsWith('/assets/uploads/')) deleteMediaFile(img);
+                                });
+                                onDelete(celeb.id);
+                              }
+                            }} className="p-3 bg-red-600 text-white rounded-2xl shadow-xl hover:scale-110 transition-all">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -519,7 +538,14 @@ export function Team({ content, dark }: Props) {
                             <Pencil className="w-4 h-4" /> Edit Profile
                           </button>
                           <button
-                            onClick={() => { if(confirm('Remove this leader?')) deleteItemFromSection('leaders', leader.id); }}
+                            onClick={() => { 
+                              if(confirm('Remove this leader?')) {
+                                if (leader.image?.startsWith('/assets/uploads/')) {
+                                  deleteMediaFile(leader.image);
+                                }
+                                deleteItemFromSection('leaders', leader.id);
+                              }
+                            }}
                             className="inline-flex items-center gap-2 px-5 py-2 bg-red-600/10 text-red-600 rounded-2xl font-bold hover:bg-red-600 hover:text-white transition-all"
                           >
                             <Trash2 className="w-4 h-4" /> Remove
@@ -656,7 +682,14 @@ export function Team({ content, dark }: Props) {
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => { if (confirm(`Remove ${member.name}?`)) deleteItemFromSection('teamMembers', member.id); }}
+                        onClick={() => { 
+                          if (confirm(`Remove ${member.name}?`)) {
+                            if (member.image?.startsWith('/assets/uploads/')) {
+                              deleteMediaFile(member.image);
+                            }
+                            deleteItemFromSection('teamMembers', member.id);
+                          }
+                        }}
                         className="p-2.5 bg-red-600 text-white rounded-xl shadow-xl hover:scale-110 transition-all"
                       >
                         <Trash2 className="w-4 h-4" />

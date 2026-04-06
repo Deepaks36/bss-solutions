@@ -4,7 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WhyItem, TimelineItem } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface WhyItemEditModalProps {
   item: WhyItem | null;
@@ -24,6 +24,12 @@ function WhyItemEditModal({ item, onSave, onClose, dark }: WhyItemEditModalProps
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old image if it's an upload
+      if (image && image.startsWith('/assets/uploads/')) {
+        deleteMediaFile(image);
+      }
+      
       setImage(path);
     } catch (_e) {
       // Ignore and keep existing image.
@@ -404,7 +410,14 @@ export function WhyChooseUs({
                 index={i}
                 dark={dark}
                 onEdit={() => setEditingItem(item)}
-                onDelete={() => onDeleteWhyItem(item.id)}
+                onDelete={() => {
+                  if (confirm(`Delete ${item.title}?`)) {
+                    if (item.image && item.image.startsWith('/assets/uploads/')) {
+                      deleteMediaFile(item.image);
+                    }
+                    onDeleteWhyItem(item.id);
+                  }
+                }}
               />
             ))}
 

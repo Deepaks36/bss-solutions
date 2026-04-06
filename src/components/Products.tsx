@@ -5,6 +5,7 @@ import { SiteContent, Service } from '../types';
 import { useSite } from '../context/SiteContext';
 import { ProductDetailModal } from './ProductDetailModal';
 import { ProductEditModal } from './ProductEditModal';
+import { deleteMediaFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -208,7 +209,18 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
                 isActive={activeId === item.id}
                 onCardClick={() => setSelectedProduct(item)}
                 onEdit={() => setEditingProduct(item)}
-                onDelete={() => onDeleteService(item.id)}
+                onDelete={() => {
+                  if (confirm(`Are you sure you want to delete ${item.title}? This will also remove all associated images.`)) {
+                    // Collect all possible uploaded images
+                    const toDelete = [item.icon, item.image, item.detailsImage, ...(item.images || [])];
+                    toDelete.forEach(path => {
+                      if (path && typeof path === 'string' && path.startsWith('/assets/uploads/')) {
+                        deleteMediaFile(path);
+                      }
+                    });
+                    onDeleteService(item.id);
+                  }
+                }}
               />
             ))}
 

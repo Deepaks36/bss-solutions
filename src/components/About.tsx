@@ -5,7 +5,7 @@ import { EditableText } from './EditableText';
 import { EditableImage } from './EditableImage';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, Technology } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface TechnologyEditModalProps {
   tech: Technology | null;
@@ -24,6 +24,12 @@ function TechnologyEditModal({ tech, onSave, onClose, dark }: TechnologyEditModa
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old image if it exists and is an upload
+      if (image && image.startsWith('/assets/uploads/')) {
+        deleteMediaFile(image);
+      }
+      
       setImage(path);
     } catch (_e) {
       // Ignore upload failures.
@@ -112,7 +118,7 @@ interface Props {
 export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAddTechnology, onDeleteTechnology }: Props) {
   const { ref: textRef, visible: textVisible } = useAnimateOnScroll(0.1);
   const { ref: imgRef, visible: imgVisible } = useAnimateOnScroll(0.1);
-  // const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
+  const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
 
   const { editMode } = useSite();
   const [editingTech, setEditingTech] = useState<Technology | null>(null);
@@ -188,9 +194,9 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
             </div>
           </div>
         </div>
-
+        
         {/* Tech Stack */}
-        {/* <div
+        <div
           ref={techRef}
           className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
@@ -215,7 +221,14 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                       <Pencil className="h-3 w-3" />
                     </button>
                     <button
-                      onClick={() => onDeleteTechnology(tech.id)}
+                      onClick={() => {
+                        if (confirm('Delete this technology?')) {
+                          if (tech.image && tech.image.startsWith('/assets/uploads/')) {
+                            deleteMediaFile(tech.image);
+                          }
+                          onDeleteTechnology(tech.id);
+                        }
+                      }}
                       className="p-1 rounded bg-red-600 text-white shadow-lg shadow-red-600/20"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -237,7 +250,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
               </button>
             )}
           </div>
-        </div> */}
+        </div>
       </div>
 
       {(editingTech || isAdding) && (

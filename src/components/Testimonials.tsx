@@ -55,11 +55,19 @@ function TestimonialModal({
     try {
       let videoUrl = videoPreview;
       if (videoFile) {
+        // Delete old video if it was an upload
+        if (initialData?.videoUrl && initialData.videoUrl.startsWith('/assets/uploads/')) {
+          await deleteMediaFile(initialData.videoUrl);
+        }
         videoUrl = await uploadMediaFile(videoFile);
       }
       
       let imageUrl = imagePreview;
       if (imageFile) {
+        // Delete old image if it was an upload
+        if (initialData?.imageUrl && initialData.imageUrl.startsWith('/assets/uploads/')) {
+          await deleteMediaFile(initialData.imageUrl);
+        }
         imageUrl = await uploadMediaFile(imageFile);
       }
       

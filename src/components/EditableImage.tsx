@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { ImagePlus } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface EditableImageProps {
     src: string;
@@ -30,7 +30,13 @@ export function EditableImage({
         if (!file) return;
 
         uploadImageFile(file)
-            .then((path) => onSave(path))
+            .then((path) => {
+                // If there's an existing uploaded image, delete it from the server
+                if (src && src.startsWith('/assets/uploads/')) {
+                    deleteMediaFile(src);
+                }
+                onSave(path);
+            })
             .catch(() => {
                 // Keep current image unchanged if upload fails.
             });

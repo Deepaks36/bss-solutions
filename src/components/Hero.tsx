@@ -3,7 +3,7 @@ import { ArrowRight, Check, CheckCircle2, ImagePlus, Pencil, Plus, Sparkles, Tra
 import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { HomeHighlight, HomeProofItem, HomeStat, SiteContent } from '../types';
 import { useSite } from '../context/SiteContext';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface Props {
   content: SiteContent;
@@ -84,10 +84,16 @@ function HomeEditModal({
   const topLeftImageRef = useRef<HTMLInputElement>(null);
   const bottomRightImageRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = async (file: File | undefined, setter: (val: string) => void) => {
+  const handleFile = async (file: File | undefined, setter: (val: string) => void, oldPath?: string) => {
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old image if it's an upload
+      if (oldPath && oldPath.startsWith('/assets/uploads/')) {
+        deleteMediaFile(oldPath);
+      }
+      
       setter(path);
     } catch (_e) {
       // Keep previous image if upload fails.
@@ -138,7 +144,7 @@ function HomeEditModal({
             <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
               <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Center Card</h4>
               <div className="space-y-4">
-                <input ref={mainImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroImage)} className="hidden" />
+                <input ref={mainImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroImage, heroImage)} className="hidden" />
                 <button
                   onClick={() => mainImageRef.current?.click()}
                   className={`flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}
@@ -155,7 +161,7 @@ function HomeEditModal({
             <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
               <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Top-Left Card</h4>
               <div className="space-y-4">
-                <input ref={topLeftImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroTopLeftImage)} className="hidden" />
+                <input ref={topLeftImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroTopLeftImage, heroTopLeftImage)} className="hidden" />
                 <button
                   onClick={() => topLeftImageRef.current?.click()}
                   className={`flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}
@@ -172,7 +178,7 @@ function HomeEditModal({
             <div className={`mt-6 rounded-2xl border p-4 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
               <h4 className={`mb-4 text-sm font-black uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Bottom-Right Card</h4>
               <div className="space-y-4">
-                <input ref={bottomRightImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroBottomRightImage)} className="hidden" />
+                <input ref={bottomRightImageRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0], setHeroBottomRightImage, heroBottomRightImage)} className="hidden" />
                 <button
                   onClick={() => bottomRightImageRef.current?.click()}
                   className={`flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors ${dark ? 'border-slate-600 hover:border-blue-500' : 'border-slate-300 hover:border-blue-500'}`}

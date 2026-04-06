@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Check, ImagePlus, Workflow, ArrowRight, Pipette } from 'lucide-react';
 import { Service } from '../types';
-import { uploadImageFile } from '../utils/upload';
+import { uploadImageFile, deleteMediaFile } from '../utils/upload';
 
 interface ServiceModalProps {
   product: Service | null;
@@ -51,11 +51,17 @@ export function ServiceModal({ product, onSave, onClose, dark }: ServiceModalPro
   const fromRef = useRef<HTMLInputElement>(null);
   const toRef   = useRef<HTMLInputElement>(null);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void, oldPath?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const path = await uploadImageFile(file);
+      
+      // Delete old file if it's an upload
+      if (oldPath && oldPath.startsWith('/assets/uploads/')) {
+        deleteMediaFile(oldPath);
+      }
+      
       setter(path);
     } catch (_e) {
       // Ignore upload failures.
@@ -131,8 +137,8 @@ export function ServiceModal({ product, onSave, onClose, dark }: ServiceModalPro
                 <ImagePlus className="h-4 w-4 text-cyan-400" /> Image
               </button>
             </div>
-            <input type="file" id="svc-icon" className="hidden" accept="image/*" onChange={(e) => handleFile(e, setIcon)} />
-            <input type="file" id="svc-img"  className="hidden" accept="image/*" onChange={(e) => handleFile(e, setImage)} />
+            <input type="file" id="svc-icon" className="hidden" accept="image/*" onChange={(e) => handleFile(e, setIcon, icon)} />
+            <input type="file" id="svc-img"  className="hidden" accept="image/*" onChange={(e) => handleFile(e, setImage, image)} />
           </div>
         </div>
 
