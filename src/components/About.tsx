@@ -6,6 +6,7 @@ import { EditableImage } from './EditableImage';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, Technology } from '../types';
 import { uploadImageFile, deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 interface TechnologyEditModalProps {
   tech: Technology | null;
@@ -120,7 +121,8 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
   const { ref: imgRef, visible: imgVisible } = useAnimateOnScroll(0.1);
   const { ref: techRef, visible: techVisible } = useAnimateOnScroll(0.1);
 
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'about';
   const [editingTech, setEditingTech] = useState<Technology | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -138,16 +140,17 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
   };
 
   return (
-    <section
-      id="about"
-      className={`py-24 ${dark ? 'bg-gray-900' : 'bg-white'}`}
-    >
+    <SectionProvider value="about">
+      <section
+        id="about"
+        className={`py-24 ${dark ? 'bg-gray-900' : 'bg-white'}`}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 items-center mb-12">
           {/* Text */}
           <div
             ref={textRef}
-            className={`transition-all duration-700 ${textVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
+            className={`transition-all duration-700 ${textVisible ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
             <span className={`inline-block text-[10px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-blue-400' : 'text-blue-600'}`}>
               World&apos;s exceptional IT-based corporation!
@@ -159,6 +162,15 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                 as="span"
                 dark={dark}
               />
+              {editMode && (
+                <button 
+                  onClick={() => setActiveEditingSection(activeEditingSection === 'about' ? null : 'about')}
+                  className={`ml-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'about' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+                >
+                  <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'about' ? 'rotate-45' : ''}`} />
+                  {activeEditingSection === 'about' ? 'Finish Editing' : 'Edit About'}
+                </button>
+              )}
             </h2>
             <div className={`text-lg leading-relaxed mb-4 ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
               <EditableText
@@ -181,7 +193,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
           {/* Image */}
           <div
             ref={imgRef}
-            className={`transition-all duration-700 delay-200 ${imgVisible || editMode ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
+            className={`transition-all duration-700 delay-200 ${imgVisible ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-0'}`}
           >
             <div className="relative max-w-sm mx-auto">
               <div className="absolute -inset-3 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/10 blur-lg" />
@@ -198,7 +210,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
         {/* Tech Stack */}
         <div
           ref={techRef}
-          className={`transition-all duration-700 ${techVisible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`transition-all duration-700 ${techVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <p className={`text-center text-[10px] font-bold uppercase tracking-widest mb-6 ${dark ? 'text-gray-400' : 'text-gray-400'}`}>
             Our Products & Services
@@ -212,7 +224,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
                 }`}
                 style={{ transitionDelay: `${i * 40}ms` }}
               >
-                {editMode && (
+                {isEditing && (
                   <div className="absolute -top-2 -right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => setEditingTech(tech)}
@@ -240,7 +252,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
               </div>
             ))}
 
-            {editMode && (
+            {isEditing && (
               <button
                 onClick={() => setIsAdding(true)}
                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group ${dark ? 'border-gray-700 hover:bg-blue-900/10 text-gray-400' : 'border-gray-200 text-gray-500'}`}
@@ -264,6 +276,7 @@ export function About({ content, dark, onUpdate, onUpdateTechnologyAtomic, onAdd
           }}
         />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }

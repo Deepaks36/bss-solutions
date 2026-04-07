@@ -10,6 +10,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { SiteContent, Service } from '../types';
 import { useSite } from '../context/SiteContext';
 import { ServiceModal } from './ServiceModal';
+import { SectionProvider } from '../context/SectionContext';
 
 interface Props {
   content: SiteContent;
@@ -21,7 +22,8 @@ interface Props {
 
 export function Services({ content, dark, onUpdateServiceAtomic, onAddService, onDeleteService }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'services';
   const [activeIndex, setActiveIndex] = useState(0);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -50,23 +52,35 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
   const activeService = hasServices ? services[safeActiveIndex] : null;
 
   return (
-    <section id="services" className={`relative py-16 transition-colors duration-300 ${dark ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <SectionProvider value="services">
+      <section id="services" className={`relative py-16 transition-colors duration-300 ${dark ? 'bg-slate-950' : 'bg-slate-50'}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div ref={ref} className={`mb-10 grid grid-cols-1 md:grid-cols-[1fr_auto] items-end transition-all duration-1000 ${visible || editMode ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+        <div ref={ref} className={`mb-10 grid grid-cols-1 md:grid-cols-[1fr_auto] items-end transition-all duration-1000 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.3em] text-blue-600">
               <Workflow className="h-3 w-3" />
               {content.servicesTagline || "Our Services"}
             </span>
-            <h2 className={`mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl ${dark ? 'text-white' : 'text-slate-950'}`}>
-              {content.servicesTitle || "Services & Solutions"}
-            </h2>
+            <div className="flex items-center gap-4">
+              <h2 className={`mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl ${dark ? 'text-white' : 'text-slate-950'}`}>
+                {content.servicesTitle || "Services & Solutions"}
+              </h2>
+              {editMode && (
+                <button 
+                  onClick={() => setActiveEditingSection(activeEditingSection === 'services' ? null : 'services')}
+                  className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'services' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+                >
+                  <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'services' ? 'rotate-45' : ''}`} />
+                  {activeEditingSection === 'services' ? 'Finish Editing' : 'Edit Services'}
+                </button>
+              )}
+            </div>
             <p className={`mt-2 max-w-2xl text-lg leading-relaxed ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
               {content.servicesSubtitle || "Team up with the perfect digital partner for all your technical needs."}
             </p>
           </div>
 
-          {editMode && (
+          {isEditing && (
             <button
               onClick={() => setIsAdding(true)}
               className="mt-8 flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-xl shadow-blue-600/20 transition-all hover:bg-blue-700 hover:scale-105 active:scale-95"
@@ -111,7 +125,7 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
                 );
               }) : (
                 <div className={`rounded-3xl border border-dashed p-8 text-center text-sm ${dark ? 'border-slate-800 bg-slate-900/50 text-slate-400' : 'border-slate-200 bg-white text-slate-500'}`}>
-                  {editMode ? 'No services yet. Use "Add New Service" to create one.' : 'Services will appear here soon.'}
+                  {isEditing ? 'No services yet. Use "Add New Service" to create one.' : 'Services will appear here soon.'}
                 </div>
               )}
             </div>
@@ -124,7 +138,7 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
                 key={activeService.id}
                 className={`animate-[fadeIn_0.4s_ease-out_forwards] relative overflow-hidden rounded-[2rem] border p-6 sm:p-8 transition-all duration-500 ${dark ? 'border-slate-800 bg-slate-900 shadow-xl' : 'border-slate-100 bg-white shadow-2xl'}`}
               >
-                {editMode && (
+                {isEditing && (
                   <div className="absolute top-4 right-4 flex gap-2 z-[20]">
                     <button onClick={() => setEditingService(activeService)} className="p-2 rounded-xl bg-blue-600 text-white shadow-xl hover:bg-blue-700 transition-all hover:scale-110">
                       <Pencil className="h-3.5 w-3.5" />
@@ -245,6 +259,7 @@ export function Services({ content, dark, onUpdateServiceAtomic, onAddService, o
           }}
         />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }

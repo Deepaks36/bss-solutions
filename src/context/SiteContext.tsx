@@ -12,6 +12,8 @@ interface SiteContextType {
     setIsAdmin: (val: boolean) => void;
     editMode: boolean;
     setEditMode: (val: boolean) => void;
+    activeEditingSection: string | null;
+    setActiveEditingSection: (id: string | null) => void;
     resetContent: () => void;
 }
 
@@ -157,6 +159,14 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
     const [content, setContent] = useState<SiteContent>(defaultContent);
     const [isAdmin, setIsAdmin] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [activeEditingSection, setActiveEditingSection] = useState<string | null>(null);
+
+    // Clear active section if edit mode is toggled off
+    useEffect(() => {
+        if (!editMode) {
+            setActiveEditingSection(null);
+        }
+    }, [editMode]);
 
     // Load from database on mount
     useEffect(() => {
@@ -296,6 +306,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         setIsAdmin,
         editMode,
         setEditMode,
+        activeEditingSection,
+        setActiveEditingSection,
         resetContent,
     }), [
         content,
@@ -306,6 +318,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         deleteItemFromSection,
         isAdmin,
         editMode,
+        activeEditingSection,
         resetContent,
     ]);
 

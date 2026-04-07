@@ -11,7 +11,9 @@ export function useAnimateOnScroll(threshold = 0.1) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setVisible(entry.isIntersecting);
+          if (entry.isIntersecting) {
+            setVisible(true);
+          }
         });
       },
       { threshold: Math.min(threshold, 0.1), rootMargin: '0px 0px -60px 0px' }

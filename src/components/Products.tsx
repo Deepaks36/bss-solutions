@@ -6,6 +6,7 @@ import { useSite } from '../context/SiteContext';
 import { ProductDetailModal } from './ProductDetailModal';
 import { ProductEditModal } from './ProductEditModal';
 import { deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 interface Props {
   content: SiteContent;
@@ -32,7 +33,8 @@ function ProductCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'products';
 
   return (
     <div
@@ -54,7 +56,7 @@ function ProductCard({
       }}
     >
       {/* Edit/Delete buttons */}
-      {editMode && (
+      {isEditing && (
         <div className="absolute top-5 right-5 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
@@ -123,7 +125,8 @@ function ProductCard({
 
 export function Products({ content, dark, onUpdateServiceAtomic, onAddService, onDeleteService }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'products';
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Service | null>(null);
   const [editingProduct, setEditingProduct] = useState<Service | null>(null);
@@ -182,18 +185,30 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
   };
 
   return (
-    <section id="products" className={`py-16 transition-colors duration-300 relative ${dark ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <SectionProvider value="products">
+      <section id="products" className={`py-16 transition-colors duration-300 relative ${dark ? 'bg-slate-950' : 'bg-slate-50'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section header */}
-        <div ref={ref} className={`mb-16 text-center transition-all duration-1000 ${visible || editMode ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+        <div ref={ref} className={`mb-16 text-center transition-all duration-1000 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-5 py-2.5 text-xs font-black uppercase tracking-[0.3em] text-blue-600 shadow-sm mb-6">
             <Workflow className="h-4 w-4" />
             Flagship Products
           </span>
-          <h2 className={`text-4xl font-black tracking-tight sm:text-5xl ${dark ? 'text-white' : 'text-slate-950'}`}>
-            Our Core <span className="text-blue-600">Solutions.</span>
-          </h2>
+          <div className="flex flex-col items-center gap-4">
+            <h2 className={`text-4xl font-black tracking-tight sm:text-5xl ${dark ? 'text-white' : 'text-slate-950'}`}>
+              Our Core <span className="text-blue-600">Solutions.</span>
+            </h2>
+            {editMode && (
+              <button 
+                onClick={() => setActiveEditingSection(activeEditingSection === 'products' ? null : 'products')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'products' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+              >
+                <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'products' ? 'rotate-45' : ''}`} />
+                {activeEditingSection === 'products' ? 'Finish Editing' : 'Edit Products'}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
@@ -224,7 +239,7 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
               />
             ))}
 
-            {editMode && (
+            {isEditing && (
               <button
                 onClick={() => setIsAdding(true)}
                 className={`sticky flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed transition-all hover:border-blue-500 group min-h-[200px]
@@ -297,6 +312,7 @@ export function Products({ content, dark, onUpdateServiceAtomic, onAddService, o
           onClose={() => { setEditingProduct(null); setIsAdding(false); }}
         />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }

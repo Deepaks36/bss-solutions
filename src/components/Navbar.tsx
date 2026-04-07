@@ -255,12 +255,6 @@ export function Navbar({ activeSection, dark, onToggleDark, isAdmin, editMode, o
         )}
       </div>
 
-      {/* Edit mode banner */}
-      {isAdmin && editMode && (
-        <div className="bg-amber-500 text-white text-center text-xs py-1.5 font-semibold tracking-wide">
-          EDIT MODE ACTIVE — Click any pencil icon to edit content inline
-        </div>
-      )}
     </header>
   );
 }

@@ -5,6 +5,7 @@ import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WorkflowStep } from '../types';
 import { uploadImageFile, deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 interface WorkflowEditModalProps {
   step: WorkflowStep | null;
@@ -140,7 +141,8 @@ function StepCard({
   onDelete: () => void;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.15);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'workflow';
 
   return (
     <div
@@ -152,7 +154,7 @@ function StepCard({
         }`}
       style={{ transitionDelay: `${index * 80}ms` }}
     >
-      {editMode && (
+      {isEditing && (
         <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={onEdit}
@@ -191,7 +193,8 @@ function StepCard({
 
 export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, onAddWorkflowStep, onDeleteWorkflowStep }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'workflow';
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -213,14 +216,15 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
   };
 
   return (
-    <section
-      id="workflow"
-      className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-950' : 'bg-gray-50'}`}
-    >
+    <SectionProvider value="workflow">
+      <section
+        id="workflow"
+        className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-950' : 'bg-gray-50'}`}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-700 ${visible || editMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 ${dark ? 'text-white' : 'text-gray-900'}`}>
             <EditableText
@@ -229,6 +233,15 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
               as="span"
               dark={dark}
             />
+            {editMode && (
+              <button 
+                onClick={() => setActiveEditingSection(activeEditingSection === 'workflow' ? null : 'workflow')}
+                className={`ml-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'workflow' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+              >
+                <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'workflow' ? 'rotate-45' : ''}`} />
+                {activeEditingSection === 'workflow' ? 'Finish Editing' : 'Edit Workflow'}
+              </button>
+            )}
           </h2>
           <div className="max-w-2xl mx-auto">
             <EditableText
@@ -260,7 +273,7 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
             />
           ))}
 
-          {editMode && (
+          {isEditing && (
             <button
               onClick={() => setIsAdding(true)}
               className={`flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group min-h-[250px] ${dark ? 'border-gray-700 hover:bg-blue-900/10' : 'border-gray-200'}`}
@@ -274,17 +287,23 @@ export function Workflow({ content, dark, onUpdate, onUpdateWorkflowStepAtomic, 
         </div>
       </div>
 
-      {(editingStep || isAdding) && (
+      {isAdding && (
+        <WorkflowEditModal
+          step={null}
+          dark={dark}
+          onSave={handleSave}
+          onClose={() => setIsAdding(false)}
+        />
+      )}
+      {(editingStep) && (
         <WorkflowEditModal
           step={editingStep}
           dark={dark}
           onSave={handleSave}
-          onClose={() => {
-            setEditingStep(null);
-            setIsAdding(false);
-          }}
+          onClose={() => setEditingStep(null)}
         />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }

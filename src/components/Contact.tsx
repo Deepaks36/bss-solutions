@@ -5,6 +5,7 @@ import { EditableText } from './EditableText';
 import { SiteContent, Company } from '../types';
 import { useSite } from '../context/SiteContext';
 import { uploadImageFile, deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 
 interface Props {
@@ -62,13 +63,13 @@ export function Contact({ content, dark, onUpdate }: Props) {
     }
   };
 
-  const { editMode, updateSectionItemAtomic, addItemToSection, deleteItemFromSection } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection, updateSectionItemAtomic, addItemToSection, deleteItemFromSection } = useSite();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [isAddingCompany, setIsAddingCompany] = useState(false);
 
   return (
-    <>
+    <SectionProvider value="contact">
       <section
         id="companies"
         className={`py-24 transition-colors duration-300 ${dark ? 'bg-gray-950' : 'bg-gray-50'}`}
@@ -137,7 +138,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
               dark={dark}
             />
           </h2>
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto flex items-center justify-center gap-4">
             <EditableText
               value={content.contactTagline}
               onSave={(v) => onUpdate('contactTagline', v)}
@@ -145,6 +146,15 @@ export function Contact({ content, dark, onUpdate }: Props) {
               dark={dark}
               className={`text-lg ${dark ? 'text-gray-400' : 'text-gray-500'}`}
             />
+            {editMode && (
+              <button 
+                onClick={() => setActiveEditingSection(activeEditingSection === 'contact' ? null : 'contact')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'contact' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+              >
+                <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'contact' ? 'rotate-45' : ''}`} />
+                {activeEditingSection === 'contact' ? 'Finish Editing' : 'Edit Reach Out'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -225,7 +235,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex gap-2">
-                  {/* <select
+                  <select
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
                     className={`w-28 px-2 py-3 rounded-xl border text-xs sm:text-sm outline-none transition-all cursor-pointer ${inputCls}`}
@@ -237,7 +247,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
                     <option value="+44">+44 (UK)</option>
                     <option value="+971">+971 (UAE)</option>
                     <option value="+65">+65 (SG)</option>
-                  </select> */}
+                  </select>
                   <input
                     type="tel"
                     placeholder="Phone Number"
@@ -334,7 +344,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
           }}
         />
       )}
-    </>
+    </SectionProvider>
   );
 }
 

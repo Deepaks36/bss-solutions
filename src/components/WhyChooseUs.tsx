@@ -5,6 +5,7 @@ import { EditableText } from './EditableText';
 import { useSite } from '../context/SiteContext';
 import { SiteContent, WhyItem, TimelineItem } from '../types';
 import { uploadImageFile, deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 interface WhyItemEditModalProps {
   item: WhyItem | null;
@@ -132,13 +133,13 @@ interface Props {
 function TimelineItemCard({
   item,
   dark,
-  editMode,
+  isEditing,
   onEdit,
   onDelete
 }: {
   item: TimelineItem,
   dark: boolean,
-  editMode: boolean,
+  isEditing: boolean,
   onEdit: () => void,
   onDelete: () => void
 }) {
@@ -165,7 +166,7 @@ function TimelineItemCard({
               Growth: {item.growth}
             </div>
           </div>
-          {editMode && (
+          {isEditing && (
             <div className="flex gap-2">
               <button onClick={onEdit} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
               <button onClick={onDelete} className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -291,7 +292,8 @@ function WhyCard({
   onDelete: () => void;
 }) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'why';
 
   return (
     <div
@@ -315,7 +317,7 @@ function WhyCard({
             alt={item.title}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
           />
-          {editMode && (
+          {isEditing && (
             <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={onEdit}
@@ -353,7 +355,8 @@ export function WhyChooseUs({
   onDeleteTimelineItem
 }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.1);
-  const { editMode, updateSectionItemAtomic, addItemToSection, deleteItemFromSection } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection, updateSectionItemAtomic, addItemToSection, deleteItemFromSection } = useSite();
+  const isEditing = editMode && activeEditingSection === 'why';
   const [editingItem, setEditingItem] = useState<WhyItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -378,10 +381,11 @@ export function WhyChooseUs({
   };
 
   return (
-    <section
-      id="why"
-      className={`py-24 transition-colors duration-300 relative ${dark ? 'bg-gray-900' : 'bg-white'}`}
-    >
+    <SectionProvider value="why">
+      <section
+        id="why"
+        className={`py-24 transition-colors duration-300 relative ${dark ? 'bg-gray-900' : 'bg-white'}`}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
           <div
@@ -395,6 +399,15 @@ export function WhyChooseUs({
                 as="span"
                 dark={dark}
               />
+              {editMode && (
+                <button 
+                  onClick={() => setActiveEditingSection(activeEditingSection === 'why' ? null : 'why')}
+                  className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${activeEditingSection === 'why' ? 'bg-amber-500 text-white shadow-lg' : 'bg-blue-600/10 text-blue-600 hover:bg-blue-600/20'}`}
+                >
+                  <Plus className={`w-3.5 h-3.5 transition-transform ${activeEditingSection === 'why' ? 'rotate-45' : ''}`} />
+                  {activeEditingSection === 'why' ? 'Finish Editing' : 'Edit Why Us'}
+                </button>
+              )}
             </h2>
             <div className={`w-20 h-2 rounded-full mb-8 bg-blue-600`}></div>
             <p className={`text-lg leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -421,7 +434,7 @@ export function WhyChooseUs({
               />
             ))}
 
-            {editMode && (
+            {isEditing && (
               <button
                 onClick={() => setIsAdding(true)}
                 className={`flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group min-h-[300px] sticky ${dark ? 'bg-gray-800/80 border-gray-700 hover:bg-blue-900/10 backdrop-blur-md' : 'bg-white/80 border-gray-200 backdrop-blur-md'}`}
@@ -452,7 +465,7 @@ export function WhyChooseUs({
                   key={item.id}
                   item={item}
                   dark={dark}
-                  editMode={editMode}
+                  isEditing={isEditing}
                   onEdit={() => setEditingTimeline(item)}
                   onDelete={() => {
                     if (onDeleteTimelineItem) onDeleteTimelineItem(item.id);
@@ -461,7 +474,7 @@ export function WhyChooseUs({
                 />
               ))}
 
-              {editMode && (
+              {isEditing && (
                 <button
                   onClick={() => setIsAddingTimeline(true)}
                   className={`mt-8 flex items-center justify-center gap-3 w-full p-8 rounded-2xl border-2 border-dashed transition-all hover:bg-blue-50/50 hover:border-blue-500 group ${dark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}
@@ -508,6 +521,7 @@ export function WhyChooseUs({
           }}
         />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Pencil } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
+import { useCurrentSection } from '../context/SectionContext';
 
 interface EditableTextProps {
     value: string;
@@ -19,10 +20,13 @@ export function EditableText({
     multiline = false,
     dark = false,
 }: EditableTextProps) {
-    const { editMode } = useSite();
+    const { editMode, activeEditingSection } = useSite();
+    const sectionId = useCurrentSection();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
     const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
+
+    const isThisSectionEditing = editMode && (activeEditingSection === null || activeEditingSection === sectionId);
 
     useEffect(() => {
         setText(value);
@@ -34,7 +38,7 @@ export function EditableText({
         }
     }, [editing]);
 
-    if (!editMode) {
+    if (!isThisSectionEditing) {
         return <Tag className={className}>{value}</Tag>;
     }
 

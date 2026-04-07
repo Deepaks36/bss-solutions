@@ -4,6 +4,7 @@ import { useAnimateOnScroll } from '../hooks/useAnimateOnScroll';
 import { HomeHighlight, HomeProofItem, HomeStat, SiteContent } from '../types';
 import { useSite } from '../context/SiteContext';
 import { uploadImageFile, deleteMediaFile } from '../utils/upload';
+import { SectionProvider } from '../context/SectionContext';
 
 interface Props {
   content: SiteContent;
@@ -283,7 +284,7 @@ function HomeEditModal({
 
 export function Hero({ content, dark, onUpdate }: Props) {
   const { ref, visible } = useAnimateOnScroll(0.12);
-  const { editMode } = useSite();
+  const { editMode, activeEditingSection, setActiveEditingSection } = useSite();
   const [isEditing, setIsEditing] = useState(false);
 
   const heroHighlights = Array.isArray(content.heroHighlights) && content.heroHighlights.length ? content.heroHighlights : defaultHighlights;
@@ -327,10 +328,11 @@ export function Hero({ content, dark, onUpdate }: Props) {
   };
 
   return (
-    <section
-      id="home"
-      className={`relative pt-32 pb-16 lg:pt-40 lg:pb-24 transition-colors duration-300 isolate ${dark ? 'bg-[#0A0F1C] text-white' : 'bg-slate-50 text-slate-900'}`}
-    >
+    <SectionProvider value="home">
+      <section
+        id="home"
+        className={`relative pt-32 pb-16 lg:pt-40 lg:pb-24 transition-colors duration-300 isolate ${dark ? 'bg-[#0A0F1C] text-white' : 'bg-slate-50 text-slate-900'}`}
+      >
       <CircuitBackground dark={dark} />
 
       {/* Background subtleties */}
@@ -345,7 +347,7 @@ export function Hero({ content, dark, onUpdate }: Props) {
           {/* Content Column */}
           <div
             ref={ref}
-            className={`transition-all duration-700 ${visible || true ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
+            className={`transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
               <Sparkles className="h-4 w-4" />
@@ -501,18 +503,34 @@ export function Hero({ content, dark, onUpdate }: Props) {
 
       {editMode && (
         <button
-          onClick={() => setIsEditing(true)}
-          className="absolute bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-xl shadow-blue-600/30 transition-all hover:bg-blue-700"
+          onClick={() => setActiveEditingSection(activeEditingSection === 'home' ? null : 'home')}
+          className={`absolute bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black text-white shadow-xl transition-all ${
+            activeEditingSection === 'home' 
+              ? 'bg-amber-500 shadow-amber-600/30' 
+              : 'bg-blue-600 shadow-blue-600/30 hover:bg-blue-700 hover:scale-105 active:scale-95'
+          }`}
         >
-          <Pencil className="h-4 w-4" />
-          Edit Home Section
+          <Pencil className={`h-4 w-4 transition-transform ${activeEditingSection === 'home' ? 'rotate-12' : ''}`} />
+          {activeEditingSection === 'home' ? 'Finish Editing' : 'Edit Home Section'}
         </button>
+      )}
+
+      {activeEditingSection === 'home' && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+           <button 
+             onClick={() => setIsEditing(true)}
+             className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-2xl flex items-center gap-2 hover:bg-blue-700 transition-all"
+           >
+             <Pencil className="w-4 h-4" /> Open Full Editor
+           </button>
+        </div>
       )}
 
       {isEditing && (
         <HomeEditModal content={content} dark={dark} onClose={() => setIsEditing(false)} onSave={saveHeroContent} />
       )}
-    </section>
+      </section>
+    </SectionProvider>
   );
 }
 
