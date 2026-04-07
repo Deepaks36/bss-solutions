@@ -15,6 +15,10 @@ function ensureMessageColumns() {
     db.exec('ALTER TABLE messages ADD COLUMN verified INTEGER NOT NULL DEFAULT 0');
   }
 
+  if (!columns.includes('phone')) {
+    db.exec('ALTER TABLE messages ADD COLUMN phone TEXT');
+  }
+
   if (!columns.includes('updated_at')) {
     db.exec('ALTER TABLE messages ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP');
     db.exec('UPDATE messages SET updated_at = COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)');
@@ -306,6 +310,7 @@ function initDb() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL,
+            phone TEXT,
             subject TEXT,
             message TEXT NOT NULL,
             verified INTEGER NOT NULL DEFAULT 0,

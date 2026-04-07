@@ -476,7 +476,7 @@ export function Team({ content, dark }: Props) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   const teamCelebrations = useMemo(() => content.teamCelebrations || [], [content.teamCelebrations]);
-  const teamMembers = useMemo(() => content.teamMembers || [], [content.teamMembers]);
+  // const teamMembers = useMemo(() => content.teamMembers || [], [content.teamMembers]);
   const displayYears = useMemo(() => {
     const years = Array.from(new Set((content.teamCelebrations || []).map(c => c.year))).sort((a, b) => a - b);
     return years.length > 0 ? years : [new Date().getFullYear()];
@@ -643,7 +643,7 @@ export function Team({ content, dark }: Props) {
         </div>
 
         {/* ── Team Members Section ── */}
-        <div className={`mb-32 transition-all duration-700 delay-150 ${visible || editMode ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+        {/* <div className={`mb-32 transition-all duration-700 delay-150 ${visible || editMode ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
           <div className="flex items-center justify-between mb-12">
             <div>
               <h3 className={`text-4xl font-black mb-2 ${dark ? 'text-white' : 'text-slate-950'}`}>Meet the Team</h3>
@@ -700,7 +700,7 @@ export function Team({ content, dark }: Props) {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* ── Culture & Celebrations ── */}
         <div className={`transition-all duration-700 delay-300 ${visible || editMode ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>

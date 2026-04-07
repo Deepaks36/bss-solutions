@@ -16,6 +16,7 @@ type SortConfig = {
 type ColumnFilters = {
   name: string;
   email: string;
+  phone: string;
   subject: string;
   status: string;
 };
@@ -43,6 +44,7 @@ export function AdminMessagesPage({ dark }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     status: 'all'
   });
@@ -137,6 +139,7 @@ export function AdminMessagesPage({ dark }: Props) {
     // Column Filters (for Grid View)
     const matchesName = msg.name.toLowerCase().includes(columnFilters.name.toLowerCase());
     const matchesEmail = msg.email.toLowerCase().includes(columnFilters.email.toLowerCase());
+    const matchesPhone = (msg.phone || '').toLowerCase().includes(columnFilters.phone.toLowerCase());
     const matchesSubject = (msg.subject || '').toLowerCase().includes(columnFilters.subject.toLowerCase());
     const matchesStatus = columnFilters.status === 'all' || 
       (columnFilters.status === 'verified' ? msg.verified : !msg.verified);
@@ -145,11 +148,11 @@ export function AdminMessagesPage({ dark }: Props) {
     if (viewMode === 'card') {
       const matchesGlobalStatus = statusFilter === 'all' || 
         (statusFilter === 'verified' ? msg.verified : !msg.verified);
-      return matchesSearch && matchesGlobalStatus;
+      return (matchesSearch || (msg.phone || '').toLowerCase().includes(searchTerm.toLowerCase())) && matchesGlobalStatus;
     }
     
     // Grid mode: combine global search with column filters
-    return matchesSearch && matchesName && matchesEmail && matchesSubject && matchesStatus;
+    return matchesSearch && matchesName && matchesEmail && matchesPhone && matchesSubject && matchesStatus;
   });
 
 
@@ -269,7 +272,10 @@ export function AdminMessagesPage({ dark }: Props) {
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1 min-w-0 pr-2">
                           <h3 className="font-bold truncate text-base" title={msg.name}>{msg.name}</h3>
-                          <p className={`text-xs truncate mt-0.5 ${dark ? 'text-slate-400' : 'text-slate-500'} font-medium`} title={msg.email}>{msg.email}</p>
+                          <div className="flex flex-col gap-0.5 mt-0.5">
+                            <p className={`text-xs truncate ${dark ? 'text-slate-400' : 'text-slate-500'} font-medium`} title={msg.email}>{msg.email}</p>
+                            {msg.phone && <p className={`text-[10px] truncate ${dark ? 'text-blue-400/80' : 'text-blue-600/80'} font-bold`}>{msg.phone}</p>}
+                          </div>
                         </div>
                         <div className="flex items-start gap-2 relative">
                           {msg.verified && (
@@ -379,6 +385,16 @@ export function AdminMessagesPage({ dark }: Props) {
                     </th>
                     <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <button 
+                        onClick={() => requestSort('phone')}
+                        className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'phone' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
+                      >
+                        Phone
+                        {sortConfig.key === 'phone' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3"/> : <ArrowDown className="w-3 h-3"/>)}
+                        {sortConfig.key !== 'phone' && <ArrowUpDown className="w-3 h-3 opacity-30"/>}
+                      </button>
+                    </th>
+                    <th className={`px-3 py-2.5 border-b ${dark ? 'border-slate-800' : 'border-slate-200'}`}>
+                      <button 
                         onClick={() => requestSort('subject')}
                         className={`flex items-center gap-2 font-black uppercase tracking-wider text-[10px] transition-colors ${sortConfig.key === 'subject' ? 'text-blue-500' : (dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}
                       >
@@ -431,6 +447,15 @@ export function AdminMessagesPage({ dark }: Props) {
                         placeholder="Filter email..."
                         value={columnFilters.email}
                         onChange={(e) => setColumnFilters({...columnFilters, email: e.target.value})}
+                        className={`w-full text-[10px] py-1 px-2 rounded-md border outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-200 focus:border-blue-500'}`}
+                      />
+                    </th>
+                    <th className="px-3 py-1.5 border-b dark:border-slate-800 border-slate-100">
+                      <input 
+                        type="text" 
+                        placeholder="Filter phone..."
+                        value={columnFilters.phone}
+                        onChange={(e) => setColumnFilters({...columnFilters, phone: e.target.value})}
                         className={`w-full text-[10px] py-1 px-2 rounded-md border outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-200 focus:border-blue-500'}`}
                       />
                     </th>
@@ -511,6 +536,7 @@ export function AdminMessagesPage({ dark }: Props) {
                       </td>
                       <td className="px-3 py-1.5 font-bold transition-colors group-hover:text-blue-500">{msg.name}</td>
                       <td className="px-3 py-1.5 opacity-80">{msg.email}</td>
+                      <td className="px-3 py-1.5 text-xs font-bold text-blue-500/80">{msg.phone || '-'}</td>
                       <td className="px-3 py-1.5 max-w-[200px] truncate" title={msg.subject}>{msg.subject || '-'}</td>
                       <td className="px-3 py-1.5 text-[10px] font-mono opacity-60">{new Date(msg.created_at).toLocaleString()}</td>
                     </tr>
@@ -627,6 +653,10 @@ export function AdminMessagesPage({ dark }: Props) {
               <div>
                 <label className={`text-xs font-bold uppercase tracking-wider mb-1.5 block ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Email</label>
                 <input value={editingMessage.email} onChange={e => setEditingMessage({...editingMessage, email: e.target.value} as ContactMessage)} className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500' : 'bg-white border-slate-200 focus:border-blue-500'}`} />
+              </div>
+              <div>
+                <label className={`text-xs font-bold uppercase tracking-wider mb-1.5 block ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Phone</label>
+                <input value={editingMessage.phone} onChange={e => setEditingMessage({...editingMessage, phone: e.target.value.replace(/\D/g, '')} as ContactMessage)} className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${dark ? 'bg-slate-800 border-slate-700 focus:border-blue-500' : 'bg-white border-slate-200 focus:border-blue-500'}`} />
               </div>
               <div>
                 <label className={`text-xs font-bold uppercase tracking-wider mb-1.5 block ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Subject</label>

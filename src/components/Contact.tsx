@@ -16,7 +16,8 @@ interface Props {
 export function Contact({ content, dark, onUpdate }: Props) {
 
   const { ref, visible } = useAnimateOnScroll(0.1); 
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [countryCode, setCountryCode] = useState('+91');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,11 +34,16 @@ export function Contact({ content, dark, onUpdate }: Props) {
     setLoading(true);
     setError('');
 
+    const payload = {
+      ...formData,
+      phone: formData.phone ? `${countryCode} ${formData.phone}` : ''
+    };
+
     try {
         const res = await fetch('/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
         const data = await res.json();
@@ -46,7 +52,7 @@ export function Contact({ content, dark, onUpdate }: Props) {
         if (!res.ok) throw new Error(data.error || 'Failed to send message');
 
       setSent(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setShowPopup(true);
       setTimeout(() => setSent(false), 5000);
     } catch (err) {
@@ -217,13 +223,37 @@ export function Contact({ content, dark, onUpdate }: Props) {
                   className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
                 />
               </div>
-              <input
-                type="text"
-                placeholder="Subject"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
-              />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="flex gap-2">
+                  {/* <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className={`w-28 px-2 py-3 rounded-xl border text-xs sm:text-sm outline-none transition-all cursor-pointer ${inputCls}`}
+                  >
+                    <option value="+91">+91 (IN)</option>
+                    <option value="+960">+960 (MV)</option>
+                    <option value="+975">+975 (BT)</option>
+                    <option value="+1">+1 (US)</option>
+                    <option value="+44">+44 (UK)</option>
+                    <option value="+971">+971 (UAE)</option>
+                    <option value="+65">+65 (SG)</option>
+                  </select> */}
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                    className={`flex-1 px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Subject"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${inputCls}`}
+                />
+              </div>
               <textarea
                 placeholder="Your Message"
                 rows={5}

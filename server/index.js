@@ -780,17 +780,17 @@ app.post('/api/login', (req, res) => {
 
 // Create message and send email when SMTP is configured
 app.post('/api/messages', async (req, res) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, phone, subject, message } = req.body;
   if (!name || !email || !message) {
     return res.status(400).json({ error: 'Name, email, and message are required' });
   }
 
   try {
     const stmt = db.prepare(`
-      INSERT INTO messages (name, email, subject, message, verified, updated_at)
-      VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
+      INSERT INTO messages (name, email, phone, subject, message, verified, updated_at)
+      VALUES (?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
     `);
-    const result = stmt.run(name.trim(), email.trim(), (subject || '').trim(), message.trim());
+    const result = stmt.run(name.trim(), email.trim(), (phone || '').trim(), (subject || '').trim(), message.trim());
 
     let emailSent = false;
     let warning = null;
@@ -804,7 +804,7 @@ app.post('/api/messages', async (req, res) => {
           replyTo: email.trim(),
           to: CONTACT_TO_EMAIL,
           subject: `New Reach Out submission from ${name.trim()}`,
-          text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
+          text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nPhone: ${(phone || 'Not provided').trim()}\nSubject: ${(subject || 'General inquiry').trim()}\n\nMessage:\n${message.trim()}`,
         });
         console.log('Internal notification mail triggered. MessageId:', info1.messageId);
 
@@ -849,7 +849,7 @@ app.get('/api/messages', (req, res) => {
 // Update a message
 app.put('/api/messages/:id', (req, res) => {
   const { id } = req.params;
-  const { name, email, subject, message, verified } = req.body;
+  const { name, email, phone, subject, message, verified } = req.body;
 
   if (!name || !email || !message) {
     return res.status(400).json({ error: 'Name, email, and message are required' });
@@ -858,10 +858,10 @@ app.put('/api/messages/:id', (req, res) => {
   try {
     const stmt = db.prepare(`
       UPDATE messages
-      SET name = ?, email = ?, subject = ?, message = ?, verified = ?, updated_at = CURRENT_TIMESTAMP
+      SET name = ?, email = ?, phone = ?, subject = ?, message = ?, verified = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    const result = stmt.run(name.trim(), email.trim(), (subject || '').trim(), message.trim(), verified ? 1 : 0, id);
+    const result = stmt.run(name.trim(), email.trim(), (phone || '').trim(), (subject || '').trim(), message.trim(), verified ? 1 : 0, id);
 
     if (!result.changes) {
       return res.status(404).json({ error: 'Message not found' });
